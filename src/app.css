@@ -1,0 +1,31 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/inter';
+
+@theme {
+	--color-background: #111210;
+	--color-surface: #1b1d19;
+	--color-foreground: #f1f0e9;
+	--color-muted: #92958a;
+	--color-accent: #d5ff35;
+
+	--font-display: 'Space Grotesk Variable', system-ui, sans-serif;
+	--font-sans: 'Inter Variable', system-ui, sans-serif;
+}
+
+body {
+	font-family: var(--font-sans);
+	background-color: var(--color-background);
+	color: var(--color-foreground);
+}
+
+::selection {
+	background-color: var(--color-accent);
+	color: #111210;
+}
+
+.skeleton {
+	animation: pulse 1.5s ease-in-out infinite;
+	border-radius: 0.5rem;
+	background: #1b1d19;
+}

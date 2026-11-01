@@ -1,0 +1,106 @@
+<script lang="ts">
+	import { createQuery } from '@tanstack/svelte-query';
+	import type { PageData } from './$types';
+	import Card from '$lib/components/ui/Card.svelte';
+	import Button from '$lib/components/ui/Button.svelte';
+	import { copyText, formatDate, formatIdr } from '$lib/utils';
+
+	let { data } = $props();
+
+	let copied = $state(false);
+
+	type StatusResponse = { status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' };
+
+	// Poll payment status; the endpoint re-syncs from DOKU server-side.
+	const statusQuery = createQuery(() => ({
+		queryKey: ['payment', data.order.id],
+		queryFn: async (): Promise<StatusResponse> => {
+			const res = await fetch(`/api/payments/${data.order.id}/status`);
+			if (!res.ok) throw new Error('Could not fetch payment status');
+			return res.json();
+		},
+		refetchInterval: (query) => {
+			const status = query.state.data?.status;
+			return status === 'pending' ? 10_000 : false;
+		},
+		refetchIntervalInBackground: false,
+		initialData: { status: data.order.status },
+		staleTime: 5_000
+	}));
+
+	const status = $derived(statusQuery.data?.status ?? data.order.status);
+
+	async function copyVa() {
+		if (await copyText(data.payment.paymentCode ?? '')) {
+			copied = true;
+			setTimeout(() => (copied = false), 1500);
+		}
+	}
+</script>
+
+<svelte:head>
+	<title>Checkout — OVYN</title>
+</svelte:head>
+
+<div class="mx-auto flex max-w-lg flex-col gap-6">
+	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Complete your payment</h1>
+
+	<Card class="flex flex-col gap-4 p-6">
+		<div class="flex items-center justify-between">
+			<div>
+				<p class="text-sm text-neutral-400">{data.product.name}</p>
+				<p class="font-[family-name:var(--font-display)] text-2xl font-bold">
+					{formatIdr(data.order.amount)}
+				</p>
+			</div>
+			<span
+				class="rounded-full border px-3 py-1 text-xs font-medium
+					{status === 'paid'
+					? 'border-lime-300/50 text-lime-300'
+					: status === 'failed' || status === 'cancelled'
+						? 'border-red-900 text-red-400'
+						: status === 'expired'
+							? 'border-neutral-700 text-neutral-400'
+							: 'border-amber-500/50 text-amber-300'}"
+			>
+				{status}
+			</span>
+		</div>
+
+		{#if status === 'pending'}
+			<div class="rounded-lg bg-neutral-800/50 p-4">
+				<p class="text-xs text-neutral-400">
+					{data.payment.paymentMethod.startsWith('VIRTUAL_ACCOUNT')
+						? 'Virtual account number'
+						: 'Payment code'}
+				</p>
+				<div class="mt-1 flex items-center justify-between gap-3">
+					<p class="font-mono text-xl tracking-wider text-lime-300">{data.payment.paymentCode}</p>
+					<Button variant="secondary" onclick={copyVa}>{copied ? 'Copied!' : 'Copy'}</Button>
+				</div>
+			</div>
+
+			<ul class="text-sm text-neutral-400">
+				<li>1. Open your mobile banking or ATM app.</li>
+				<li>2. Choose "Virtual Account" payment and enter the number above.</li>
+				<li>3. Amount must be exactly {formatIdr(data.order.amount)}.</li>
+				<li>4. Pay before {formatDate(data.payment.expiresAt ?? data.order.createdAt)}.</li>
+			</ul>
+
+			<p class="text-xs text-neutral-500">
+				This page updates automatically once your payment is confirmed by DOKU. You can leave and come back anytime at /checkout/{data.order.id}.
+			</p>
+		{:else if status === 'paid'}
+			<p class="text-lime-300">Payment received — thank you! Your plan is now active.</p>
+		{:else if status === 'expired'}
+			<p class="text-neutral-400">This payment code expired. Start again from Plans &amp; billing.</p>
+		{:else}
+			<p class="text-red-400">This payment did not go through. Start again from Plans &amp; billing.</p>
+		{/if}
+	</Card>
+
+	<div class="flex gap-3">
+		<Button href="/billing" variant="secondary">Plans &amp; billing</Button>
+		<Button href="/billing/history" variant="ghost">Payment history</Button>
+	</div>
+</div>
