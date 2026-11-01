@@ -53,7 +53,8 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
  *  - `discord_accounts` always mirrors the current Discord identity.
  *  - Profile display name auto-follows Discord UNLESS the user customized
  *    it (custom = differs from the previously mirrored Discord name).
- *  - The slug never changes automatically (stable profile URLs).
+ *  - Slug auto-follows the Discord username with the same policy; custom
+ *    slugs are preserved.
  *  - Avatar: users with no uploaded avatar always show the live Discord
  *    avatar (resolved via fallback at read time).
  */
@@ -129,7 +130,10 @@ export async function provisionUser(userId: string): Promise<void> {
 					displayName: newDiscordName
 				})
 				.onConflictDoNothing({ target: profiles.userId });
-		} else if (
+			return;
+		}
+
+		if (
 			profile.displayName === null ||
 			profile.displayName === previousMirroredName ||
 			profile.displayName === ''
@@ -139,6 +143,31 @@ export async function provisionUser(userId: string): Promise<void> {
 				await tx
 					.update(profiles)
 					.set({ displayName: newDiscordName, updatedAt: new Date() })
+					.where(eq(profiles.userId, userId));
+			}
+		}
+
+		// Slug follows the Discord username with the same policy: only
+		// override when the user never customized it. Auto-generated suffix
+		// variants (e.g. "name-2" when "name" was taken) still count as
+		// "not customized".
+		const prevUsername = previous?.username;
+		const slugIsCustomized = prevUsername
+			? profile.slug !== prevUsername && !profile.slug.startsWith(`${prevUsername}-`)
+			: false;
+
+		const normalizedNewSlug = normalizeSlug(discordUser.username);
+		if (
+			!slugIsCustomized &&
+			normalizedNewSlug &&
+			normalizedNewSlug !== profile.slug &&
+			normalizedNewSlug !== prevUsername
+		) {
+			const newSlug = await availableSlug(tx, normalizedNewSlug);
+			if (newSlug !== profile.slug) {
+				await tx
+					.update(profiles)
+					.set({ slug: newSlug, updatedAt: new Date() })
 					.where(eq(profiles.userId, userId));
 			}
 		}
