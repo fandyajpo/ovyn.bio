@@ -9,7 +9,9 @@
 		disabled = false,
 		loading = false,
 		class: className,
-		children
+		onclick,
+		children,
+		...rest
 	}: {
 		variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
 		type?: 'button' | 'submit';
@@ -17,7 +19,9 @@
 		disabled?: boolean;
 		loading?: boolean;
 		class?: string;
+		onclick?: (event: MouseEvent) => void;
 		children: Snippet;
+		[key: string]: unknown;
 	} = $props();
 
 	const styles = {
@@ -34,10 +38,14 @@
 </script>
 
 {#if href && !isDisabled}
-	<a {href} class={cn(base, styles[variant], className)}>{@render children()}</a>
+	<a {href} {onclick} {rest} class={cn(base, styles[variant], className)}>
+		{@render children()}
+	</a>
 {:else}
 	<button
 		{type}
+		{onclick}
+		{rest}
 		class={cn(base, styles[variant], className)}
 		disabled={isDisabled}
 		aria-busy={loading}
