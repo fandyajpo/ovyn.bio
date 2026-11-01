@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import { AppError } from '../utils/errors';
 import { minifiedBodyHash, symmetricSignature } from './signature';
+import { DOKU_SECRET_KEY } from '$app/env/private';
 
 /**
  * Verify an inbound DOKU HTTP Notification.
@@ -22,7 +23,9 @@ export function verifyNotificationSignature(params: {
 	signature: string | null;
 	authorization: string | null;
 }): void {
-	const { env } = validateEnv();
+	if (!DOKU_SECRET_KEY) {
+		throw new AppError(500, 'DOKU_SECRET_KEY is not configured');
+	}
 
 	if (!params.timestamp || !params.signature) {
 		throw new AppError(401, 'Missing notification signature');
@@ -38,19 +41,12 @@ export function verifyNotificationSignature(params: {
 		params.timestamp
 	].join(':');
 
-	const expected = symmetricSignature(env.DOKU_SECRET_KEY!, stringToSign);
+	const expected = symmetricSignature(DOKU_SECRET_KEY, stringToSign);
 
 	// Constant-time comparison.
 	if (!timingSafeEqual(expected, params.signature)) {
 		throw new AppError(401, 'Invalid notification signature');
 	}
-}
-
-function validateEnv(): { env: Record<string, string | undefined> } {
-	if (!process.env.DOKU_SECRET_KEY) {
-		throw new AppError(500, 'DOKU_SECRET_KEY is not configured');
-	}
-	return { env: process.env };
 }
 
 function timingSafeEqual(a: string, b: string): boolean {

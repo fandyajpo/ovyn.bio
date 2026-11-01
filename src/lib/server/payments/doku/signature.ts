@@ -1,8 +1,12 @@
 import { createHash, createHmac, sign as cryptoSign } from 'node:crypto';
 import { AppError } from '../utils/errors';
-
-// Server-only module; process.env works in Node and Vercel Functions.
-const env = process.env;
+import {
+	DOKU_BASE_URL,
+	DOKU_CLIENT_ID,
+	DOKU_ENV,
+	DOKU_PRIVATE_KEY,
+	DOKU_SECRET_KEY
+} from '$app/env/private';
 
 /**
  * DOKU Direct API (SNAP) — implements exactly what the official docs specify:
@@ -58,14 +62,14 @@ export function asymmetricSignature(privateKey: string, clientId: string, timest
 }
 
 export function dokuEnv(): { baseUrl: string; clientId: string; clientSecret: string } {
-	const clientId = env.DOKU_CLIENT_ID;
-	const clientSecret = env.DOKU_SECRET_KEY;
+	const clientId = DOKU_CLIENT_ID;
+	const clientSecret = DOKU_SECRET_KEY;
 	if (!clientId || !clientSecret) {
 		throw new AppError(500, 'DOKU is not configured');
 	}
-	const baseUrl = env.DOKU_BASE_URL
-		? env.DOKU_BASE_URL.replace(/\/$/, '')
-		: env.DOKU_ENV === 'production'
+	const baseUrl = DOKU_BASE_URL
+		? DOKU_BASE_URL.replace(/\/$/, '')
+		: DOKU_ENV === 'production'
 			? 'https://api.doku.com'
 			: 'https://api-sandbox.doku.com';
 	return { baseUrl, clientId, clientSecret };
@@ -83,7 +87,7 @@ export async function getAccessToken(): Promise<string> {
 	}
 
 	const { baseUrl, clientId } = dokuEnv();
-	const privateKey = env.DOKU_PRIVATE_KEY;
+	const privateKey = DOKU_PRIVATE_KEY;
 	if (!privateKey) {
 		throw new AppError(500, 'DOKU_PRIVATE_KEY is not configured');
 	}

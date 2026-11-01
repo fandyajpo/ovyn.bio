@@ -8,24 +8,26 @@ import {
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { AppError } from '../utils/errors';
-
-// process.env is the deliberate choice here: SvelteKit 3's $app/env/private
-// requires every variable to be declared in src/env.ts, which these
-// server-only modules don't need. Serverless runtimes provide process.env.
-const env = process.env;
+import {
+	AWS_ACCESS_KEY_ID,
+	AWS_ENDPOINT_URL_S3,
+	AWS_REGION,
+	AWS_SECRET_ACCESS_KEY,
+	S3_BUCKET
+} from '$app/env/private';
 
 function s3(): S3Client {
-	const endpoint = env.AWS_ENDPOINT_URL_S3;
-	const accessKeyId = env.AWS_ACCESS_KEY_ID;
-	const secretAccessKey = env.AWS_SECRET_ACCESS_KEY;
+	const endpoint = AWS_ENDPOINT_URL_S3;
+	const accessKeyId = AWS_ACCESS_KEY_ID;
+	const secretAccessKey = AWS_SECRET_ACCESS_KEY;
 
-	if (!endpoint || !accessKeyId || !secretAccessKey || !env.S3_BUCKET) {
+	if (!endpoint || !accessKeyId || !secretAccessKey || !S3_BUCKET) {
 		throw new AppError(500, 'Object storage is not configured');
 	}
 
 	return new S3Client({
 		endpoint,
-		region: env.AWS_REGION || 'auto',
+		region: AWS_REGION || 'auto',
 		credentials: { accessKeyId, secretAccessKey },
 		forcePathStyle: true
 	});
@@ -35,7 +37,7 @@ let cached: { client: S3Client; bucket: string } | null = null;
 
 function s3WithBucket(): { client: S3Client; bucket: string } {
 	if (!cached) {
-		cached = { client: s3(), bucket: env.S3_BUCKET! };
+		cached = { client: s3(), bucket: S3_BUCKET };
 	}
 	return cached;
 }

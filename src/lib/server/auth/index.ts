@@ -2,18 +2,27 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
+import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, BETTER_AUTH_SECRET, BETTER_AUTH_URL } from '$app/env/private';
 import { db } from '#lib/server/db';
 import * as schema from '#lib/server/db/schema';
 import { provisionUser } from '#lib/server/services/profiles';
 
-const discordClientId = process.env.DISCORD_CLIENT_ID;
-const discordClientSecret = process.env.DISCORD_CLIENT_SECRET;
+const discordClientId = DISCORD_CLIENT_ID;
+const discordClientSecret = DISCORD_CLIENT_SECRET;
 
 if (!discordClientId || !discordClientSecret) {
 	throw new Error('DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET must be set');
 }
 
+if (!BETTER_AUTH_SECRET) {
+	throw new Error('BETTER_AUTH_SECRET must be set');
+}
+
 export const auth = betterAuth({
+	// Better Auth reads process.env internally, which SvelteKit 3 no longer
+	// populates from .env — pass everything explicitly from the typed env.
+	secret: BETTER_AUTH_SECRET,
+	baseURL: BETTER_AUTH_URL,
 	database: drizzleAdapter(db, { provider: 'pg', schema }),
 	emailAndPassword: { enabled: false },
 	socialProviders: {

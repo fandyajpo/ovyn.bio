@@ -1,9 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { AppError } from '../utils/errors';
 import { dokuEnv, generateExternalId, signedHeaders } from './signature';
-
-// Server-only module; process.env works in Node and Vercel Functions.
-const env = process.env;
+import { DOKU_BASE_URL, DOKU_ENV, DOKU_PARTNER_SERVICE_ID } from '$app/env/private';
 
 /**
  * DOKU Direct API — SNAP endpoints implemented per official docs:
@@ -65,7 +63,7 @@ export type CheckStatusResult = {
 };
 
 function partnerServiceId(): string {
-	const bin = env.DOKU_PARTNER_SERVICE_ID;
+	const bin = DOKU_PARTNER_SERVICE_ID;
 	if (!bin) {
 		throw new AppError(500, 'DOKU_PARTNER_SERVICE_ID is not configured');
 	}
