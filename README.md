@@ -67,12 +67,13 @@ You must add:
   Discord accounts without an email get a stable `<discord-id>@discord.ovyn.bio`
   placeholder via `mapProfileToUser`. Duplicate accounts for the same Discord
   ID are prevented by the unique `(provider, accountId)` pairing.
-- **Coming from Neon Managed Auth?** Run the data backfill in
-  `scripts/backfill-better-auth.sql` as part of the migration — see its header
-  for the step-by-step. It copies users and Discord accounts into the
-  standalone tables with the SAME user ids, so profiles, guild memberships,
-  and orders keep working. Do not disable Neon Managed Auth or drop
-  `neon_auth` until sign-in is verified.
+- **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
+  one-time data backfill with `npm run db:backfill` — it copies users and
+  Discord accounts from the managed `neon_auth` schema into the standalone
+  tables with the SAME user ids, so profiles, guild memberships, and orders
+  keep working. It's idempotent (safe to re-run). Do not disable Neon Managed
+  Auth or drop `neon_auth` until sign-in is verified.
+  (Prefer raw SQL? The same statements are in `scripts/backfill-better-auth.sql`.)
 - **One guild per user** is enforced three ways: `guild_members.user_id`
   PRIMARY KEY, a `SELECT … FOR UPDATE` lock on the user row inside a
   transaction, and explicit conflict errors with user-facing explanations.
