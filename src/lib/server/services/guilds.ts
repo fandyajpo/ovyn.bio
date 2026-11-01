@@ -6,7 +6,7 @@ import {
 	guilds,
 	profiles
 } from '#lib/server/db/schema';
-import { user } from '#lib/server/db/schema/neon-auth';
+import { neonAuthUser as user } from '#lib/server/db/schema/neon-auth';
 import {
 	ConflictError,
 	ForbiddenError,

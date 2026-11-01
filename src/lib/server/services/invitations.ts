@@ -1,7 +1,7 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { guildInvitations, guildMembers, guilds } from '#lib/server/db/schema';
-import { user } from '#lib/server/db/schema/neon-auth';
+import { neonAuthUser as user } from '#lib/server/db/schema/neon-auth';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 
