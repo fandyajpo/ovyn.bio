@@ -5,7 +5,7 @@
 
 	let { data } = $props();
 
-	const p = data.profile;
+	const p = $derived(data.profile);
 	const displayName = $derived(p.displayName || p.slug);
 </script>
 

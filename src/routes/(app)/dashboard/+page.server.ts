@@ -1,3 +1,4 @@
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getMembership } from '#lib/server/services/guilds';
 import { getProfileByUserId } from '#lib/server/services/profiles';
@@ -6,7 +7,10 @@ import { listUserOrders } from '#lib/server/services/billing';
 import { presignDownload } from '#lib/server/storage';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	const user = locals.user!;
+	// Layout and page loads run in parallel — guard here too.
+	if (!locals.user) redirect(302, '/login');
+
+	const user = locals.user;
 
 	const profile = await getProfileByUserId(user.id);
 	const membership = await getMembership(user.id);

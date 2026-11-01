@@ -10,6 +10,9 @@ export const load: PageServerLoad = async () => {
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const user = locals.user;
+
 		const data = await request.formData();
 		const productId = data.get('productId');
 		if (typeof productId !== 'string' || !productId) {
@@ -17,8 +20,8 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`checkout:${locals.user!.id}`, 5, 60_000);
-			const { order } = await createCheckout(locals.user!.id, productId);
+			rateLimit(`checkout:${user.id}`, 5, 60_000);
+			const { order } = await createCheckout(user.id, productId);
 			redirect(302, `/checkout/${order.id}`);
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });

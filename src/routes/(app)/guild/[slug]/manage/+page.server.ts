@@ -1,4 +1,4 @@
-import { fail } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import {
 	getGuildBySlug,
@@ -18,10 +18,11 @@ import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+	if (!locals.user) redirect(302, '/login');
 	const guild = await getGuildBySlug(params.slug);
 	if (!guild) fail(404, 'Guild not found');
 
-	const membership = await getMembership(locals.user!.id);
+	const membership = await getMembership(locals.user.id);
 	if (!membership || membership.guild.id !== guild.id) {
 		fail(403, 'You are not a member of this guild');
 	}
@@ -39,9 +40,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions: Actions = {
 	default: async ({ request, params, locals }) => {
+		if (!locals.user) redirect(302, '/login');
 		const data = await request.formData();
 		const intent = data.get('intent');
-		const user = locals.user!;
+		const user = locals.user;
 
 		const guild = await getGuildBySlug(params.slug);
 		if (!guild) return fail(404, { error: 'Guild not found' });

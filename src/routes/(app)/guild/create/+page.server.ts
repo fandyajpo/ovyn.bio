@@ -1,18 +1,13 @@
-import { redirect } from '@sveltejs/kit';
-import { fail } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
-import { guildCreateSchema } from '#lib/schemas/guild';
-import { createGuild, getMembership } from '#lib/server/services/guilds';
-import { AppError } from '#lib/server/utils/errors';
-import { rateLimit } from '#lib/server/utils/rate-limit';
-
 export const load: PageServerLoad = async ({ locals }) => {
-	const membership = await getMembership(locals.user!.id);
+	if (!locals.user) redirect(302, '/login');
+	const membership = await getMembership(locals.user.id);
 	if (membership) redirect(302, '/guild');
 };
 
 export const actions: Actions = {
 	default: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const user = locals.user;
 		const data = await request.formData();
 		const parsed = guildCreateSchema.safeParse({
 			name: data.get('name'),
@@ -25,8 +20,8 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`guild-create:${locals.user!.id}`, 3, 60_000);
-			const guild = await createGuild(locals.user!.id, parsed.data);
+			rateLimit(`guild-create:${user.id}`, 3, 60_000);
+			const guild = await createGuild(user.id, parsed.data);
 			redirect(302, `/guild/${guild.slug}/manage`);
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
