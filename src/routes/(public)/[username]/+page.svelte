@@ -6,7 +6,10 @@
 	let { data } = $props();
 
 	const p = $derived(data.profile);
-	const displayName = $derived(p.displayName || p.slug);
+	// OVYN display name wins; fall back to the auto-synced Discord identity.
+	const displayName = $derived(
+		p.displayName || data.discord?.globalName || data.discord?.username || p.slug
+	);
 </script>
 
 <svelte:head>
