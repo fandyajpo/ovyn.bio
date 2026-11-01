@@ -3,12 +3,12 @@ import { db } from '#lib/server/db';
 import { orders, paymentEvents, payments, products } from '#lib/server/db/schema';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
-import { dokuTimestamp } from './doku/signature';
+import { dokuTimestamp } from '#lib/server/payments/doku/signature';
 import {
 	checkVirtualAccountStatus,
 	createVirtualAccount,
 	type SnapChannel
-} from './doku/client';
+} from '#lib/server/payments/doku/client';
 import type { TransactionFn } from './types';
 
 type Tx = Parameters<TransactionFn>[0];
