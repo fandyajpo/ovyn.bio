@@ -9,6 +9,7 @@ import {
 	text,
 	timestamp,
 	unique,
+	uniqueIndex,
 	uuid
 } from 'drizzle-orm/pg-core';
 import { user } from './auth';
@@ -150,8 +151,7 @@ export const guildInvitations = pgTable(
 	(t) => [
 		index('guild_invitations_invitee_idx').on(t.inviteeId),
 		// Partial unique index: at most one pending invitation per (guild, invitee).
-		index('guild_invitations_pending_unique')
-			.unique()
+		uniqueIndex('guild_invitations_pending_unique')
 			.on(t.guildId, t.inviteeId)
 			.where(sql`status = 'pending'`)
 	]
