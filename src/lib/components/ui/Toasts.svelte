@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { dismiss, toastState } from './toasts.svelte';
-
-	const toasts = toastState();
+	import { toasts, dismiss } from './toasts.svelte';
 </script>
 
 <div class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4">
-	{#each toasts.list as t (t.id)}
+	{#each toasts as t (t.id)}
 		<button
 			type="button"
 			onclick={() => dismiss(t.id)}
@@ -15,7 +13,7 @@
 				: t.kind === 'error'
 					? 'border-red-900/60 bg-neutral-900 text-red-300'
 					: 'border-neutral-700 bg-neutral-900 text-neutral-200'}"
-			role="status"
+			aria-label="Dismiss notification"
 		>
 			{t.message}
 		</button>

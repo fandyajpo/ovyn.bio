@@ -34,7 +34,7 @@
 </script>
 
 {#if href && !isDisabled}
-	<a {href} class={cn(base, styles[variant], className)}>{children}</a>
+	<a {href} class={cn(base, styles[variant], className)}>{@render children()}</a>
 {:else}
 	<button
 		{type}
@@ -47,6 +47,6 @@
 				class="inline-block size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
 				aria-hidden="true"></span>
 		{/if}
-		{children}
+		{@render children()}
 	</button>
 {/if}
