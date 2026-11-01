@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
-	import { formatDate, formatIdr } from '$lib/utils';
+	import Card from '#lib/components/ui/Card.svelte';
+	import { formatDate, formatIdr } from '#lib/utils';
 
 	let { data } = $props();
 </script>

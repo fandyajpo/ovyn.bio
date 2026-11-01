@@ -1,11 +1,11 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { profileUpdateSchema } from '$lib/schemas/profile';
-import { getProfileByUserId, updateProfile } from '$lib/server/services/profiles';
-import { presignDownload } from '$lib/server/storage';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
-import { isValidSlug } from '$lib/server/utils/slug';
+import { profileUpdateSchema } from '#lib/schemas/profile';
+import { getProfileByUserId, updateProfile } from '#lib/server/services/profiles';
+import { presignDownload } from '#lib/server/storage';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
+import { isValidSlug } from '#lib/server/utils/slug';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const profile = await getProfileByUserId(locals.user!.id);

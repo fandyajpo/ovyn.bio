@@ -2,13 +2,12 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
-import { env } from '$env/dynamic/private';
-import { db } from '$lib/server/db';
-import * as schema from '$lib/server/db/schema';
-import { provisionUser } from '$lib/server/services/profiles';
+import { db } from '#lib/server/db';
+import * as schema from '#lib/server/db/schema';
+import { provisionUser } from '#lib/server/services/profiles';
 
-const discordClientId = env.DISCORD_CLIENT_ID;
-const discordClientSecret = env.DISCORD_CLIENT_SECRET;
+const discordClientId = process.env.DISCORD_CLIENT_ID;
+const discordClientSecret = process.env.DISCORD_CLIENT_SECRET;
 
 if (!discordClientId || !discordClientSecret) {
 	throw new Error('DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET must be set');

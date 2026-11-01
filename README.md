@@ -8,7 +8,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 
 | Layer | Choice |
 |---|---|
-| Framework | SvelteKit + Svelte 5 (runes) + TypeScript (strict) |
+| Framework | SvelteKit 3 + Svelte 5 (runes) + TypeScript (strict) |
 | Styling | Tailwind CSS v4 |
 | Hosting | Vercel (`@sveltejs/adapter-vercel`, Node runtime) |
 | Database | Neon PostgreSQL (pooled connection for app, direct for migrations) |
@@ -17,7 +17,13 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Client data | TanStack Query (checkout status polling) |
-| Validation | Zod |
+| Validation | Zod 4 |
+
+Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
+`sveltekit()` plugin options — there is no `svelte.config.js`), imports use the
+`#lib/*` subpath alias declared in `package.json`, and `$app/env/*` replaces the
+old `$env/*` modules. Server-only modules read `process.env` directly, which
+works unchanged on Vercel Functions.
 
 ## Getting started
 

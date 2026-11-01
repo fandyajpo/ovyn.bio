@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { signIn } from '$lib/auth-client';
-	import Button from '$lib/components/ui/Button.svelte';
+	import { signIn } from '#lib/auth-client';
+	import Button from '#lib/components/ui/Button.svelte';
 
 	let { form }: { form?: { error?: string } } = $props();
 

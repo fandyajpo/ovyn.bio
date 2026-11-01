@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { form } from '$app/forms';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
 
 	let { form }: { form?: { error?: string } } = $props();
 

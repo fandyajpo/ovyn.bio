@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Avatar from './ui/Avatar.svelte';
 	import Card from './ui/Card.svelte';
-	import { formatDate } from '$lib/utils';
+	import { formatDate } from '#lib/utils';
 
 	let {
 		slug,

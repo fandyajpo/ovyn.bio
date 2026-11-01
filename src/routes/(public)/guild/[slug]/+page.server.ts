@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getGuildBySlug, listGuildMembers } from '$lib/server/services/guilds';
-import { presignDownload } from '$lib/server/storage';
+import { getGuildBySlug, listGuildMembers } from '#lib/server/services/guilds';
+import { presignDownload } from '#lib/server/storage';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const guild = await getGuildBySlug(params.slug);

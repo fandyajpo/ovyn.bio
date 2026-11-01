@@ -1,7 +1,7 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { disbandGuild, getMembership, leaveGuild, listGuildMembers } from '$lib/server/services/guilds';
-import { AppError } from '$lib/server/utils/errors';
+import { disbandGuild, getMembership, leaveGuild, listGuildMembers } from '#lib/server/services/guilds';
+import { AppError } from '#lib/server/utils/errors';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const membership = await getMembership(locals.user!.id);

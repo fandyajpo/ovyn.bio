@@ -1,7 +1,7 @@
 <script lang="ts">
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import { formatDate } from '$lib/utils';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
+	import { formatDate } from '#lib/utils';
 
 	let { data } = $props();
 </script>

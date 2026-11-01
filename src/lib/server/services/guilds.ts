@@ -1,20 +1,20 @@
 import { and, asc, count, eq, ilike, sql } from 'drizzle-orm';
-import { db } from '$lib/server/db';
+import { db } from '#lib/server/db';
 import {
 	guildInvitations,
 	guildMembers,
 	guilds,
 	profiles
-} from '$lib/server/db/schema';
-import { user } from '$lib/server/db/schema/auth';
+} from '#lib/server/db/schema';
+import { user } from '#lib/server/db/schema/auth';
 import {
 	ConflictError,
 	ForbiddenError,
 	isUniqueViolation,
 	NotFoundError,
 	ValidationError
-} from '$lib/server/utils/errors';
-import { normalizeSlug, RESERVED_SLUGS } from '$lib/server/utils/slug';
+} from '#lib/server/utils/errors';
+import { normalizeSlug, RESERVED_SLUGS } from '#lib/server/utils/slug';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

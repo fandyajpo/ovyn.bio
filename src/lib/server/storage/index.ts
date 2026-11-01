@@ -7,8 +7,12 @@ import {
 	S3ServiceException
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { env } from '$env/dynamic/private';
 import { AppError } from '../utils/errors';
+
+// process.env is the deliberate choice here: SvelteKit 3's $app/env/private
+// requires every variable to be declared in src/env.ts, which these
+// server-only modules don't need. Serverless runtimes provide process.env.
+const env = process.env;
 
 function s3(): S3Client {
 	const endpoint = env.AWS_ENDPOINT_URL_S3;

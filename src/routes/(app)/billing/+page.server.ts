@@ -1,8 +1,8 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { createCheckout, listActiveProducts } from '$lib/server/services/billing';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
+import { createCheckout, listActiveProducts } from '#lib/server/services/billing';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async () => {
 	return { products: await listActiveProducts() };

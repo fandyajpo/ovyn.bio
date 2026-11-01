@@ -2,8 +2,8 @@
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { LayoutData } from './$types';
 	import '../app.css';
-	import Nav from '$lib/components/Nav.svelte';
-	import Toasts from '$lib/components/ui/Toasts.svelte';
+	import Nav from '#lib/components/Nav.svelte';
+	import Toasts from '#lib/components/ui/Toasts.svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
 

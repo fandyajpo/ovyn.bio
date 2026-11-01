@@ -1,8 +1,7 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { verifyNotificationSignature } from '$lib/server/payments/doku/webhook';
-import { processWebhookNotification } from '$lib/server/services/billing';
-import { AppError } from '$lib/server/utils/errors';
+import { verifyNotificationSignature } from '#lib/server/payments/doku/webhook';
+import { processWebhookNotification } from '#lib/server/services/billing';
+import { AppError } from '#lib/server/utils/errors';
 
 /**
  * DOKU HTTP Notification endpoint.
@@ -27,15 +26,15 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			authorization: request.headers.get('Authorization')
 		});
 	} catch (err) {
-		if (err instanceof AppError) return json({ error: err.message }, { status: err.status });
-		return json({ error: 'Verification failed' }, { status: 401 });
+		if (err instanceof AppError) return Response.json({ error: err.message }, { status: err.status });
+		return Response.json({ error: 'Verification failed' }, { status: 401 });
 	}
 
 	let payload: unknown;
 	try {
 		payload = JSON.parse(rawBody); // non-strict: providers may add fields
 	} catch {
-		return json({ error: 'Invalid JSON' }, { status: 400 });
+		return Response.json({ error: 'Invalid JSON' }, { status: 400 });
 	}
 
 	// Resolve the order id: SNAP VA notifications reference our trxId via
@@ -56,7 +55,7 @@ export const POST: RequestHandler = async ({ request, url }) => {
 		(body.virtualAccountData?.paidAmount?.value ? '00' : undefined);
 
 	if (!orderId || !status) {
-		return json({ error: 'Unrecognised notification' }, { status: 400 });
+		return Response.json({ error: 'Unrecognised notification' }, { status: 400 });
 	}
 
 	try {
@@ -68,13 +67,13 @@ export const POST: RequestHandler = async ({ request, url }) => {
 			paidAt: body.trxDateTime ? new Date(body.trxDateTime) : null,
 			payload: rawBody
 		});
-		return json({ responseCode: '2005600', responseMessage: 'Processed', applied });
+		return Response.json({ responseCode: '2005600', responseMessage: 'Processed', applied });
 	} catch (err) {
 		// Unknown order: acknowledge so DOKU doesn't retry forever, but log loudly.
 		console.error('Webhook processing failed', err);
 		if (err instanceof AppError && err.status === 404) {
-			return json({ responseCode: '2005600', responseMessage: 'Ignored' });
+			return Response.json({ responseCode: '2005600', responseMessage: 'Ignored' });
 		}
-		return json({ error: 'Processing failed' }, { status: 500 });
+		return Response.json({ error: 'Processing failed' }, { status: 500 });
 	}
 };

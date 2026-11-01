@@ -1,6 +1,6 @@
 import { count, eq } from 'drizzle-orm';
-import { db } from '$lib/server/db';
-import { guildMembers, guilds, profiles } from '$lib/server/db/schema';
+import { db } from '#lib/server/db';
+import { guildMembers, guilds, profiles } from '#lib/server/db/schema';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {

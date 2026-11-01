@@ -1,6 +1,8 @@
 import { createHash, createHmac, sign as cryptoSign } from 'node:crypto';
-import { env } from '$env/dynamic/private';
-import { AppError } from '$lib/server/utils/errors';
+import { AppError } from '../utils/errors';
+
+// Server-only module; process.env works in Node and Vercel Functions.
+const env = process.env;
 
 /**
  * DOKU Direct API (SNAP) — implements exactly what the official docs specify:

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import Button from '$lib/components/ui/Button.svelte';
-	import { signOut } from '$lib/auth-client';
+	import Button from '#lib/components/ui/Button.svelte';
+	import { signOut } from '#lib/auth-client';
 
 	let { data } = $props();
 

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { createQuery } from '@tanstack/svelte-query';
 	import type { PageData } from './$types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { copyText, formatDate, formatIdr } from '$lib/utils';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import { copyText, formatDate, formatIdr } from '#lib/utils';
 
 	let { data } = $props();
 

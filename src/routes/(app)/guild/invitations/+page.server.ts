@@ -1,9 +1,9 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { acceptInvitation, listMyInvitations, rejectInvitation } from '$lib/server/services/invitations';
-import { getMembership } from '$lib/server/services/guilds';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
+import { acceptInvitation, listMyInvitations, rejectInvitation } from '#lib/server/services/invitations';
+import { getMembership } from '#lib/server/services/guilds';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const [invitations, membership] = await Promise.all([

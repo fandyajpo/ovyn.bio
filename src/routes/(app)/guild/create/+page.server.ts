@@ -1,10 +1,10 @@
 import { redirect } from '@sveltejs/kit';
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { guildCreateSchema } from '$lib/schemas/guild';
-import { createGuild, getMembership } from '$lib/server/services/guilds';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
+import { guildCreateSchema } from '#lib/schemas/guild';
+import { createGuild, getMembership } from '#lib/server/services/guilds';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	const membership = await getMembership(locals.user!.id);

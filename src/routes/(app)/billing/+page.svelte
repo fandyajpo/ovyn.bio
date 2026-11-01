@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { formatIdr } from '$lib/utils';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import { formatIdr } from '#lib/utils';
 
 	let { data, form }: { data: PageData; form?: { error?: string } } = $props();
 

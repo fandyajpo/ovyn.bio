@@ -1,4 +1,4 @@
-import { browser } from '$app/environment';
+import { browser } from '$app/env';
 
 type Toast = { id: number; kind: 'success' | 'error' | 'info'; message: string };
 

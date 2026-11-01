@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { signOut } from '$lib/auth-client';
+	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
 	import { toast } from './ui/toasts.svelte';
 

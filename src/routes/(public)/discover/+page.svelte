@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Input from '$lib/components/ui/Input.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: boolean } } = $props();
 </script>

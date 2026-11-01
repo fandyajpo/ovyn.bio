@@ -1,7 +1,9 @@
 import { randomBytes } from 'node:crypto';
-import { env } from '$env/dynamic/private';
-import { AppError } from '$lib/server/utils/errors';
+import { AppError } from '../utils/errors';
 import { dokuEnv, generateExternalId, signedHeaders } from './signature';
+
+// Server-only module; process.env works in Node and Vercel Functions.
+const env = process.env;
 
 /**
  * DOKU Direct API — SNAP endpoints implemented per official docs:

@@ -1,9 +1,9 @@
 import { and, eq, sql } from 'drizzle-orm';
-import { db } from '$lib/server/db';
-import { discordAccounts, profiles } from '$lib/server/db/schema';
-import { account } from '$lib/server/db/schema/auth';
-import { ConflictError, isUniqueViolation, NotFoundError } from '$lib/server/utils/errors';
-import { isValidSlug, normalizeSlug } from '$lib/server/utils/slug';
+import { db } from '#lib/server/db';
+import { discordAccounts, profiles } from '#lib/server/db/schema';
+import { account } from '#lib/server/db/schema/auth';
+import { ConflictError, isUniqueViolation, NotFoundError } from '#lib/server/utils/errors';
+import { isValidSlug, normalizeSlug } from '#lib/server/utils/slug';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

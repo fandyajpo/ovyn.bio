@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import { formatDate, formatIdr } from '$lib/utils';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import { formatDate, formatIdr } from '#lib/utils';
 
 	let { data } = $props();
 </script>

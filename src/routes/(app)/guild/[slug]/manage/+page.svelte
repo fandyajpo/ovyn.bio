@@ -1,9 +1,9 @@
 <script lang="ts">
-	import Card from '$lib/components/ui/Card.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Input from '$lib/components/ui/Input.svelte';
-	import UploadButton from '$lib/components/UploadButton.svelte';
-	import { formatDate } from '$lib/utils';
+	import Card from '#lib/components/ui/Card.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
+	import UploadButton from '#lib/components/UploadButton.svelte';
+	import { formatDate } from '#lib/utils';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
 

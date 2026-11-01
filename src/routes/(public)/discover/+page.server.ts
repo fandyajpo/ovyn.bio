@@ -1,8 +1,8 @@
 import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { getMembership, joinGuild, listPublicGuilds } from '$lib/server/services/guilds';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
+import { getMembership, joinGuild, listPublicGuilds } from '#lib/server/services/guilds';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async ({ locals, url }) => {
 	const q = url.searchParams.get('q');

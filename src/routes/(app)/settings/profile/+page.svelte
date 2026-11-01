@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Input from '$lib/components/ui/Input.svelte';
-	import Button from '$lib/components/ui/Button.svelte';
-	import Avatar from '$lib/components/ui/Avatar.svelte';
-	import UploadButton from '$lib/components/UploadButton.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
+	import Button from '#lib/components/ui/Button.svelte';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import UploadButton from '#lib/components/UploadButton.svelte';
 
 	let { data, form }: {
 		data: PageData;

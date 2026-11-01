@@ -1,9 +1,9 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
-import { db } from '$lib/server/db';
-import { guildInvitations, guildMembers, guilds } from '$lib/server/db/schema';
-import { user } from '$lib/server/db/schema/auth';
-import { profiles } from '$lib/server/db/schema';
-import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '$lib/server/utils/errors';
+import { db } from '#lib/server/db';
+import { guildInvitations, guildMembers, guilds } from '#lib/server/db/schema';
+import { user } from '#lib/server/db/schema/auth';
+import { profiles } from '#lib/server/db/schema';
+import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 

@@ -8,14 +8,14 @@ import {
 	setMemberRole,
 	transferOwnership,
 	updateGuild
-} from '$lib/server/services/guilds';
+} from '#lib/server/services/guilds';
 import {
 	cancelInvitation,
 	createInvitation,
 	listGuildInvitations
-} from '$lib/server/services/invitations';
-import { AppError } from '$lib/server/utils/errors';
-import { rateLimit } from '$lib/server/utils/rate-limit';
+} from '#lib/server/services/invitations';
+import { AppError } from '#lib/server/utils/errors';
+import { rateLimit } from '#lib/server/utils/rate-limit';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const guild = await getGuildBySlug(params.slug);
