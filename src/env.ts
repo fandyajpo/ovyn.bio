@@ -13,10 +13,11 @@ export const variables = defineEnvVars({
 	DATABASE_URL: { schema: z.string().optional() },
 	DATABASE_URL_POOLED: { schema: z.string().optional() },
 
-	// Neon Auth (Managed Better Auth) — OAuth (Discord) is configured in the
-	// Neon Console, not in app env vars.
-	NEON_AUTH_BASE_URL: { schema: z.string().optional() },
-	NEON_AUTH_COOKIE_SECRET: { schema: z.string().optional() },
+	// Standalone Better Auth + Discord OAuth
+	BETTER_AUTH_SECRET: { schema: z.string().optional() },
+	BETTER_AUTH_URL: { schema: z.string().optional() },
+	DISCORD_CLIENT_ID: { schema: z.string().optional() },
+	DISCORD_CLIENT_SECRET: { schema: z.string().optional() },
 
 	// Neon Object Storage (S3-compatible)
 	AWS_ENDPOINT_URL_S3: { schema: z.string().optional() },

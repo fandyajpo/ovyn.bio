@@ -42,7 +42,7 @@ export async function createCheckout(userId: string, productId: string) {
 
 	// Lock user for order creation so a user can't flood parallel checkouts.
 	const order = await db.transaction(async (tx) => {
-		await tx.execute(sql`SELECT id FROM neon_auth.user WHERE id = ${userId} FOR UPDATE`);
+		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
 
 		const [pending] = await tx
 			.select()

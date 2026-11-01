@@ -1,109 +1,69 @@
-import {
-	createAuthServer,
-	handleAuthProxyRequest,
-	type RequestContext,
-	type CookieOptions
-} from '@neon/auth/server';
-import type { RequestEvent } from '@sveltejs/kit';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { getRequestEvent } from '$app/server';
+import { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, BETTER_AUTH_SECRET, BETTER_AUTH_URL } from '$app/env/private';
+import { db } from '#lib/server/db';
+import * as schema from '#lib/server/db/schema';
+import { provisionUser } from '#lib/server/services/profiles';
 
-/**
- * SvelteKit adapter for Neon's Managed Better Auth, built on the
- * framework-agnostic `@neon/auth/server` toolkit (see the upstream
- * BUILDING-AN-ADAPTER.md — this mirrors the Next.js reference adapter).
- *
- * Three pieces:
- *  1. RequestContext — bridges SvelteKit's cookies/headers to the toolkit
- *  2. `auth` server instance — getSession() etc., request-scoped via
- *     SvelteKit's getRequestEvent()
- *  3. `auth.handler()` — the /api/auth/[...all] proxy that keeps auth
- *     cookies first-party and finalizes OAuth callbacks
- */
+const discordClientId = DISCORD_CLIENT_ID;
+const discordClientSecret = DISCORD_CLIENT_SECRET;
 
-function createRequestContext(event: RequestEvent): RequestContext {
-	return {
-		getCookies: () => event.request.headers.get('cookie') ?? '',
-		setCookie: (name: string, value: string, options: CookieOptions) => {
-			event.cookies.set(name, value, {
-				path: options.path ?? '/',
-				httpOnly: options.httpOnly,
-				secure: options.secure,
-				sameSite: options.sameSite,
-				domain: options.domain,
-				maxAge: options.maxAge,
-				expires: options.expires
-			});
-		},
-		getHeader: (name: string) => event.request.headers.get(name),
-		getOrigin: () => event.request.headers.get('origin') ?? event.url.origin,
-		getFramework: () => 'sveltekit'
-	};
+if (!discordClientId || !discordClientSecret) {
+	throw new Error('DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET must be set');
 }
 
-export interface CreateNeonAuthOptions {
-	/** Managed Better Auth base URL, e.g. https://ep-xxx.neonauth...aws.neon.tech/neondb/auth */
-	baseUrl: string;
-	/** Secret for signing the session_data cookie (min 32 chars). */
-	cookieSecret: string;
-	sessionDataTtl?: number;
-	domain?: string;
+if (!BETTER_AUTH_SECRET) {
+	throw new Error('BETTER_AUTH_SECRET must be set');
 }
 
-export function createNeonAuth(options: CreateNeonAuthOptions) {
-	const config = {
-		baseUrl: options.baseUrl,
-		cookieSecret: options.cookieSecret,
-		sessionDataTtl: options.sessionDataTtl,
-		domain: options.domain
-	};
-
-	// Server methods (getSession etc.) resolve the current request through
-	// SvelteKit's request-scoped event.
-	const server = createAuthServer({
-		baseUrl: config.baseUrl,
-		cookieSecret: config.cookieSecret,
-		sessionDataTtl: config.sessionDataTtl,
-		domain: config.domain,
-		context: () => createRequestContext(getRequestEvent())
-	});
-
-	/** Catch-all handler for /api/auth/* — proxies upstream with cookie
-	 *  sanitization and OAuth callback finalization. */
-	const handler = async (event: RequestEvent) => {
-		const { pathname } = new URL(event.request.url);
-		const path = pathname.replace(/^\/api\/auth\//, '');
-
-		return handleAuthProxyRequest({
-			request: event.request,
-			path,
-			baseUrl: config.baseUrl,
-			cookieSecret: config.cookieSecret,
-			sessionDataTtl: config.sessionDataTtl,
-			domain: config.domain
-		});
-	};
-
-	return Object.assign(server, { handler });
-}
-
-// ---------------------------------------------------------------------------
-// App-level env access (server-only). Declared in src/env.ts.
-// ---------------------------------------------------------------------------
-
-import { NEON_AUTH_BASE_URL, NEON_AUTH_COOKIE_SECRET } from '$app/env/private';
-
-function requireEnv(name: string, value: string | undefined): string {
-	if (!value) {
-		throw new Error(`${name} must be set`);
-	}
-	return value;
-}
-
-/**
- * The shared Neon Auth instance for the whole app.
- * Throws at import time when configuration is missing — fail fast, loudly.
- */
-export const auth = createNeonAuth({
-	baseUrl: requireEnv('NEON_AUTH_BASE_URL', NEON_AUTH_BASE_URL),
-	cookieSecret: requireEnv('NEON_AUTH_COOKIE_SECRET', NEON_AUTH_COOKIE_SECRET)
+export const auth = betterAuth({
+	// SvelteKit 3 doesn't populate process.env from .env — pass explicitly.
+	secret: BETTER_AUTH_SECRET,
+	baseURL: BETTER_AUTH_URL,
+	database: drizzleAdapter(db, { provider: 'pg', schema }),
+	// Discord OAuth is the ONLY authentication method.
+	emailAndPassword: { enabled: false },
+	socialProviders: {
+		discord: {
+			clientId: discordClientId,
+			clientSecret: discordClientSecret,
+			// Identity only — we never require the user's email.
+			scope: ['identify']
+		}
+	},
+	// Some Discord accounts have no email — synthesize a stable placeholder
+	// so Better Auth's unique email column stays satisfied.
+	// https://better-auth.com/docs/concepts/oauth
+	mapProfileToUser: (profile) => ({
+		email: profile.email ?? `${profile.id}@discord.ovyn.bio`,
+		emailVerified: false
+	}),
+	user: {
+		additionalFields: {
+			status: { type: 'string', defaultValue: 'active', input: false }
+		}
+	},
+	databaseHooks: {
+		session: {
+			// Provision / refresh identity data after sign-in.
+			create: {
+				after: async (session) => {
+					try {
+						await provisionUser(session.userId);
+					} catch (err) {
+						// Never block sign-in on provisioning failures.
+						console.error('provisionUser failed', err);
+					}
+				}
+			}
+		}
+	},
+	advanced: {
+		database: { joins: true }
+	},
+	plugins: [sveltekitCookies(getRequestEvent)]
 });
+
+export type AuthSession = typeof auth.$Infer.Session;

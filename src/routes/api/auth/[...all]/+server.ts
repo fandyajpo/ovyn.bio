@@ -2,10 +2,11 @@ import type { RequestHandler } from './$types';
 import { auth } from '#lib/server/auth';
 
 /**
- * Better Auth proxy: every /api/auth/* request is forwarded to Neon's
- * managed Better Auth service, with auth cookies kept first-party on our
- * origin. OAuth callbacks are finalized here too.
+ * Standalone Better Auth catch-all: every /api/auth/* request is passed
+ * to the auth handler, which handles Discord sign-in, the OAuth callback,
+ * session reads/writes, and sign-out.
  */
-export const POST: RequestHandler = (event) => auth.handler(event);
+const handler = (event: { request: Request }) => auth.handler(event.request);
 
-export const GET: RequestHandler = (event) => auth.handler(event);
+export const GET = handler;
+export const POST = handler;

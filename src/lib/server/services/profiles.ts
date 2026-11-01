@@ -1,7 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
-import { discordAccounts, neonAuthUser, profiles } from '#lib/server/db/schema';
-import { neonAuthAccount } from '#lib/server/db/schema/neon-auth';
+import { account, user } from '#lib/server/db/schema/auth';
+import { discordAccounts, profiles } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError } from '../utils/errors';
 import { isValidSlug, normalizeSlug } from '../utils/slug';
 
@@ -27,81 +27,66 @@ async function fetchDiscordUser(accessToken: string): Promise<DiscordUser> {
 }
 
 /**
- * Provision the OVYN identity for a managed-auth user: store their Discord
- * identity (fetched server-to-server, never from the client) and make sure
- * a profile with a unique slug exists. Failures must not block requests.
+ * Refresh identity data from Discord (backend-to-backend — never from the
+ * client) and make sure the user has a profile with a unique slug.
+ * Runs inside Better Auth's session-create hook, so failures must not
+ * block sign-in.
  */
 export async function provisionUser(userId: string): Promise<void> {
-	// Cheap early exit — hooks call this on every authenticated request.
-	const [existing] = await db
-		.select({ id: profiles.id })
-		.from(profiles)
-		.where(eq(profiles.userId, userId))
-		.limit(1);
-	if (existing) return;
-
-	// Identity data lives in Neon Auth's managed schema.
-	const [authUser] = await db
+	const [acc] = await db
 		.select()
-		.from(neonAuthUser)
-		.where(eq(neonAuthUser.id, userId))
-		.limit(1);
-	if (!authUser) return;
-
-	const [authAccount] = await db
-		.select()
-		.from(neonAuthAccount)
-		.where(and(eq(neonAuthAccount.userId, userId), eq(neonAuthAccount.providerId, 'discord')))
+		.from(account)
+		.where(and(eq(account.userId, userId), eq(account.providerId, 'discord')))
 		.limit(1);
 
-	// Managed Better Auth stores the display name, not the raw Discord
-	// username — fetch it from Discord directly on the backend.
-	let discordUsername = authUser.name ?? 'ovyn';
-	let discordAvatarUrl = authUser.image;
+	if (!acc?.accessToken) return;
 
-	if (authAccount?.accessToken) {
-		try {
-			const discordUser = await fetchDiscordUser(authAccount.accessToken);
-			discordUsername = discordUser.username;
-			discordAvatarUrl = discordUser.avatar
-				? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`
-				: authUser.image;
-		} catch (err) {
-			console.error('Discord identity fetch failed', err);
-		}
+	let discordUser: DiscordUser;
+	try {
+		discordUser = await fetchDiscordUser(acc.accessToken);
+	} catch (err) {
+		console.error('Discord identity fetch failed', err);
+		return;
 	}
 
+	const avatarUrl = discordUser.avatar
+		? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`
+		: null;
+
 	await db.transaction(async (tx) => {
-		// Lock the auth user row so concurrent requests don't double-provision.
-		await tx.execute(sql`SELECT id FROM neon_auth.user WHERE id = ${userId} FOR UPDATE`);
+		// Lock the account row so two concurrent sign-ins don't race.
+		await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
 
 		await tx
 			.insert(discordAccounts)
 			.values({
 				userId,
-				discordId: authAccount?.accountId ?? userId,
-				username: discordUsername,
-				globalName: authUser.name,
-				avatarUrl: discordAvatarUrl
+				discordId: discordUser.id,
+				username: discordUser.username,
+				globalName: discordUser.global_name,
+				avatarUrl
 			})
 			.onConflictDoUpdate({
 				target: discordAccounts.discordId,
 				set: {
 					userId,
-					username: discordUsername,
-					globalName: authUser.name,
-					avatarUrl: discordAvatarUrl,
+					username: discordUser.username,
+					globalName: discordUser.global_name,
+					avatarUrl,
 					updatedAt: new Date()
 				}
 			});
 
+		// Profile creation happens once; later sign-ins just refresh Discord data.
 		await tx
 			.insert(profiles)
 			.values({
 				userId,
-				slug: await availableSlug(tx, discordUsername),
-				displayName: authUser.name ?? discordUsername
+				slug: await availableSlug(tx, discordUser.username),
+				displayName: discordUser.global_name ?? discordUser.username
 			})
 			.onConflictDoNothing({ target: profiles.userId });
 	});
 }
+
+export { isUniqueViolation, user };
