@@ -1,5 +1,8 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { db } from '#lib/server/db';
+import { discordAccounts } from '#lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 import { getMembership } from '#lib/server/services/guilds';
 import { getProfileByUserId } from '#lib/server/services/profiles';
 import { listMyInvitations } from '#lib/server/services/invitations';
@@ -14,8 +17,16 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const profile = await getProfileByUserId(user.id);
 	const membership = await getMembership(user.id);
+
+	// Avatar: uploaded OVYN avatar wins, else the synced Discord avatar.
+	const [discord] = await db
+		.select({ avatarUrl: discordAccounts.avatarUrl })
+		.from(discordAccounts)
+		.where(eq(discordAccounts.userId, user.id))
+		.limit(1);
+
 	const [avatarUrl, invitations, orders] = await Promise.all([
-		profile.avatarKey ? presignDownload(profile.avatarKey) : null,
+		profile.avatarKey ? presignDownload(profile.avatarKey) : (discord?.avatarUrl ?? null),
 		listMyInvitations(user.id),
 		listUserOrders(user.id)
 	]);

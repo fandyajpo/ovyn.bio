@@ -44,10 +44,18 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
 }
 
 /**
- * Refresh identity data from Discord (backend-to-backend — never from the
- * client) and make sure the user has a profile with a unique slug.
+ * Sync identity from Discord (backend-to-backend — never from the client)
+ * and make sure the user has a profile with a unique slug.
  * Runs inside Better Auth's session-create hook, so failures must not
  * block sign-in.
+ *
+ * Sync policy:
+ *  - `discord_accounts` always mirrors the current Discord identity.
+ *  - Profile display name auto-follows Discord UNLESS the user customized
+ *    it (custom = differs from the previously mirrored Discord name).
+ *  - The slug never changes automatically (stable profile URLs).
+ *  - Avatar: users with no uploaded avatar always show the live Discord
+ *    avatar (resolved via fallback at read time).
  */
 export async function provisionUser(userId: string): Promise<void> {
 	const [acc] = await db
@@ -69,10 +77,20 @@ export async function provisionUser(userId: string): Promise<void> {
 	const avatarUrl = discordUser.avatar
 		? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`
 		: null;
+	const newDiscordName = discordUser.global_name ?? discordUser.username;
 
 	await db.transaction(async (tx) => {
 		// Lock the account row so two concurrent sign-ins don't race.
 		await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
+
+		// Read the previously mirrored Discord name BEFORE updating it —
+		// it tells us whether the user customized their OVYN display name.
+		const [previous] = await tx
+			.select()
+			.from(discordAccounts)
+			.where(eq(discordAccounts.userId, userId))
+			.limit(1);
+		const previousMirroredName = previous?.globalName ?? previous?.username ?? null;
 
 		await tx
 			.insert(discordAccounts)
@@ -94,15 +112,36 @@ export async function provisionUser(userId: string): Promise<void> {
 				}
 			});
 
-		// Profile creation happens once; later sign-ins just refresh Discord data.
-		await tx
-			.insert(profiles)
-			.values({
-				userId,
-				slug: await availableSlug(tx, discordUser.username),
-				displayName: discordUser.global_name ?? discordUser.username
-			})
-			.onConflictDoNothing({ target: profiles.userId });
+		// Strong sync: follow Discord's display name unless the user set
+		// their own custom one in OVYN settings.
+		const [profile] = await tx
+			.select()
+			.from(profiles)
+			.where(eq(profiles.userId, userId))
+			.limit(1);
+
+		if (!profile) {
+			await tx
+				.insert(profiles)
+				.values({
+					userId,
+					slug: await availableSlug(tx, discordUser.username),
+					displayName: newDiscordName
+				})
+				.onConflictDoNothing({ target: profiles.userId });
+		} else if (
+			profile.displayName === null ||
+			profile.displayName === previousMirroredName ||
+			profile.displayName === ''
+		) {
+			// Never customized (or still mirrors Discord) → follow Discord.
+			if (profile.displayName !== newDiscordName) {
+				await tx
+					.update(profiles)
+					.set({ displayName: newDiscordName, updatedAt: new Date() })
+					.where(eq(profiles.userId, userId));
+			}
+		}
 	});
 }
 
