@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { assertOwnObjectKey, presignUpload, type UploadKind } from '#lib/server/storage';
-import { setProfileMedia } from '#lib/server/services/profiles';
+import { setProfileBanner } from '#lib/server/services/profiles';
 import { getMembership, updateGuild } from '#lib/server/services/guilds';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
@@ -39,17 +39,16 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 	const kind = body.kind;
 	const key = body.key;
 
-	if ((kind !== 'avatar' && kind !== 'banner' && kind !== 'icon') || typeof key !== 'string') {
+	if ((kind !== 'banner' && kind !== 'icon') || typeof key !== 'string') {
 		return Response.json({ error: 'Invalid request' }, { status: 422 });
 	}
 
 	try {
 		assertOwnObjectKey(locals.user.id, kind as UploadKind, key);
 
-		if (kind === 'avatar') {
-			await setProfileMedia(locals.user.id, { avatarKey: key });
-		} else if (kind === 'banner') {
-			await setProfileMedia(locals.user.id, { bannerKey: key });
+		if (kind === 'banner') {
+			// The profile wallpaper.
+			await setProfileBanner(locals.user.id, key);
 		} else {
 			const membership = await getMembership(locals.user.id);
 			if (!membership || membership.membership.role !== 'owner') {

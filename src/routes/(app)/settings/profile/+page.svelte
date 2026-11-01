@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Input from '#lib/components/ui/Input.svelte';
-	import Button from '#lib/components/ui/Button.svelte';
+	import { goto } from '$app/navigation';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
 
 	let { data, form }: {
@@ -10,18 +10,21 @@
 		form?: { error?: string; ok?: boolean };
 	} = $props();
 
-	let displayName = $state(data.profile.displayName ?? '');
-	let slug = $state(data.profile.slug);
-	let bio = $state(data.profile.bio ?? '');
+	// Identity is Discord-synced (read-only here).
+	const displayName = $derived(
+		data.profile.displayName || data.discord?.globalName || data.discord?.username || data.profile.slug
+	);
+
 	let visibility = $state<string>(data.profile.visibility);
 
-	const previewSlug = $derived(
-		slug
-			.normalize('NFKD')
-			.toLowerCase()
-			.replace(/[^a-z0-9._-]+/g, '-')
-			.replace(/^-+|-+$/g, '')
-	);
+	async function onVisibilityChange() {
+		const res = await fetch('/settings/profile?/visibility', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+			body: new URLSearchParams({ visibility })
+		});
+		if (res.ok) goto('', { replaceState: true });
+	}
 </script>
 
 <svelte:head>
@@ -31,66 +34,62 @@
 <div class="mx-auto flex max-w-2xl flex-col gap-8">
 	<div>
 		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Profile settings</h1>
-		<p class="mt-1 text-neutral-400">This is how the world sees you at ovyn.bio.</p>
+		<p class="mt-1 text-neutral-400">
+			Your name, username and avatar come from Discord and stay in sync.
+		</p>
 	</div>
 
 	{#if form?.ok}
 		<p class="rounded-lg border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">
-			Profile saved.
+			Saved.
 		</p>
 	{/if}
 
+	<section class="flex items-center gap-4 rounded-xl border border-neutral-800 p-5">
+		<Avatar name={displayName} src={data.avatarUrl} size="lg" />
+		<div class="min-w-0">
+			<p class="truncate font-medium text-neutral-100">{displayName}</p>
+			<p class="font-mono text-xs text-neutral-500">ovyn.bio/{data.profile.slug}</p>
+			{#if data.discord}
+				<p class="font-mono text-xs text-neutral-600">discord: {data.discord.username}</p>
+			{/if}
+			<a href="/settings/account" class="mt-1 inline-block text-xs text-neutral-500 hover:text-neutral-300">
+				Managed by Discord — account settings
+			</a>
+		</div>
+	</section>
+
 	<section class="rounded-xl border border-neutral-800 p-5">
-		<h2 class="mb-4 font-medium text-neutral-200">Images</h2>
-		<div class="flex flex-wrap items-center gap-6">
-			<div class="flex items-center gap-3">
-				<Avatar name={displayName || data.profile.slug} src={data.avatarUrl} size="lg" />
-				<div>
-					<p class="text-sm text-neutral-300">Avatar</p>
-					<p class="mb-1 text-xs text-neutral-500">JPG, PNG or WebP · max 2 MB</p>
-					<UploadButton kind="avatar" existingKey={data.profile.avatarKey} label="Upload avatar" />
-				</div>
+		<h2 class="mb-4 font-medium text-neutral-200">Page wallpaper</h2>
+		<div class="flex items-center gap-4">
+			<div class="h-14 w-24 overflow-hidden rounded-lg bg-neutral-800">
+				{#if data.bannerUrl}
+					<img src={data.bannerUrl} alt="Wallpaper preview" class="size-full object-cover" />
+				{/if}
 			</div>
-			<div class="flex items-center gap-3">
-				<div class="h-12 w-20 overflow-hidden rounded-lg bg-neutral-800">
-					{#if data.bannerUrl}
-						<img src={data.bannerUrl} alt="Banner preview" class="size-full object-cover" />
-					{/if}
-				</div>
-				<div>
-					<p class="text-sm text-neutral-300">Banner</p>
-					<p class="mb-1 text-xs text-neutral-500">JPG, PNG or WebP · max 5 MB</p>
-					<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload banner" />
-				</div>
+			<div>
+				<p class="mb-1 text-sm text-neutral-300">Your page background image</p>
+				<p class="mb-1 text-xs text-neutral-500">JPG, PNG or WebP · max 5 MB</p>
+				<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload wallpaper" />
 			</div>
 		</div>
 	</section>
 
-	<form method="POST" action="/settings/profile" class="flex flex-col gap-5">
-		<div class="grid gap-5 sm:grid-cols-2">
-			<Input name="displayName" label="Display name" bind:value={displayName} required maxlength={50} />
-			<div>
-				<Input name="slug" label="Username" bind:value={slug} required minlength={2} maxlength={32} />
-				<p class="mt-1 font-mono text-xs text-neutral-600">ovyn.bio/{previewSlug}</p>
-			</div>
-		</div>
-
-		<Input name="bio" label="Bio" bind:value={bio} textarea maxlength={500} />
-
-		<fieldset class="flex items-center gap-3">
-			<legend class="mb-1.5 text-sm font-medium text-neutral-300">Profile visibility</legend>
-			<label class="flex items-center gap-2 text-sm text-neutral-300">
-				<input type="radio" name="visibility" value="public" bind:group={visibility} /> Public
-			</label>
-			<label class="flex items-center gap-2 text-sm text-neutral-300">
-				<input type="radio" name="visibility" value="private" bind:group={visibility} /> Private
-			</label>
-		</fieldset>
-
+	<section class="rounded-xl border border-neutral-800 p-5">
+		<h2 class="mb-3 font-medium text-neutral-200">Page visibility</h2>
+		<label class="flex items-center gap-3 text-sm text-neutral-300">
+			<input
+				type="checkbox"
+				checked={visibility === 'public'}
+				onchange={() => {
+					visibility = visibility === 'public' ? 'private' : 'public';
+					onVisibilityChange();
+				}}
+			/>
+			Public profile — anyone can visit ovyn.bio/{data.profile.slug}
+		</label>
 		{#if form?.error}
-			<p class="text-sm text-red-400" role="alert">{form.error}</p>
+			<p class="mt-2 text-sm text-red-400" role="alert">{form.error}</p>
 		{/if}
-
-		<Button type="submit">Save changes</Button>
-	</form>
+	</section>
 </div>

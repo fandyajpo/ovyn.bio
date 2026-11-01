@@ -46,7 +46,6 @@ export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as con
 export type ImageMime = (typeof IMAGE_MIME_TYPES)[number];
 
 export const UPLOAD_LIMITS = {
-	avatar: { maxSize: 2 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	banner: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
 } as const;

@@ -13,6 +13,7 @@ type DiscordUser = {
 	id: string;
 	username: string;
 	global_name: string | null;
+	bio: string | null;
 	avatar: string | null;
 };
 
@@ -147,6 +148,14 @@ export async function provisionUser(userId: string): Promise<void> {
 			}
 		}
 
+		// Bio is fully Discord-owned: always mirror it.
+		if (discordUser.bio !== profile.bio) {
+			await tx
+				.update(profiles)
+				.set({ bio: discordUser.bio, updatedAt: new Date() })
+				.where(eq(profiles.userId, userId));
+		}
+
 		// Slug follows the Discord username with the same policy: only
 		// override when the user never customized it. Auto-generated suffix
 		// variants (e.g. "name-2" when "name" was taken) still count as
@@ -174,46 +183,28 @@ export async function provisionUser(userId: string): Promise<void> {
 	});
 }
 
-type ProfileUpdate = {
-	displayName?: string;
-	slug?: string;
-	bio?: string | null;
-	visibility?: 'public' | 'private';
-};
-
-export async function updateProfile(userId: string, update: ProfileUpdate) {
-	return db.transaction(async (tx) => {
-		if (update.slug) {
-			// Lock the current row, then make sure the slug is free.
-			await tx.execute(sql`SELECT id FROM profiles WHERE user_id = ${userId} FOR UPDATE`);
-			const [taken] = await tx
-				.select({ userId: profiles.userId })
-				.from(profiles)
-				.where(eq(profiles.slug, update.slug))
-				.limit(1);
-			if (taken && taken.userId !== userId) {
-				throw new ConflictError('That username is already taken');
-			}
-		}
-
-		const [updated] = await tx
-			.update(profiles)
-			.set({ ...update, updatedAt: new Date() })
-			.where(eq(profiles.userId, userId))
-			.returning();
-
-		if (!updated) throw new NotFoundError('Profile not found');
-		return updated;
-	});
-}
-
-export async function setProfileMedia(
+/**
+ * Identity fields (name, slug, bio, avatar) are Discord-owned and sync
+ * automatically — the only user-editable profile settings are the page's
+ * visibility and its wallpaper (banner).
+ */
+export async function setProfileVisibility(
 	userId: string,
-	media: { avatarKey?: string | null; bannerKey?: string | null }
+	visibility: 'public' | 'private'
 ) {
 	const [updated] = await db
 		.update(profiles)
-		.set({ ...media, updatedAt: new Date() })
+		.set({ visibility, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
+export async function setProfileBanner(userId: string, bannerKey: string) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ bannerKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');

@@ -6,7 +6,7 @@
 		kind,
 		existingKey = null,
 		label
-	}: { kind: 'avatar' | 'banner' | 'icon'; existingKey?: string | null; label: string } = $props();
+	}: { kind: 'banner' | 'icon'; existingKey?: string | null; label: string } = $props();
 
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
