@@ -1,10 +1,11 @@
-import { and, asc, count, eq, ilike, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, ilike, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import {
 	guildInvitations,
 	guildMembers,
 	guilds,
-	profiles
+	profiles,
+	spotlights
 } from '#lib/server/db/schema';
 import { user } from '#lib/server/db/schema/auth';
 import {
@@ -97,17 +98,27 @@ export async function listPublicGuilds(search: string | null) {
 		eq(guilds.status, 'active'),
 		search ? ilike(guilds.name, `%${search}%`) : undefined
 	);
+	const featured = sql<boolean>`count(${spotlights.id}) > 0`;
 
 	return db
 		.select({
 			guild: guilds,
-			memberCount: count(guildMembers.userId)
+			memberCount: count(guildMembers.userId),
+			featured
 		})
 		.from(guilds)
 		.leftJoin(guildMembers, eq(guildMembers.guildId, guilds.id))
+		.leftJoin(
+			spotlights,
+			and(
+				eq(spotlights.targetType, 'guild'),
+				sql`${spotlights.targetId} = ${guilds.id}::text`,
+				gt(spotlights.expiresAt, new Date())
+			)
+		)
 		.where(where)
 		.groupBy(guilds.id)
-		.orderBy(asc(guilds.name))
+		.orderBy(desc(featured), asc(guilds.name))
 		.limit(60);
 }
 

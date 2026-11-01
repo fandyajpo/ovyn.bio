@@ -26,6 +26,7 @@ const SEED = [
 		name: 'Lime Glow',
 		kind: 'frame',
 		price: 5000,
+		pointsPrice: 250,
 		description: 'A subtle electric lime ring for your avatar.',
 		accent: '#D5FF35'
 	},
@@ -33,6 +34,7 @@ const SEED = [
 		name: 'Neon Ring',
 		kind: 'frame',
 		price: 10000,
+		pointsPrice: 400,
 		description: 'Cyan neon frame. Maximum internet energy.',
 		accent: '#35D6FF'
 	},
@@ -40,6 +42,7 @@ const SEED = [
 		name: 'Sunset Frame',
 		kind: 'frame',
 		price: 10000,
+		pointsPrice: 400,
 		description: 'Warm gradient frame.',
 		accent: '#FF9B35'
 	},
@@ -47,6 +50,7 @@ const SEED = [
 		name: 'Lime Fade Wallpaper',
 		kind: 'wallpaper',
 		price: 8000,
+		pointsPrice: 350,
 		description: 'Subtle lime wash for your profile header.',
 		accent: '#D5FF35'
 	},
@@ -54,6 +58,7 @@ const SEED = [
 		name: 'Midnight Grid',
 		kind: 'wallpaper',
 		price: 12000,
+		pointsPrice: 500,
 		description: 'Dark grid pattern wallpaper.',
 		accent: '#6B6F8A'
 	},
@@ -61,6 +66,7 @@ const SEED = [
 		name: 'OG Member',
 		kind: 'badge',
 		price: 0,
+		pointsPrice: 0,
 		description: 'For the early ones. Free forever.',
 		accent: '#D5FF35'
 	},
@@ -68,8 +74,19 @@ const SEED = [
 		name: 'Verified Vibes',
 		kind: 'badge',
 		price: 15000,
+		pointsPrice: 500,
 		description: 'A little checkmark with personality.',
 		accent: '#35D6FF'
+	},
+	{
+		name: 'Limited Neon Eclipse',
+		kind: 'frame',
+		price: 25000,
+		pointsPrice: 900,
+		stockLimit: 100,
+		dropDays: 30,
+		description: 'Limited run: only 100 frames, available for 30 days after first seed.',
+		accent: '#B56DFF'
 	}
 ];
 
@@ -77,25 +94,54 @@ try {
 	for (const item of SEED) {
 		await sql.begin(async (tx) => {
 			const [product] = await tx`
-				INSERT INTO products (name, description, price, currency, active)
-				VALUES (${item.name}, ${item.description}, ${item.price}, 'IDR', true)
+				INSERT INTO products (name, description, price, currency, active, category)
+				VALUES (${item.name}, ${item.description}, ${item.price}, 'IDR', true, 'cosmetic')
 				ON CONFLICT (name) DO UPDATE
-				SET description = ${item.description}, price = ${item.price}, active = true
+				SET description = ${item.description}, price = ${item.price}, active = true, category = 'cosmetic'
 				RETURNING id
 			`;
 
+			const dropEndsAt = item.dropDays ? new Date(Date.now() + item.dropDays * 86400_000) : null;
 			await tx`
-				INSERT INTO cosmetics (id, kind, asset_key, accent_color)
-				VALUES (${product.id}, ${item.kind}, ${`cosmetics/${item.kind}s/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`}, ${item.accent})
+				INSERT INTO cosmetics (id, kind, asset_key, accent_color, points_price, stock_limit, drop_ends_at)
+				VALUES (
+					${product.id}, ${item.kind},
+					${`cosmetics/${item.kind}s/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`},
+					${item.accent}, ${item.pointsPrice ?? null}, ${item.stockLimit ?? null}, ${dropEndsAt}
+				)
 				ON CONFLICT (id) DO UPDATE
-				SET kind = ${item.kind}, accent_color = ${item.accent}, updated_at = now()
+				SET kind = ${item.kind}, accent_color = ${item.accent},
+					points_price = EXCLUDED.points_price,
+					stock_limit = EXCLUDED.stock_limit,
+					drop_ends_at = COALESCE(cosmetics.drop_ends_at, EXCLUDED.drop_ends_at),
+					updated_at = now()
 			`;
 		});
 	}
 
+	// Starter spotlight products. These prices/terms are sample defaults;
+	// edit the rows in products before launch to set your business pricing.
+	const spotlightProducts = [
+		{ name: 'Profile Spotlight — 1 day', category: 'profile_spotlight', price: 10000, days: 1 },
+		{ name: 'Profile Spotlight — 7 days', category: 'profile_spotlight', price: 50000, days: 7 },
+		{ name: 'Guild Spotlight — 1 day', category: 'guild_spotlight', price: 20000, days: 1 },
+		{ name: 'Guild Spotlight — 7 days', category: 'guild_spotlight', price: 90000, days: 7 }
+	];
+
+	for (const item of spotlightProducts) {
+		await sql`
+			INSERT INTO products (name, description, price, currency, active, category, duration_days)
+			VALUES (${item.name}, 'Featured placement in OVYN discovery.', ${item.price}, 'IDR', true, ${item.category}, ${item.days})
+			ON CONFLICT (name) DO UPDATE
+			SET description = EXCLUDED.description, price = EXCLUDED.price,
+				active = true, category = EXCLUDED.category, duration_days = EXCLUDED.duration_days
+		`;
+	}
+
 	const [{ count }] = await sql`SELECT count(*)::int AS count FROM cosmetics`;
-	console.log(`Seed complete: ${count} cosmetics in the shop.`);
+	console.log(`Seed complete: ${count} cosmetics and ${spotlightProducts.length} spotlight plans in the catalog.`);
 	console.log("Each cosmetic's asset_key points at cosmetics/<kind>/<slug>.png in your Neon Object Storage bucket — upload the art there.");
+	console.log('Spotlight prices are sample defaults; change products.price before launch if needed.');
 } catch (err) {
 	console.error('Seed failed:', err instanceof Error ? err.message : err);
 	process.exitCode = 1;

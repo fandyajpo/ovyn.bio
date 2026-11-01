@@ -1,21 +1,44 @@
-import { and, asc, eq } from 'drizzle-orm';
+import { and, asc, count, eq, gte, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { db } from '#lib/server/db';
-import { cosmetics, profiles, products, userCosmetics } from '#lib/server/db/schema';
-import { ForbiddenError, ValidationError } from '#lib/server/utils/errors';
+import {
+	cosmetics,
+	orders,
+	profiles,
+	products,
+	userCosmetics,
+	userRewards
+} from '#lib/server/db/schema';
+import { ForbiddenError, NotFoundError, ValidationError, ConflictError } from '#lib/server/utils/errors';
 import { presignDownload } from '#lib/server/storage';
 
-// Aliased joins so one query can fetch all three equipped cosmetics.
 const frameCosmetic = alias(cosmetics, 'frame_cosmetic');
 const wallpaperCosmetic = alias(cosmetics, 'wallpaper_cosmetic');
 const badgeCosmetic = alias(cosmetics, 'badge_cosmetic');
+const PENDING_RESERVATION_MS = 24 * 60 * 60 * 1000;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export type CosmeticKind = 'frame' | 'wallpaper' | 'badge';
 
-/**
- * The shop catalog: every active cosmetic with its product price,
- * plus ownership + equip status for the viewer (when signed in).
- */
+async function inventory(cosmeticId: string) {
+	const [owned] = await db
+		.select({ total: count() })
+		.from(userCosmetics)
+		.where(eq(userCosmetics.cosmeticId, cosmeticId));
+	const [pending] = await db
+		.select({ total: count() })
+		.from(orders)
+		.where(
+			and(
+				eq(orders.productId, cosmeticId),
+				eq(orders.status, 'pending'),
+				gte(orders.createdAt, new Date(Date.now() - PENDING_RESERVATION_MS))
+			)
+		);
+	return Number(owned?.total ?? 0) + Number(pending?.total ?? 0);
+}
+
+/** Shop catalog includes real remaining inventory and the viewer's points. */
 export async function listShop(userId: string | null) {
 	const items = await db
 		.select({
@@ -26,49 +49,50 @@ export async function listShop(userId: string | null) {
 			price: products.price,
 			currency: products.currency,
 			assetKey: cosmetics.assetKey,
-			accentColor: cosmetics.accentColor
+			accentColor: cosmetics.accentColor,
+			pointsPrice: cosmetics.pointsPrice,
+			stockLimit: cosmetics.stockLimit,
+			dropEndsAt: cosmetics.dropEndsAt
 		})
 		.from(cosmetics)
 		.innerJoin(products, eq(products.id, cosmetics.id))
-		.where(eq(products.active, true))
+		.where(and(eq(products.active, true), eq(products.category, 'cosmetic')))
 		.orderBy(asc(products.price));
 
-	if (!userId) {
-		return items.map((i) => ({ ...i, owned: false, equipped: false, assetUrl: null as string | null }));
+	let ownedIds = new Set<string>();
+	let points = 0;
+	let equipped: { frame: string | null; wallpaper: string | null; badge: string | null } | undefined;
+
+	if (userId) {
+		const [ownedRows, [rewardsRow], [profile]] = await Promise.all([
+			db.select({ cosmeticId: userCosmetics.cosmeticId }).from(userCosmetics).where(eq(userCosmetics.userId, userId)),
+			db.select({ points: userRewards.points }).from(userRewards).where(eq(userRewards.userId, userId)).limit(1),
+			db.select({ frame: profiles.equippedFrameId, wallpaper: profiles.equippedWallpaperId, badge: profiles.equippedBadgeId })
+				.from(profiles).where(eq(profiles.userId, userId)).limit(1)
+		]);
+		ownedIds = new Set(ownedRows.map((o) => o.cosmeticId));
+		points = rewardsRow?.points ?? 0;
+		equipped = profile;
 	}
 
-	const owned = await db
-		.select({ cosmeticId: userCosmetics.cosmeticId })
-		.from(userCosmetics)
-		.where(eq(userCosmetics.userId, userId));
-	const ownedIds = new Set(owned.map((o) => o.cosmeticId));
-
-	const [profile] = await db
-		.select({
-			frame: profiles.equippedFrameId,
-			wallpaper: profiles.equippedWallpaperId,
-			badge: profiles.equippedBadgeId
-		})
-		.from(profiles)
-		.where(eq(profiles.userId, userId))
-		.limit(1);
-
-	const assetUrls = await Promise.all(
-		items.map((i) => (i.assetKey ? presignDownload(i.assetKey) : null))
-	);
-
-	return items.map((i, idx) => ({
-		...i,
-		owned: ownedIds.has(i.id),
-		equipped:
-			(i.kind === 'frame' && profile?.frame === i.id) ||
-			(i.kind === 'wallpaper' && profile?.wallpaper === i.id) ||
-			(i.kind === 'badge' && profile?.badge === i.id),
-		assetUrl: assetUrls[idx]
+	return Promise.all(items.map(async (item) => {
+		const reserved = item.stockLimit === null ? 0 : await inventory(item.id);
+		return {
+			...item,
+			owned: ownedIds.has(item.id),
+			equipped:
+				(item.kind === 'frame' && equipped?.frame === item.id) ||
+				(item.kind === 'wallpaper' && equipped?.wallpaper === item.id) ||
+				(item.kind === 'badge' && equipped?.badge === item.id),
+			points,
+			remainingStock: item.stockLimit === null ? null : Math.max(0, item.stockLimit - reserved),
+			dropOpen: !item.dropEndsAt || item.dropEndsAt.getTime() > Date.now(),
+			assetUrl: item.assetKey ? await presignDownload(item.assetKey) : null
+		};
 	}));
 }
 
-/** Cosmetics the user owns, grouped by kind, for the settings equip UI. */
+/** Cosmetics the user owns, grouped by kind, for the equip UI. */
 export async function listOwnedByKind(userId: string) {
 	const rows = await db
 		.select({
@@ -91,51 +115,114 @@ export async function listOwnedByKind(userId: string) {
 	};
 }
 
-/**
- * Equip (cosmeticId) or unequip (null) a cosmetic in the slot for its kind.
- * Verifies ownership and that the cosmetic's kind matches the slot.
- */
+/** Equip (cosmeticId) or unequip (null) a cosmetic in the slot for its kind. */
 export async function setEquippedCosmetic(
 	userId: string,
 	kind: CosmeticKind,
 	cosmeticId: string | null
 ) {
-	if (!cosmeticId) {
-		// Unequip: null out the slot for this kind.
-		switch (kind) {
-			case 'frame':
-				await db.update(profiles).set({ equippedFrameId: null, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-				return;
-			case 'wallpaper':
-				await db.update(profiles).set({ equippedWallpaperId: null, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-				return;
-			case 'badge':
-				await db.update(profiles).set({ equippedBadgeId: null, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-				return;
+	if (cosmeticId && !UUID_PATTERN.test(cosmeticId)) throw new ValidationError('Invalid cosmetic');
+	if (cosmeticId) {
+		const [owned] = await db
+			.select()
+			.from(userCosmetics)
+			.where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmeticId)))
+			.limit(1);
+		if (!owned) throw new ForbiddenError('You do not own this cosmetic');
+
+		const [cosmetic] = await db.select().from(cosmetics).where(eq(cosmetics.id, cosmeticId)).limit(1);
+		if (!cosmetic || cosmetic.kind !== kind) throw new ValidationError('Cosmetic kind mismatch');
+	}
+
+	const values = {
+		frame: { equippedFrameId: cosmeticId },
+		wallpaper: { equippedWallpaperId: cosmeticId },
+		badge: { equippedBadgeId: cosmeticId }
+	}[kind];
+
+	const [updated] = await db
+		.update(profiles)
+		.set({ ...values, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning({ id: profiles.id });
+	if (!updated) throw new NotFoundError('Profile not found');
+}
+
+/** Redeem a cosmetic with earned points; debit and ownership grant are atomic. */
+export async function redeemCosmeticWithPoints(userId: string, cosmeticId: string) {
+	if (!UUID_PATTERN.test(cosmeticId)) throw new NotFoundError('Item is not available');
+	await db.transaction(async (tx) => {
+		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+		await tx.execute(sql`SELECT id FROM cosmetics WHERE id = ${cosmeticId} FOR UPDATE`);
+		await tx.execute(sql`
+			UPDATE payments AS p
+			SET status = 'expired', updated_at = now()
+			FROM orders AS o
+			WHERE p.order_id = o.id AND o.user_id = ${userId}
+				AND o.status = 'pending' AND o.created_at <= now() - interval '24 hours'
+				AND p.status = 'pending'
+		`);
+		await tx.execute(sql`
+			UPDATE orders SET status = 'expired', updated_at = now()
+			WHERE user_id = ${userId} AND status = 'pending'
+				AND created_at <= now() - interval '24 hours'
+		`);
+		const [pendingOrder] = await tx
+			.select({ id: orders.id })
+			.from(orders)
+			.where(
+				and(
+					eq(orders.userId, userId),
+					eq(orders.productId, cosmeticId),
+					eq(orders.status, 'pending')
+				)
+			)
+			.limit(1);
+		if (pendingOrder) throw new ConflictError('You already have a pending payment for this cosmetic');
+
+		const [item] = await tx
+			.select({
+				pointsPrice: cosmetics.pointsPrice,
+				stockLimit: cosmetics.stockLimit,
+				dropEndsAt: cosmetics.dropEndsAt,
+				active: products.active,
+				category: products.category
+			})
+			.from(cosmetics)
+			.innerJoin(products, eq(products.id, cosmetics.id))
+			.where(eq(cosmetics.id, cosmeticId))
+			.limit(1);
+		if (!item || !item.active || item.category !== 'cosmetic') throw new NotFoundError('Item is not available');
+		if (item.pointsPrice === null) throw new ValidationError('This item cannot be redeemed with points');
+		if (item.dropEndsAt && item.dropEndsAt.getTime() <= Date.now()) throw new ConflictError('This drop has ended');
+
+		const [alreadyOwned] = await tx
+			.select({ cosmeticId: userCosmetics.cosmeticId })
+			.from(userCosmetics)
+			.where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmeticId)))
+			.limit(1);
+		if (alreadyOwned) throw new ConflictError('You already own this item');
+
+		if (item.stockLimit !== null) {
+			const [inventoryRow] = await tx.execute(sql`
+				SELECT
+					(SELECT count(*) FROM user_cosmetics WHERE cosmetic_id = ${cosmeticId}) +
+					(SELECT count(*) FROM orders WHERE product_id = ${cosmeticId} AND status = 'pending'
+					 AND created_at > now() - interval '24 hours') AS reserved
+			`);
+			if (Number(inventoryRow?.reserved ?? 0) >= item.stockLimit) throw new ConflictError('This limited drop is sold out');
 		}
-	}
 
-	const [owned] = await db
-		.select()
-		.from(userCosmetics)
-		.where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmeticId)))
-		.limit(1);
-	if (!owned) throw new ForbiddenError('You do not own this cosmetic');
+		await tx.insert(userRewards).values({ userId }).onConflictDoNothing();
+		const [balance] = await tx
+			.update(userRewards)
+			.set({ points: sql`${userRewards.points} - ${item.pointsPrice}`, updatedAt: new Date() })
+			.where(and(eq(userRewards.userId, userId), gte(userRewards.points, item.pointsPrice)))
+			.returning({ points: userRewards.points });
+		if (!balance) throw new ConflictError('Not enough points');
 
-	const [cosmetic] = await db.select().from(cosmetics).where(eq(cosmetics.id, cosmeticId)).limit(1);
-	if (!cosmetic || cosmetic.kind !== kind) throw new ValidationError('Cosmetic kind mismatch');
-
-	switch (kind) {
-		case 'frame':
-			await db.update(profiles).set({ equippedFrameId: cosmeticId, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-			break;
-		case 'wallpaper':
-			await db.update(profiles).set({ equippedWallpaperId: cosmeticId, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-			break;
-		case 'badge':
-			await db.update(profiles).set({ equippedBadgeId: cosmeticId, updatedAt: new Date() }).where(eq(profiles.userId, userId));
-			break;
-	}
+		await tx.insert(userCosmetics).values({ userId, cosmeticId }).onConflictDoNothing();
+	});
 }
 
 /** Equipped cosmetics for a profile (by slug), with presigned asset URLs. */
@@ -147,22 +234,17 @@ export async function getEquippedForProfile(slug: string) {
 			badgeKey: badgeCosmetic.assetKey
 		})
 		.from(profiles)
-		.leftJoin(cosmetics, eq(profiles.equippedFrameId, cosmetics.id))
-		.leftJoin(
-			wallpaperCosmetic,
-			eq(profiles.equippedWallpaperId, wallpaperCosmetic.id)
-		)
+		.leftJoin(frameCosmetic, eq(profiles.equippedFrameId, frameCosmetic.id))
+		.leftJoin(wallpaperCosmetic, eq(profiles.equippedWallpaperId, wallpaperCosmetic.id))
 		.leftJoin(badgeCosmetic, eq(profiles.equippedBadgeId, badgeCosmetic.id))
 		.where(eq(profiles.slug, slug))
 		.limit(1);
 
 	if (!row) return { frameUrl: null, wallpaperUrl: null, badgeUrl: null };
-
 	const [frameUrl, wallpaperUrl, badgeUrl] = await Promise.all([
 		row.frameKey ? presignDownload(row.frameKey) : null,
 		row.wallpaperKey ? presignDownload(row.wallpaperKey) : null,
 		row.badgeKey ? presignDownload(row.badgeKey) : null
 	]);
-
 	return { frameUrl, wallpaperUrl, badgeUrl };
 }

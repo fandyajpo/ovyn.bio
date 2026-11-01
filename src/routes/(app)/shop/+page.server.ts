@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { listShop, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
+import { listShop, redeemCosmeticWithPoints, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
 import { createCheckout } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
@@ -27,6 +27,22 @@ export const actions: Actions = {
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			throw err; // redirect() control flow
+		}
+	},
+
+	redeem: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const data = await request.formData();
+		const cosmeticId = data.get('cosmeticId');
+		if (typeof cosmeticId !== 'string' || !cosmeticId) return fail(422, { error: 'Invalid item' });
+		try {
+			rateLimit(`shop-redeem:${locals.user.id}`, 10, 60_000);
+			await redeemCosmeticWithPoints(locals.user.id, cosmeticId);
+			return { ok: true };
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not redeem item' });
 		}
 	},
 

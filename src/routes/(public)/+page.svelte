@@ -1,7 +1,9 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import Button from '#lib/components/ui/Button.svelte';
+	import ProfileCard from '#lib/components/ProfileCard.svelte';
 
-	let { user, stats } = $props();
+	let { data }: { data: PageData } = $props();
 </script>
 
 <svelte:head>
@@ -20,7 +22,7 @@
 		that fits you — with full control over your identity.
 	</p>
 	<div class="flex flex-wrap items-center justify-center gap-3">
-		{#if user}
+		{#if data.user}
 			<Button href="/dashboard">Go to dashboard</Button>
 			<Button href="/discover" variant="secondary">Discover guilds</Button>
 		{:else}
@@ -34,7 +36,7 @@
 	<div class="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
 		<h3 class="font-[family-name:var(--font-display)] text-lg font-semibold">Identity</h3>
 		<p class="mt-2 text-sm text-neutral-400">
-			Your profile at ovyn.bio/you — display name, avatar, banner, and bio. Fully yours.
+			A personal page at ovyn.bio/you — Discord-synced identity with your own page wallpaper and style.
 		</p>
 	</div>
 	<div class="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
@@ -44,15 +46,38 @@
 		</p>
 	</div>
 	<div class="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
-		<h3 class="font-[family-name:var(--font-display)] text-lg font-semibold">Ownership</h3>
+		<h3 class="font-[family-name:var(--font-display)] text-lg font-semibold">Make it yours</h3>
 		<p class="mt-2 text-sm text-neutral-400">
-			Your identity and membership belong to you. Change, move, or leave whenever you decide.
+			Collect profile cosmetics, keep a check-in streak, and put your profile or guild in the spotlight.
 		</p>
 	</div>
 </section>
 
-{#if stats}
+{#if data.featuredProfiles.length > 0}
+	<section class="flex flex-col gap-4 py-10">
+		<div class="flex items-end justify-between">
+			<div>
+				<p class="font-mono text-xs uppercase tracking-wider text-lime-300">Featured</p>
+				<h2 class="mt-1 font-[family-name:var(--font-display)] text-2xl font-semibold">Identities in the spotlight</h2>
+			</div>
+			<a href="/spotlight" class="text-sm text-neutral-400 hover:text-lime-300">Get featured</a>
+		</div>
+		<div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+			{#each data.featuredProfiles as item (item.profile.userId)}
+				<ProfileCard
+					slug={item.profile.slug}
+					displayName={item.profile.displayName}
+					bio={item.profile.bio}
+					avatarUrl={item.avatarUrl}
+					createdAt={item.profile.createdAt}
+				/>
+			{/each}
+		</div>
+	</section>
+{/if}
+
+{#if data.stats}
 	<section class="py-8 text-center font-mono text-sm text-neutral-500">
-		{stats.guilds} guilds · {stats.members} members · {stats.profiles} identities
+		{data.stats.guilds} guilds · {data.stats.members} members · {data.stats.profiles} identities
 	</section>
 {/if}

@@ -54,20 +54,46 @@
 						{/if}
 					</div>
 
-					<div class="flex items-center justify-between gap-2">
-						<span class="font-mono text-lime-300">
-							{item.price === 0 ? 'Free' : formatIdr(item.price)}
-						</span>
+					{#if item.stockLimit !== null || item.dropEndsAt}
+						<p class="font-mono text-xs text-amber-300">
+							{#if item.remainingStock !== null}{item.remainingStock} left{/if}
+							{#if item.dropEndsAt} · ends {new Date(item.dropEndsAt).toLocaleDateString()}{/if}
+						</p>
+					{/if}
+
+					<div class="flex flex-wrap items-center justify-between gap-2">
+						<div class="flex flex-col">
+							<span class="font-mono text-lime-300">
+								{item.price === 0 ? 'Free' : formatIdr(item.price)}
+							</span>
+							{#if item.pointsPrice !== null}
+								<span class="font-mono text-xs text-neutral-400">or {item.pointsPrice} points</span>
+							{/if}
+						</div>
 
 						{#if item.owned}
 							<span class="rounded-full border border-lime-300/40 px-2 py-0.5 text-xs text-lime-300">
 								{item.equipped ? 'Equipped' : 'Owned'}
 							</span>
+						{:else if !item.dropOpen || item.remainingStock === 0}
+							<span class="text-xs text-neutral-500">Drop closed / sold out</span>
 						{:else}
-							<form method="POST" action="/shop?/buy">
-								<input type="hidden" name="productId" value={item.id} />
-								<Button type="submit" variant="secondary">Buy</Button>
-							</form>
+							<div class="flex flex-wrap gap-2">
+								{#if item.price > 0}
+									<form method="POST" action="/shop?/buy">
+										<input type="hidden" name="productId" value={item.id} />
+										<Button type="submit" variant="secondary">Buy</Button>
+									</form>
+								{/if}
+								{#if item.pointsPrice !== null}
+									<form method="POST" action="/shop?/redeem">
+										<input type="hidden" name="cosmeticId" value={item.id} />
+										<Button type="submit" variant="ghost" disabled={item.points < item.pointsPrice}>
+											{item.price === 0 ? 'Claim free' : 'Redeem'}
+										</Button>
+									</form>
+								{/if}
+							</div>
 						{/if}
 					</div>
 

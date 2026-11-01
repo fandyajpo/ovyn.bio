@@ -81,5 +81,8 @@
 		{/if}
 
 		<p class="font-mono text-xs text-neutral-600">Member since {formatDate(p.createdAt)}</p>
+		{#if data.viewerTracked}
+			<p class="text-xs text-neutral-600">As a signed-in visitor, your visit may appear in this profile's analytics.</p>
+		{/if}
 	</article>
 {/if}

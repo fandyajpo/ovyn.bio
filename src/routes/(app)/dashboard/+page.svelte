@@ -1,10 +1,21 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import { formatDate, formatIdr } from '#lib/utils';
 
-	let { data } = $props();
+	let { data, form }: { data: PageData; form?: { error?: string; checkin?: { alreadyCheckedIn: boolean; points: number; streakCount: number; pointsEarned: number } } } = $props();
+	let referralCopied = $state(false);
+
+	async function copyReferralLink() {
+		try {
+			await navigator.clipboard.writeText(data.referralUrl);
+			referralCopied = true;
+		} catch {
+			referralCopied = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -16,7 +27,10 @@
 		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">
 			Hey, {data.profile.displayName || data.profile.slug}
 		</h1>
-		<Button href="/settings/profile" variant="secondary">Edit profile</Button>
+		<div class="flex gap-2">
+			<Button href="/spotlight" variant="ghost">Get featured</Button>
+			<Button href="/settings/profile" variant="secondary">Customize page</Button>
+		</div>
 	</div>
 
 	<div class="grid gap-4 sm:grid-cols-3">
@@ -61,6 +75,48 @@
 			{/if}
 		</Card>
 	</div>
+
+	<div class="grid gap-4 sm:grid-cols-3">
+		<Card class="p-5">
+			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Daily check-in</p>
+			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.rewards.streakCount} day streak</p>
+			<p class="mt-1 text-sm text-neutral-400">{data.rewards.points} OVYN points · +{data.rewardValues.dailyCheckin} daily, +{data.rewardValues.weeklyStreakBonus} every 7-day streak</p>
+			{#if form?.checkin}
+				<p class="mt-2 text-sm text-lime-300">
+					{form.checkin.alreadyCheckedIn ? 'Already checked in today.' : `Checked in! +${form.checkin.pointsEarned} points.`}
+				</p>
+			{:else if data.rewards.checkedInToday}
+				<p class="mt-2 text-sm text-lime-300">You're checked in for today. Come back tomorrow.</p>
+			{:else}
+				<form method="POST" action="?/checkin" class="mt-3">
+					<Button type="submit">Check in</Button>
+				</form>
+			{/if}
+		</Card>
+
+		<Card class="p-5">
+			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile views · 30 days</p>
+			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.analytics.views} views</p>
+			<p class="mt-1 text-sm text-neutral-400">{data.analytics.uniqueVisitors} unique signed-in visitors</p>
+			<a href="/settings/analytics" class="mt-3 inline-block text-sm text-lime-300 hover:underline">View analytics</a>
+		</Card>
+
+		<Card class="p-5">
+			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Invite friends</p>
+			<p class="mt-2 text-sm text-neutral-400">They earn {data.rewardValues.referral} points after their first check-in; you earn the same.</p>
+			<p class="mt-2 text-xs text-neutral-500">
+				{data.referralSummary.rewarded} rewarded · {data.referralSummary.pending} awaiting first check-in
+			</p>
+			<div class="mt-3 flex gap-2">
+				<input readonly value={data.referralUrl} class="min-w-0 flex-1 rounded-lg border border-neutral-800 bg-neutral-950 px-3 py-2 font-mono text-xs text-neutral-300" aria-label="Your referral link" />
+				<Button variant="secondary" onclick={copyReferralLink}>{referralCopied ? 'Copied' : 'Copy'}</Button>
+			</div>
+		</Card>
+	</div>
+
+	{#if form?.error}
+		<p class="text-sm text-red-400" role="alert">{form.error}</p>
+	{/if}
 
 	{#if data.invitations.length > 0}
 		<Card class="p-5">

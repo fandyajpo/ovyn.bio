@@ -15,7 +15,7 @@
 		data.profile.displayName || data.discord?.globalName || data.discord?.username || data.profile.slug
 	);
 
-	let visibility = $state<string>(data.profile.visibility);
+	let visibility = $derived(data.profile.visibility);
 
 	async function onVisibilityChange() {
 		const res = await fetch('/settings/profile?/visibility', {
@@ -65,15 +65,18 @@
 			Owned frames, wallpapers and badges. Get more in the <a href="/shop" class="text-lime-300 hover:underline">shop</a>.
 		</p>
 
-		{#each (Object.keys(data.owned) as kind) as kindKey (kindKey)}
-			{@const owned = data.owned[kindKey as keyof typeof data.owned]}
-			<h3 class="mt-3 mb-2 font-mono text-xs text-neutral-500 uppercase">{kindKey}s</h3>
-			{#if owned.length === 0}
+		{#each [
+			{ key: 'frame', label: 'Frames', items: data.owned.frames },
+			{ key: 'wallpaper', label: 'Wallpapers', items: data.owned.wallpapers },
+			{ key: 'badge', label: 'Badges', items: data.owned.badges }
+		] as group (group.key)}
+			<h3 class="mt-3 mb-2 font-mono text-xs text-neutral-500 uppercase">{group.label}</h3>
+			{#if group.items.length === 0}
 				<p class="text-xs text-neutral-600">None owned yet.</p>
 			{:else}
 				<div class="flex flex-wrap gap-2">
 					<form method="POST" action="/settings/profile?/equip">
-						<input type="hidden" name="kind" value={kindKey} />
+						<input type="hidden" name="kind" value={group.key} />
 						<input type="hidden" name="cosmeticId" value="" />
 						<button
 							type="submit"
@@ -82,7 +85,7 @@
 							None
 						</button>
 					</form>
-					{#each owned as c (c.id)}
+					{#each group.items as c (c.id)}
 						<form method="POST" action="/settings/profile?/equip">
 							<input type="hidden" name="kind" value={c.kind} />
 							<input type="hidden" name="cosmeticId" value={c.id} />

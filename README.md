@@ -92,6 +92,14 @@ You must add:
   the name. Seed the catalog with `npm run db:seed-shop`, then upload the
   art files to Neon Object Storage at the `cosmetics/<kind>/<name>.png` keys.
 
+- **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
+- **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
+- **Profile analytics** — counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
+- **Featured placement** — `profile_spotlight` and `guild_spotlight` products purchase time-limited placement. A user can feature only their own public profile; only active guild owners can feature their guild. The seed script uses sample prices; review them before enabling payments.
+- **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
+
+Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, `npm run db:seed-shop` inserts the example cosmetics and spotlight products; review sample prices before production.
+
 ## DOKU integration points
 
 - Create VA: `POST /virtual-accounts/bi-snap-va/v1.1/transfer-va/create-va`
@@ -103,4 +111,4 @@ You must add:
 
 - Payment cancellation calls (DOKU delete VA) and refund flows
 - `npm run check` / `npm run build` must be run locally — no CI configured yet
-- Product seeding: insert `products` rows (inactive by default) once pricing is decided
+- Review starter cosmetic/spotlight prices and reward values before production

@@ -1,6 +1,15 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
-import { cosmetics, orders, paymentEvents, payments, products, userCosmetics } from '#lib/server/db/schema';
+import {
+	cosmetics,
+	guilds,
+	orders,
+	paymentEvents,
+	payments,
+	products,
+	spotlights,
+	userCosmetics
+} from '#lib/server/db/schema';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import { dokuTimestamp } from '#lib/server/payments/doku/signature';
@@ -12,51 +21,152 @@ import {
 import type { TransactionFn } from './types';
 
 type Tx = Parameters<TransactionFn>[0];
+type SpotlightTarget = { type: 'profile' | 'guild'; id: string };
 
 const PAYMENT_CHANNEL: SnapChannel = 'VIRTUAL_ACCOUNT_BCA';
 /** DOKU recommends hitting Check Status ~60s after payment completion. */
 const VA_TTL_MINUTES = 60 * 24;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ---------------------------------------------------------------------------
 // Order + payment creation
 // ---------------------------------------------------------------------------
 
 /**
- * Create a pending order and a pending payment with a DOKU virtual account.
- * Amount/currency come from the products row — never from the client.
+ * Create an order using a server-controlled product price. Target metadata
+ * is accepted only for spotlight products and is validated against ownership.
  */
-export async function createCheckout(userId: string, productId: string) {
+export async function createCheckout(userId: string, productId: string, target?: SpotlightTarget) {
+	if (!UUID_PATTERN.test(productId)) throw new NotFoundError('Product not found or not available');
+	if (target?.type === 'guild' && !UUID_PATTERN.test(target.id)) {
+		throw new ValidationError('Invalid guild target');
+	}
+
 	const [product] = await db
 		.select()
 		.from(products)
 		.where(and(eq(products.id, productId), eq(products.active, true)))
 		.limit(1);
 
-	if (!product) throw new NotFoundError('Plan not found or not available');
+	if (!product) throw new NotFoundError('Product not found or not available');
+
+	const expectedSpotlightType =
+		product.category === 'profile_spotlight'
+			? 'profile'
+			: product.category === 'guild_spotlight'
+				? 'guild'
+				: null;
+
+	if (expectedSpotlightType) {
+		if (!target || target.type !== expectedSpotlightType) {
+			throw new ValidationError('Choose a valid target for this spotlight');
+		}
+		if (!product.durationDays || product.durationDays < 1) {
+			throw new ValidationError('This spotlight product has no valid duration configured');
+		}
+		if (target.type === 'profile' && target.id !== userId) {
+			throw new ForbiddenError('You can only feature your own profile');
+		}
+	} else if (target) {
+		throw new ValidationError('This product does not accept a spotlight target');
+	}
 
 	const [profile] = await db
-		.select({ displayName: profiles.displayName, slug: profiles.slug })
+		.select({ displayName: profiles.displayName, slug: profiles.slug, visibility: profiles.visibility })
 		.from(profiles)
 		.where(eq(profiles.userId, userId))
 		.limit(1);
 
-	// Lock user for order creation so a user can't flood parallel checkouts.
+	if (expectedSpotlightType === 'profile' && profile?.visibility !== 'public') {
+		throw new ConflictError('Make your profile public before featuring it');
+	}
+
+	// User lock prevents parallel pending orders; product lock serializes
+	// limited-drop stock reservations across different users.
 	const order = await db.transaction(async (tx) => {
 		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+		await tx.execute(sql`SELECT id FROM products WHERE id = ${product.id} FOR UPDATE`);
+
+		// Expired virtual accounts no longer reserve limited-drop stock or block
+		// the buyer from creating another checkout.
+		await tx.execute(sql`
+			UPDATE payments AS p
+			SET status = 'expired', updated_at = now()
+			FROM orders AS o
+			WHERE p.order_id = o.id
+				AND o.user_id = ${userId}
+				AND o.status = 'pending'
+				AND o.created_at <= now() - interval '24 hours'
+				AND p.status = 'pending'
+		`);
+		await tx.execute(sql`
+			UPDATE orders
+			SET status = 'expired', updated_at = now()
+			WHERE user_id = ${userId}
+				AND status = 'pending'
+				AND created_at <= now() - interval '24 hours'
+		`);
 
 		const [pending] = await tx
-			.select()
+			.select({ id: orders.id })
 			.from(orders)
 			.where(and(eq(orders.userId, userId), eq(orders.status, 'pending')))
 			.limit(1);
-
 		if (pending) {
 			throw new ConflictError('You already have a pending payment. Complete or let it expire first.');
 		}
 
+		if (product.category === 'cosmetic') {
+			// Share a lock with points redemptions so paid/points inventory
+			// reservations cannot oversell the same limited drop.
+			await tx.execute(sql`SELECT id FROM cosmetics WHERE id = ${product.id} FOR UPDATE`);
+			const [cosmetic] = await tx
+				.select()
+				.from(cosmetics)
+				.where(eq(cosmetics.id, product.id))
+				.limit(1);
+			if (!cosmetic) throw new NotFoundError('Cosmetic not found');
+			if (cosmetic.dropEndsAt && cosmetic.dropEndsAt.getTime() <= Date.now()) {
+				throw new ConflictError('This limited drop has ended');
+			}
+			const [alreadyOwned] = await tx
+				.select({ cosmeticId: userCosmetics.cosmeticId })
+				.from(userCosmetics)
+				.where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmetic.id)))
+				.limit(1);
+			if (alreadyOwned) throw new ConflictError('You already own this cosmetic');
+
+			if (cosmetic.stockLimit !== null) {
+				const [inventory] = await tx.execute(sql`
+					SELECT
+						(SELECT count(*) FROM user_cosmetics WHERE cosmetic_id = ${cosmetic.id}) +
+						(SELECT count(*) FROM orders
+						 WHERE product_id = ${product.id} AND status = 'pending'
+						 AND created_at > now() - interval '24 hours') AS reserved
+				`);
+				if (Number(inventory?.reserved ?? 0) >= cosmetic.stockLimit) {
+					throw new ConflictError('This limited drop is sold out');
+				}
+			}
+		}
+
+		if (expectedSpotlightType === 'guild') {
+			const [guild] = await tx.select().from(guilds).where(eq(guilds.id, target!.id)).limit(1);
+			if (!guild || guild.ownerId !== userId || guild.status !== 'active') {
+				throw new ForbiddenError('Only the owner of an active guild can feature it');
+			}
+		}
+
 		const [created] = await tx
 			.insert(orders)
-			.values({ userId, productId: product.id, amount: product.price, currency: product.currency })
+			.values({
+				userId,
+				productId: product.id,
+				targetType: target?.type ?? null,
+				targetId: target?.id ?? null,
+				amount: product.price,
+				currency: product.currency
+			})
 			.returning();
 		return created;
 	});
@@ -64,7 +174,7 @@ export async function createCheckout(userId: string, productId: string) {
 	const expiredDate = dokuTimestamp(new Date(Date.now() + VA_TTL_MINUTES * 60_000));
 
 	// If DOKU rejects the VA creation, fail the order instead of leaving it
-	// pending — a stuck pending order would block every future checkout.
+	// pending — a stuck pending order would block future checkouts / drop stock.
 	let va;
 	try {
 		va = await createVirtualAccount({
@@ -76,10 +186,7 @@ export async function createCheckout(userId: string, productId: string) {
 			expiredDate
 		});
 	} catch (err) {
-		await db
-			.update(orders)
-			.set({ status: 'failed', updatedAt: new Date() })
-			.where(eq(orders.id, order.id));
+		await db.update(orders).set({ status: 'failed', updatedAt: new Date() }).where(eq(orders.id, order.id));
 		throw err;
 	}
 
@@ -93,6 +200,8 @@ export async function createCheckout(userId: string, productId: string) {
 
 	return { order, virtualAccountNo: va.virtualAccountNo, howToPayPage: va.howToPayPage };
 }
+
+
 
 // ---------------------------------------------------------------------------
 // Status handling (webhooks + check-status sync share this)
@@ -112,7 +221,7 @@ const PAYMENT_TO_ORDER: Record<string, 'pending' | 'paid' | 'failed' | 'expired'
 	failed: 'failed',
 	expired: 'expired',
 	cancelled: 'cancelled',
-	refunded: 'paid' // refund bookkeeping only; entitlement unchanged
+	refunded: 'paid'
 };
 
 type ApplyStatusInput = {
@@ -122,10 +231,7 @@ type ApplyStatusInput = {
 	paidAt?: Date | null;
 };
 
-/**
- * Idempotent status application. Locks the payment row, records the state
- * machine transition, and only fulfils once (pending → paid).
- */
+/** Idempotently apply status + fulfil purchased items inside the same transaction. */
 async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' | 'ignored'> {
 	const [payment] = await tx
 		.select()
@@ -136,10 +242,7 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 
 	if (!payment) throw new NotFoundError('Payment not found');
 	if (payment.status === input.paymentStatus) return 'ignored';
-
-	// Terminal states never regress (out-of-order events).
-	const terminal: string[] = ['succeeded', 'refunded'];
-	if (terminal.includes(payment.status)) return 'ignored';
+	if (payment.status === 'succeeded' || payment.status === 'refunded') return 'ignored';
 
 	await tx
 		.update(payments)
@@ -151,34 +254,53 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 		})
 		.where(eq(payments.id, payment.id));
 
-	await tx
-		.update(orders)
-		.set({ status: PAYMENT_TO_ORDER[input.paymentStatus], updatedAt: new Date() })
-		.where(eq(orders.id, input.orderId));
+	const orderStatus = PAYMENT_TO_ORDER[input.paymentStatus];
+	await tx.update(orders).set({ status: orderStatus, updatedAt: new Date() }).where(eq(orders.id, input.orderId));
 
-	// Fulfilment: when an order is newly paid, grant what was bought.
-	// Cosmetic purchases land in user_cosmetics; the composite PK makes
-	// duplicate grants impossible even across retried webhooks.
-	if (PAYMENT_TO_ORDER[input.paymentStatus] === 'paid') {
+	if (orderStatus === 'paid' && input.paymentStatus === 'succeeded') {
 		const [order] = await tx
-			.select({ userId: orders.userId, productId: orders.productId })
+			.select({
+				userId: orders.userId,
+				productId: orders.productId,
+				targetType: orders.targetType,
+				targetId: orders.targetId,
+				category: products.category,
+				durationDays: products.durationDays
+			})
 			.from(orders)
+			.innerJoin(products, eq(products.id, orders.productId))
 			.where(eq(orders.id, input.orderId))
 			.limit(1);
 
-		if (order) {
-			const [cosmetic] = await tx
-				.select({ id: cosmetics.id })
-				.from(cosmetics)
-				.where(eq(cosmetics.id, order.productId))
-				.limit(1);
-
-			if (cosmetic) {
-				await tx
-					.insert(userCosmetics)
-					.values({ userId: order.userId, cosmeticId: cosmetic.id })
-					.onConflictDoNothing();
-			}
+		if (order?.category === 'cosmetic') {
+			await tx
+				.insert(userCosmetics)
+				.values({ userId: order.userId, cosmeticId: order.productId })
+				.onConflictDoNothing();
+		} else if (
+			(order?.category === 'profile_spotlight' || order?.category === 'guild_spotlight') &&
+			order.targetType &&
+			order.targetId &&
+			order.durationDays && order.durationDays > 0
+		) {
+			const expiresAt = new Date(Date.now() + order.durationDays * 24 * 60 * 60 * 1000);
+			await tx
+				.insert(spotlights)
+				.values({
+					targetType: order.targetType,
+					targetId: order.targetId,
+					ownerUserId: order.userId,
+					orderId: input.orderId,
+					expiresAt
+				})
+				.onConflictDoUpdate({
+					target: [spotlights.targetType, spotlights.targetId],
+					set: {
+						ownerUserId: order.userId,
+						orderId: input.orderId,
+						expiresAt: sql`GREATEST(${spotlights.expiresAt}, now()) + (${order.durationDays} * interval '1 day')`
+					}
+				});
 		}
 	}
 
@@ -195,7 +317,7 @@ export async function processWebhookNotification(input: {
 	payload: string;
 }): Promise<boolean> {
 	const paymentStatus = SNAP_STATUS_TO_PAYMENT[input.latestTransactionStatus];
-	if (!paymentStatus) throw new ValidationError(`Unknown transaction status`);
+	if (!paymentStatus) throw new ValidationError('Unknown transaction status');
 
 	return db.transaction(async (tx) => {
 		const [payment] = await tx
@@ -205,7 +327,6 @@ export async function processWebhookNotification(input: {
 			.limit(1);
 		if (!payment) throw new NotFoundError('Payment not found');
 
-		// Idempotency: duplicate events are recorded once, applied once.
 		try {
 			await tx.insert(paymentEvents).values({
 				paymentId: payment.id,
@@ -215,7 +336,7 @@ export async function processWebhookNotification(input: {
 				processedAt: new Date()
 			});
 		} catch (err) {
-			if ((err as { code?: string }).code === '23505') return false; // duplicate
+			if ((err as { code?: string }).code === '23505') return false;
 			throw err;
 		}
 
@@ -229,10 +350,7 @@ export async function processWebhookNotification(input: {
 	});
 }
 
-/**
- * Server-side status inquiry: ask DOKU, then reconcile our DB.
- * Used by the checkout page poller and billing history.
- */
+/** Server-side DOKU status inquiry + reconciliation; clients never set status. */
 export async function syncPaymentStatus(orderId: string, userId?: string) {
 	const [row] = await db
 		.select({ order: orders, payment: payments })
@@ -244,28 +362,24 @@ export async function syncPaymentStatus(orderId: string, userId?: string) {
 	if (!row) throw new NotFoundError('Order not found');
 	if (userId && row.order.userId !== userId) throw new ForbiddenError('Not your order');
 	if (row.order.status !== 'pending') return row.order.status;
-
-	// Skip provider calls in the 60s window DOKU advises after creation.
-	const pendingTooSoon = Date.now() - new Date(row.payment.createdAt).getTime() < 60_000;
-	if (pendingTooSoon) return row.order.status;
+	if (Date.now() - row.payment.createdAt.getTime() < 60_000) return row.order.status;
 
 	const status = await checkVirtualAccountStatus(
 		row.payment.paymentCode!,
-		// customerNo is the VA number minus the 8-digit service id prefix.
 		row.payment.paymentCode!.slice(8)
 	);
-
 	const paymentStatus = status.latestTransactionStatus
 		? SNAP_STATUS_TO_PAYMENT[status.latestTransactionStatus]
 		: null;
 
 	if (paymentStatus && paymentStatus !== row.payment.status) {
 		await db.transaction(async (tx) => {
-			await applyStatus(tx, {
+			const result = await applyStatus(tx, {
 				orderId,
 				paymentStatus,
 				paidAt: status.paidAt ? new Date(status.paidAt) : null
 			});
+			if (result === 'ignored') return;
 
 			const [payment] = await tx
 				.select({ id: payments.id })
@@ -278,10 +392,9 @@ export async function syncPaymentStatus(orderId: string, userId?: string) {
 				eventType: `check_status_${status.latestTransactionStatus}`,
 				payload: JSON.stringify(status.raw),
 				processedAt: new Date()
-			});
+			}).onConflictDoNothing();
 		});
 	}
-
 	return paymentStatus ? PAYMENT_TO_ORDER[paymentStatus] : row.order.status;
 }
 
@@ -297,7 +410,6 @@ export async function getOrderWithPayment(orderId: string, userId: string) {
 		.innerJoin(products, eq(products.id, orders.productId))
 		.where(eq(orders.id, orderId))
 		.limit(1);
-
 	if (!row) throw new NotFoundError('Order not found');
 	if (row.order.userId !== userId) throw new ForbiddenError('Not your order');
 	return row;
@@ -315,5 +427,6 @@ export async function listUserOrders(userId: string) {
 }
 
 export async function listActiveProducts() {
-	return db.select().from(products).where(eq(products.active, true));
+	return db.select().from(products).where(and(eq(products.active, true), eq(products.category, 'plan')));
 }
+

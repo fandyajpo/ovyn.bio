@@ -19,6 +19,7 @@
 			? [
 					{ href: '/discover', label: 'Discover' },
 					{ href: '/shop', label: 'Shop' },
+					{ href: '/spotlight', label: 'Spotlight' },
 					{ href: '/guild', label: 'My Guild' },
 					{ href: '/dashboard', label: 'Dashboard' }
 				]

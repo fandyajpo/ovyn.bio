@@ -1,6 +1,7 @@
 import { relations, sql } from 'drizzle-orm';
 import {
 	boolean,
+	date,
 	integer,
 	index,
 	pgEnum,
@@ -45,6 +46,13 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 	'refunded'
 ]);
 export const cosmeticKindEnum = pgEnum('cosmetic_kind', ['frame', 'wallpaper', 'badge']);
+export const productCategoryEnum = pgEnum('product_category', [
+	'plan',
+	'cosmetic',
+	'profile_spotlight',
+	'guild_spotlight'
+]);
+export const spotlightTargetEnum = pgEnum('spotlight_target', ['profile', 'guild']);
 
 // ---------------------------------------------------------------------------
 // Identity
@@ -65,19 +73,29 @@ export const profiles = pgTable(
 		bannerKey: text('banner_key'),
 		theme: text('theme').notNull().default('default'),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
-		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, {
-			onDelete: 'set null'
-		}),
-		equippedWallpaperId: uuid('equipped_wallpaper_id').references(() => cosmetics.id, {
-			onDelete: 'set null'
-		}),
-		equippedBadgeId: uuid('equipped_badge_id').references(() => cosmetics.id, {
-			onDelete: 'set null'
-		}),
+		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, { onDelete: 'set null' }),
+		equippedWallpaperId: uuid('equipped_wallpaper_id').references(() => cosmetics.id, { onDelete: 'set null' }),
+		equippedBadgeId: uuid('equipped_badge_id').references(() => cosmetics.id, { onDelete: 'set null' }),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [index('profiles_slug_idx').on(t.slug)]
+);
+
+/** Signed-in profile analytics; deduplicated to one visitor per UTC date. */
+export const profileViews = pgTable(
+	'profile_views',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		profileUserId: text('profile_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		viewerUserId: text('viewer_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		viewedOn: date('viewed_on', { mode: 'string' }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		uniqueIndex('profile_views_daily_unique').on(t.profileUserId, t.viewerUserId, t.viewedOn),
+		index('profile_views_profile_date_idx').on(t.profileUserId, t.viewedOn)
+	]
 );
 
 export const discordAccounts = pgTable(
@@ -179,6 +197,9 @@ export const products = pgTable('products', {
 	price: integer('price').notNull(),
 	currency: text('currency').notNull().default('IDR'),
 	active: boolean('active').notNull().default(false),
+	category: productCategoryEnum('category').notNull().default('plan'),
+	/** Spotlight term. Null for products that do not buy a time-limited placement. */
+	durationDays: integer('duration_days'),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
@@ -200,6 +221,12 @@ export const cosmetics = pgTable(
 		assetKey: text('asset_key').notNull(),
 		/** Optional accent color used for preview/glow effects. */
 		accentColor: text('accent_color'),
+		/** Null means unlimited; limited drops cap total paid/owned units. */
+		stockLimit: integer('stock_limit'),
+		/** Optional sale deadline for a time-limited drop. */
+		dropEndsAt: timestamp('drop_ends_at', { withTimezone: true }),
+		/** Optional in-app reward price; avoids requiring DOKU for earned items. */
+		pointsPrice: integer('points_price'),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
@@ -234,6 +261,9 @@ export const orders = pgTable(
 		productId: uuid('product_id')
 			.notNull()
 			.references(() => products.id, { onDelete: 'restrict' }),
+		/** Required only for spotlight products; never accepted for cosmetics/plans. */
+		targetType: spotlightTargetEnum('target_type'),
+		targetId: text('target_id'),
 		amount: integer('amount').notNull(),
 		currency: text('currency').notNull().default('IDR'),
 		status: orderStatusEnum('status').notNull().default('pending'),
@@ -241,6 +271,70 @@ export const orders = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [index('orders_user_id_idx').on(t.userId), index('orders_status_idx').on(t.status)]
+);
+
+/** Active paid spotlight; a new paid order extends the target's expiry. */
+export const spotlights = pgTable(
+	'spotlights',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		targetType: spotlightTargetEnum('target_type').notNull(),
+		targetId: text('target_id').notNull(),
+		ownerUserId: text('owner_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		orderId: uuid('order_id').notNull().unique().references(() => orders.id, { onDelete: 'cascade' }),
+		startsAt: timestamp('starts_at', { withTimezone: true }).notNull().defaultNow(),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		uniqueIndex('spotlights_target_unique').on(t.targetType, t.targetId),
+		index('spotlights_expires_idx').on(t.expiresAt)
+	]
+);
+
+/** One reward account per user; points are earned, non-cash shop credits. */
+export const userRewards = pgTable('user_rewards', {
+	userId: text('user_id').primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+	points: integer('points').notNull().default(0),
+	streakCount: integer('streak_count').notNull().default(0),
+	lastCheckinDate: date('last_checkin_date', { mode: 'string' }),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});
+
+/** Exactly one check-in per user per UTC day. */
+export const dailyCheckins = pgTable(
+	'daily_checkins',
+	{
+		userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		checkinDate: date('checkin_date', { mode: 'string' }).notNull(),
+		streakCount: integer('streak_count').notNull(),
+		pointsEarned: integer('points_earned').notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		primaryKey({ columns: [t.userId, t.checkinDate] }),
+		index('daily_checkins_date_idx').on(t.checkinDate)
+	]
+);
+
+/** Referral codes are stable per inviter; referral attribution is one-time per invitee. */
+export const referralCodes = pgTable('referral_codes', {
+	userId: text('user_id').primaryKey().references(() => user.id, { onDelete: 'cascade' }),
+	code: text('code').notNull().unique(),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+});
+
+export const referrals = pgTable(
+	'referrals',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		referrerId: text('referrer_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		referredUserId: text('referred_user_id').notNull().unique().references(() => user.id, { onDelete: 'cascade' }),
+		status: text('status').notNull().default('pending'),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		rewardedAt: timestamp('rewarded_at', { withTimezone: true })
+	},
+	(t) => [index('referrals_referrer_idx').on(t.referrerId)]
 );
 
 export const payments = pgTable(

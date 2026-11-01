@@ -45,13 +45,17 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.guilds as row (row.guild.id)}
-				<div class="flex h-full flex-col justify-between gap-4 rounded-xl border border-neutral-800 bg-neutral-900/50 p-5">
+				<div class="flex h-full flex-col justify-between gap-4 rounded-xl border {row.featured ? 'border-lime-300/60 shadow-lg shadow-lime-300/5' : 'border-neutral-800'} bg-neutral-900/50 p-5">
 					<div>
 						<div class="flex items-center justify-between gap-2">
 							<a href="/guild/{row.guild.slug}" class="text-lg font-semibold text-neutral-100 hover:text-lime-300">
 								{row.guild.name}
 							</a>
-							<span
+							<div class="flex items-center gap-2">
+								{#if row.featured}
+									<span class="rounded-full bg-lime-300/10 px-2 py-0.5 font-mono text-[10px] text-lime-300">SPOTLIGHT</span>
+								{/if}
+								<span
 								class="rounded-full border px-2 py-0.5 text-xs
 								{row.guild.visibility === 'public'
 									? 'border-lime-300/40 text-lime-300'
@@ -59,6 +63,7 @@
 							>
 								{row.guild.visibility}
 							</span>
+							</div>
 						</div>
 						{#if row.guild.description}
 							<p class="mt-1 line-clamp-2 text-sm text-neutral-400">{row.guild.description}</p>
