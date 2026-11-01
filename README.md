@@ -84,6 +84,13 @@ You must add:
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
   a key is attached to a profile.
+- **Shop & cosmetics** — cosmetic items (avatar frames, wallpapers, badges)
+  are products: buying one through the normal DOKU checkout grants it
+  automatically via the payment webhook (fulfilment is idempotent). Users
+  equip/unequip owned cosmetics in profile settings; public profiles render
+  frames around the avatar, wallpapers behind the header, and badges next to
+  the name. Seed the catalog with `npm run db:seed-shop`, then upload the
+  art files to Neon Object Storage at the `cosmetics/<kind>/<name>.png` keys.
 
 ## DOKU integration points
 

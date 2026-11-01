@@ -2,6 +2,7 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { profileVisibilitySchema } from '#lib/schemas/profile';
 import { getProfileByUserId, setProfileBanner, setProfileVisibility } from '#lib/server/services/profiles';
+import { listOwnedByKind, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
 import { presignDownload } from '#lib/server/storage';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
@@ -9,11 +10,13 @@ import { rateLimit } from '#lib/server/utils/rate-limit';
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const profile = await getProfileByUserId(locals.user.id);
-	return {
-		profile,
-		avatarUrl: profile.avatarKey ? await presignDownload(profile.avatarKey) : null,
-		bannerUrl: profile.bannerKey ? await presignDownload(profile.bannerKey) : null
-	};
+	const [owned, bannerUrl, avatarUrl] = await Promise.all([
+		listOwnedByKind(locals.user.id),
+		profile.bannerKey ? presignDownload(profile.bannerKey) : null,
+		profile.avatarKey ? presignDownload(profile.avatarKey) : null
+	]);
+
+	return { profile, owned, bannerUrl, avatarUrl };
 };
 
 export const actions: Actions = {
@@ -54,6 +57,32 @@ export const actions: Actions = {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
 			return fail(500, { error: 'Could not save the wallpaper' });
+		}
+	},
+
+	equip: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const user = locals.user;
+		const data = await request.formData();
+		const cosmeticId = data.get('cosmeticId');
+		const kind = data.get('kind');
+
+		if (typeof kind !== 'string' || !['frame', 'wallpaper', 'badge'].includes(kind)) {
+			return fail(422, { error: 'Invalid kind' });
+		}
+
+		try {
+			rateLimit(`equip:${user.id}`, 20, 60_000);
+			await setEquippedCosmetic(
+				user.id,
+				kind as CosmeticKind,
+				typeof cosmeticId === 'string' && cosmeticId ? cosmeticId : null
+			);
+			return { ok: true };
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not equip' });
 		}
 	}
 };

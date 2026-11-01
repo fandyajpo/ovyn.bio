@@ -44,6 +44,7 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 	'cancelled',
 	'refunded'
 ]);
+export const cosmeticKindEnum = pgEnum('cosmetic_kind', ['frame', 'wallpaper', 'badge']);
 
 // ---------------------------------------------------------------------------
 // Identity
@@ -64,6 +65,15 @@ export const profiles = pgTable(
 		bannerKey: text('banner_key'),
 		theme: text('theme').notNull().default('default'),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
+		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, {
+			onDelete: 'set null'
+		}),
+		equippedWallpaperId: uuid('equipped_wallpaper_id').references(() => cosmetics.id, {
+			onDelete: 'set null'
+		}),
+		equippedBadgeId: uuid('equipped_badge_id').references(() => cosmetics.id, {
+			onDelete: 'set null'
+		}),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
@@ -163,7 +173,7 @@ export const guildInvitations = pgTable(
 
 export const products = pgTable('products', {
 	id: uuid('id').primaryKey().defaultRandom(),
-	name: text('name').notNull(),
+	name: text('name').notNull().unique(),
 	description: text('description'),
 	/** Price in IDR (whole rupiah). Server-controlled only. */
 	price: integer('price').notNull(),
@@ -172,6 +182,47 @@ export const products = pgTable('products', {
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
+
+/**
+ * Profile cosmetics — avatars frames, wallpapers, badges.
+ * A cosmetic IS a product: it shares the product row's id 1:1, so the
+ * existing checkout/webhook flow fulfils cosmetic purchases automatically.
+ */
+export const cosmetics = pgTable(
+	'cosmetics',
+	{
+		/** Shared with the products row (cosmetic.id === product.id). */
+		id: uuid('id')
+			.primaryKey()
+			.references(() => products.id, { onDelete: 'cascade' }),
+		kind: cosmeticKindEnum('kind').notNull(),
+		/** Object storage key of the overlay/background/badge image. */
+		assetKey: text('asset_key').notNull(),
+		/** Optional accent color used for preview/glow effects. */
+		accentColor: text('accent_color'),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [index('cosmetics_kind_idx').on(t.kind)]
+);
+
+/** Cosmetic ownership. The composite PK prevents duplicate grants. */
+export const userCosmetics = pgTable(
+	'user_cosmetics',
+	{
+		userId: text('user_id')
+			.notNull()
+			.references(() => user.id, { onDelete: 'cascade' }),
+		cosmeticId: uuid('cosmetic_id')
+			.notNull()
+			.references(() => cosmetics.id, { onDelete: 'cascade' }),
+		acquiredAt: timestamp('acquired_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		primaryKey({ columns: [t.userId, t.cosmeticId] }),
+		index('user_cosmetics_cosmetic_idx').on(t.cosmeticId)
+	]
+);
 
 export const orders = pgTable(
 	'orders',

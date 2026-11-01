@@ -18,6 +18,7 @@
 		user
 			? [
 					{ href: '/discover', label: 'Discover' },
+					{ href: '/shop', label: 'Shop' },
 					{ href: '/guild', label: 'My Guild' },
 					{ href: '/dashboard', label: 'Dashboard' }
 				]

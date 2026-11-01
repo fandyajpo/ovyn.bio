@@ -60,6 +60,51 @@
 	</section>
 
 	<section class="rounded-xl border border-neutral-800 p-5">
+		<h2 class="mb-1 font-medium text-neutral-200">Cosmetics</h2>
+		<p class="mb-4 text-sm text-neutral-400">
+			Owned frames, wallpapers and badges. Get more in the <a href="/shop" class="text-lime-300 hover:underline">shop</a>.
+		</p>
+
+		{#each (Object.keys(data.owned) as kind) as kindKey (kindKey)}
+			{@const owned = data.owned[kindKey as keyof typeof data.owned]}
+			<h3 class="mt-3 mb-2 font-mono text-xs text-neutral-500 uppercase">{kindKey}s</h3>
+			{#if owned.length === 0}
+				<p class="text-xs text-neutral-600">None owned yet.</p>
+			{:else}
+				<div class="flex flex-wrap gap-2">
+					<form method="POST" action="/settings/profile?/equip">
+						<input type="hidden" name="kind" value={kindKey} />
+						<input type="hidden" name="cosmeticId" value="" />
+						<button
+							type="submit"
+							class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-400 transition-colors hover:bg-neutral-800"
+						>
+							None
+						</button>
+					</form>
+					{#each owned as c (c.id)}
+						<form method="POST" action="/settings/profile?/equip">
+							<input type="hidden" name="kind" value={c.kind} />
+							<input type="hidden" name="cosmeticId" value={c.id} />
+							<button
+								type="submit"
+								class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors
+									{data.profile.equippedFrameId === c.id
+									|| data.profile.equippedWallpaperId === c.id
+									|| data.profile.equippedBadgeId === c.id
+									? 'border-lime-300/50 bg-lime-300/10 text-lime-300'
+									: 'border-neutral-700 text-neutral-300 hover:bg-neutral-800'}"
+							>
+								{c.name}
+							</button>
+						</form>
+					{/each}
+				</div>
+			{/if}
+		{/each}
+	</section>
+
+	<section class="rounded-xl border border-neutral-800 p-5">
 		<h2 class="mb-4 font-medium text-neutral-200">Page wallpaper</h2>
 		<div class="flex items-center gap-4">
 			<div class="h-14 w-24 overflow-hidden rounded-lg bg-neutral-800">

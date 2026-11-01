@@ -1,6 +1,6 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
-import { orders, paymentEvents, payments, products } from '#lib/server/db/schema';
+import { cosmetics, orders, paymentEvents, payments, products, userCosmetics } from '#lib/server/db/schema';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import { dokuTimestamp } from '#lib/server/payments/doku/signature';
@@ -155,6 +155,32 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 		.update(orders)
 		.set({ status: PAYMENT_TO_ORDER[input.paymentStatus], updatedAt: new Date() })
 		.where(eq(orders.id, input.orderId));
+
+	// Fulfilment: when an order is newly paid, grant what was bought.
+	// Cosmetic purchases land in user_cosmetics; the composite PK makes
+	// duplicate grants impossible even across retried webhooks.
+	if (PAYMENT_TO_ORDER[input.paymentStatus] === 'paid') {
+		const [order] = await tx
+			.select({ userId: orders.userId, productId: orders.productId })
+			.from(orders)
+			.where(eq(orders.id, input.orderId))
+			.limit(1);
+
+		if (order) {
+			const [cosmetic] = await tx
+				.select({ id: cosmetics.id })
+				.from(cosmetics)
+				.where(eq(cosmetics.id, order.productId))
+				.limit(1);
+
+			if (cosmetic) {
+				await tx
+					.insert(userCosmetics)
+					.values({ userId: order.userId, cosmeticId: cosmetic.id })
+					.onConflictDoNothing();
+			}
+		}
+	}
 
 	return 'applied';
 }
