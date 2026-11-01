@@ -149,7 +149,9 @@ export const guildInvitations = pgTable(
 	},
 	(t) => [
 		index('guild_invitations_invitee_idx').on(t.inviteeId),
-		unique('guild_invitations_pending_unique')
+		// Partial unique index: at most one pending invitation per (guild, invitee).
+		index('guild_invitations_pending_unique')
+			.unique()
 			.on(t.guildId, t.inviteeId)
 			.where(sql`status = 'pending'`)
 	]
