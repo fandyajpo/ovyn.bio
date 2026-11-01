@@ -22,3 +22,30 @@ export const actions: Actions = {
 		if (!locals.user) redirect(302, '/login');
 		const user = locals.user;
 		const data = await request.formData();
+
+		const parsed = profileUpdateSchema.safeParse({
+			displayName: data.get('displayName'),
+			slug: data.get('slug'),
+			bio: data.get('bio') || null,
+			visibility: data.get('visibility')
+		});
+
+		if (!parsed.success) {
+			const issue = parsed.error.issues[0];
+			return fail(422, { error: issue?.message ?? 'Invalid input' });
+		}
+		if (!isValidSlug(parsed.data.slug)) {
+			return fail(422, { error: 'That username is not available' });
+		}
+
+		try {
+			rateLimit(`profile-update:${user.id}`, 10, 60_000);
+			await updateProfile(user.id, parsed.data);
+			return { ok: true };
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not save your profile' });
+		}
+	}
+};
