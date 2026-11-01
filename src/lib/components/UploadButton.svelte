@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { toast } from '#lib/components/ui/toasts.svelte';
-	import Button from './Button.svelte';
+	import Button from './ui/Button.svelte';
 
 	let {
 		kind,
