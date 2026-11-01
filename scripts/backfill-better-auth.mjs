@@ -11,7 +11,6 @@
  * Run this AFTER `npm run db:migrate` has created the tables.
  * Only disable Neon Managed Auth in the Neon Console after sign-in works.
  */
-import { readFileSync } from 'node:fs';
 import postgres from 'postgres';
 
 // Node 20+: load .env without extra dependencies.
@@ -26,7 +25,7 @@ if (!url) {
 const sql = postgres(url, { prepare: false });
 
 const COPY_USERS = sql`
-	INSERT INTO "user" ("id", "name", "email", "emailVerified", "image", "status", "createdAt", "updatedAt")
+	INSERT INTO "user" ("id", "name", "email", "email_verified", "image", "status", "created_at", "updated_at")
 	SELECT
 		u.id,
 		COALESCE(u.name, 'ovyn'),
@@ -41,7 +40,7 @@ const COPY_USERS = sql`
 `;
 
 const COPY_ACCOUNTS = sql`
-	INSERT INTO "account" ("id", "accountId", "providerId", "userId", "accessToken", "refreshToken", "scope", "createdAt", "updatedAt")
+	INSERT INTO "account" ("id", "account_id", "provider_id", "user_id", "access_token", "refresh_token", "scope", "created_at", "updated_at")
 	SELECT
 		gen_random_uuid()::text,
 		a."accountId",
