@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
@@ -14,7 +15,6 @@
 	let inviteQuery = $state('');
 	let candidates = $state<Array<{ userId: string; slug: string; displayName: string | null }>>([]);
 	let searching = $state(false);
-	let selectedUser = $state<{ userId: string; slug: string } | null>(null);
 
 	let searchTimer: ReturnType<typeof setTimeout>;
 

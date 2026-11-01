@@ -63,14 +63,25 @@ export async function createCheckout(userId: string, productId: string) {
 
 	const expiredDate = dokuTimestamp(new Date(Date.now() + VA_TTL_MINUTES * 60_000));
 
-	const va = await createVirtualAccount({
-		trxId: order.id,
-		amountMinor: product.price,
-		currency: product.currency,
-		customerName: profile?.displayName || profile?.slug || 'OVYN Member',
-		channel: PAYMENT_CHANNEL,
-		expiredDate
-	});
+	// If DOKU rejects the VA creation, fail the order instead of leaving it
+	// pending — a stuck pending order would block every future checkout.
+	let va;
+	try {
+		va = await createVirtualAccount({
+			trxId: order.id,
+			amountMinor: product.price,
+			currency: product.currency,
+			customerName: profile?.displayName || profile?.slug || 'OVYN Member',
+			channel: PAYMENT_CHANNEL,
+			expiredDate
+		});
+	} catch (err) {
+		await db
+			.update(orders)
+			.set({ status: 'failed', updatedAt: new Date() })
+			.where(eq(orders.id, order.id));
+		throw err;
+	}
 
 	await db.insert(payments).values({
 		orderId: order.id,

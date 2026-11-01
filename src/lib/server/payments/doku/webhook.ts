@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { AppError } from '../utils/errors';
+import { AppError } from '#lib/server/utils/errors';
 import { minifiedBodyHash, symmetricSignature } from './signature';
 import { DOKU_SECRET_KEY } from '$app/env/private';
 

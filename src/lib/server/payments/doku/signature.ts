@@ -1,5 +1,5 @@
 import { createHash, createHmac, sign as cryptoSign } from 'node:crypto';
-import { AppError } from '../utils/errors';
+import { AppError } from '#lib/server/utils/errors';
 import {
 	DOKU_BASE_URL,
 	DOKU_CLIENT_ID,

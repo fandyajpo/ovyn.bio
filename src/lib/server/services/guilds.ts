@@ -114,6 +114,7 @@ export async function listPublicGuilds(search: string | null) {
 export async function listGuildMembers(guildId: string) {
 	return db
 		.select({
+			userId: guildMembers.userId,
 			role: guildMembers.role,
 			joinedAt: guildMembers.joinedAt,
 			slug: profiles.slug,

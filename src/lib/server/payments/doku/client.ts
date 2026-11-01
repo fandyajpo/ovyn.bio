@@ -1,5 +1,5 @@
 import { randomBytes } from 'node:crypto';
-import { AppError } from '../utils/errors';
+import { AppError } from '#lib/server/utils/errors';
 import { dokuEnv, generateExternalId, signedHeaders } from './signature';
 import { DOKU_BASE_URL, DOKU_ENV, DOKU_PARTNER_SERVICE_ID } from '$app/env/private';
 
