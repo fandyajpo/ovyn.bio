@@ -1,12 +1,16 @@
 // See: https://svelte.dev/docs/kit/types#app.d.ts
-import type { Session, User } from 'better-auth';
 
 declare global {
 	namespace App {
 		// interface Error {}
 		interface Locals {
-			user: User | null;
-			session: Session | null;
+			/** Managed Better Auth session user (null when signed out). */
+			user: {
+				id: string;
+				name: string;
+				email: string | null;
+				image: string | null;
+			} | null;
 		}
 		// interface PageData {}
 		// interface PageState {}

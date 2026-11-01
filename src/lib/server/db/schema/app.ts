@@ -12,7 +12,7 @@ import {
 	uniqueIndex,
 	uuid
 } from 'drizzle-orm/pg-core';
-import { user } from './auth';
+import { user } from './neon-auth';
 
 // ---------------------------------------------------------------------------
 // Enums

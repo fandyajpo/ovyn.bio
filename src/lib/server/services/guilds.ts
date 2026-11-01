@@ -6,7 +6,7 @@ import {
 	guilds,
 	profiles
 } from '#lib/server/db/schema';
-import { user } from '#lib/server/db/schema/auth';
+import { user } from '#lib/server/db/schema/neon-auth';
 import {
 	ConflictError,
 	ForbiddenError,
@@ -60,7 +60,7 @@ async function currentMembership(tx: Tx, userId: string) {
 
 /** Serialize concurrent membership writes by locking the user row. */
 async function lockUserForMembership(tx: Tx, userId: string): Promise<void> {
-	await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+	await tx.execute(sql`SELECT id FROM neon_auth.user WHERE id = ${userId} FOR UPDATE`);
 }
 
 // ---------------------------------------------------------------------------
@@ -245,7 +245,7 @@ export async function transferOwnership(ownerId: string, targetUserId: string) {
 			throw new ForbiddenError('Only the owner can transfer ownership');
 		}
 
-		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${targetUserId} FOR UPDATE`);
+		await tx.execute(sql`SELECT id FROM neon_auth.user WHERE id = ${targetUserId} FOR UPDATE`);
 
 		const [target] = await tx
 			.select()

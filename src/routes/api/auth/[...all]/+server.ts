@@ -1,11 +1,11 @@
+import type { RequestHandler } from './$types';
 import { auth } from '#lib/server/auth';
 
 /**
- * Better Auth catch-all: every /api/auth/* request is passed straight to
- * the auth handler, which handles sign-in, callback, session, etc.
- * Mounted as a real route so it never depends on origin checks.
+ * Better Auth proxy: every /api/auth/* request is forwarded to Neon's
+ * managed Better Auth service, with auth cookies kept first-party on our
+ * origin. OAuth callbacks are finalized here too.
  */
-const handler = (event: { request: Request }) => auth.handler(event.request);
+export const POST: RequestHandler = (event) => auth.handler(event);
 
-export const GET = handler;
-export const POST = handler;
+export const GET: RequestHandler = (event) => auth.handler(event);

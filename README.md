@@ -13,7 +13,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Hosting | Vercel (`@sveltejs/adapter-vercel`, Node runtime) |
 | Database | Neon PostgreSQL (pooled connection for app, direct for migrations) |
 | ORM | Drizzle ORM |
-| Auth | Better Auth — Discord OAuth (`identify` scope only) |
+| Auth | Neon Auth (Managed Better Auth) — Discord OAuth, configured in the Neon Console |
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Client data | TanStack Query (checkout status polling) |
@@ -45,21 +45,26 @@ Already provisioned for you (see `.env.example`):
 
 You must add:
 
-- `BETTER_AUTH_SECRET` — `openssl rand -base64 32`
-- `BETTER_AUTH_URL` — e.g. `http://localhost:5173` (or your deployment URL)
-- `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` — from the Discord Developer Portal,
-  with redirect `${BETTER_AUTH_URL}/api/auth/callback/discord`
+- `NEON_AUTH_COOKIE_SECRET` — cookie secret for the auth proxy: `openssl rand -base64 32`
 - `DOKU_PRIVATE_KEY` — the RSA private key DOKU gives you for SNAP B2B token
   requests (`X-SIGNATURE = SHA256withRSA(privateKey, clientID + "|" + timestamp)`)
 - `DOKU_PARTNER_SERVICE_ID` — your 8-digit virtual account company code (BIN)
 - `DOKU_ENV=production` (optional; sandbox is the default), `DOKU_BASE_URL` (optional override)
 
+`NEON_AUTH_BASE_URL` comes from the Neon Console (Better Auth → Project Info).
+Discord OAuth credentials and trusted domains are configured in the Neon
+Console too — not in this app.
+
 ## Key architecture notes
 
-- **Auth** lives in `src/lib/server/auth`. Better Auth owns the `user`,
-  `session`, `account`, `verification` tables (see `src/lib/server/db/schema/auth.ts`).
-  On every session creation, `provisionUser` pulls the Discord identity
-  server-to-server and ensures a profile with a unique slug.
+- **Auth** runs on Neon's Managed Better Auth (`@neon/auth`). Our SvelteKit
+  adapter (`src/lib/server/auth`) implements the framework bridge from
+  Neon's adapter guide: `/api/auth/[...all]` proxies auth requests so cookies
+  stay first-party, and the hook populates `locals.user` from the managed
+  session. Users, sessions, and OAuth accounts live in the managed
+  `neon_auth` schema (read-only stubs in `schema/neon-auth.ts`); app tables
+  foreign-key to `neon_auth.user`. Profiles are provisioned lazily on the
+  first authenticated request, pulling Discord identity server-to-server.
 - **One guild per user** is enforced three ways: `guild_members.user_id`
   PRIMARY KEY, a `SELECT … FOR UPDATE` lock on the user row inside a
   transaction, and explicit conflict errors with user-facing explanations.

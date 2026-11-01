@@ -1,7 +1,7 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { guildInvitations, guildMembers, guilds } from '#lib/server/db/schema';
-import { user } from '#lib/server/db/schema/auth';
+import { user } from '#lib/server/db/schema/neon-auth';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 
@@ -142,7 +142,7 @@ export async function acceptInvitation(
 ): Promise<typeof guilds.$inferSelect> {
 	return db.transaction(async (tx) => {
 		// Serialize with join/create flows.
-		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${inviteeId} FOR UPDATE`);
+		await tx.execute(sql`SELECT id FROM neon_auth.user WHERE id = ${inviteeId} FOR UPDATE`);
 		await expireStale(tx);
 
 		const [invitation] = await tx

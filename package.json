@@ -38,6 +38,7 @@
 		"@fontsource-variable/space-grotesk": "^5.2.5",
 		"@tanstack/svelte-query": "^6.3.7",
 		"better-auth": "^1.7.15",
+		"@neon/auth": "^0.8.2",
 		"drizzle-orm": "^0.45.4",
 		"postgres": "^3.4.7",
 		"zod": "^4.6.7"
