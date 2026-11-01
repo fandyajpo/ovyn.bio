@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toasts, dismiss } from './toasts.svelte';
+	import { toasts, dismiss } from './toasts.svelte.ts';
 </script>
 
 <div class="pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4">

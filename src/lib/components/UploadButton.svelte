@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { toast } from '#lib/components/ui/toasts.svelte';
+	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import Button from './ui/Button.svelte';
 
 	let {

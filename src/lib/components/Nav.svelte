@@ -2,7 +2,7 @@
 	import { page } from '$app/state';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
-	import { toast } from './ui/toasts.svelte';
+	import { toast } from './ui/toasts.svelte.ts';
 
 	let { user }: { user: { name: string; image: string | null } | null } = $props();
 

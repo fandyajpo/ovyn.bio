@@ -6,7 +6,9 @@
 	let { form }: { form?: { error?: string } } = $props();
 
 	let loading = $state(false);
-	let error = $state<string | null>(form?.error ?? null);
+	let error = $state<string | null>(null);
+
+	const initialError = $derived(form?.error ?? null);
 
 	async function login() {
 		loading = true;
@@ -34,8 +36,8 @@
 
 	<Button onclick={login} loading={loading} class="w-full">Continue with Discord</Button>
 
-	{#if error}
-		<p class="text-sm text-red-400" role="alert">{error}</p>
+	{#if error || initialError}
+		<p class="text-sm text-red-400" role="alert">{error ?? initialError}</p>
 	{/if}
 
 	<p class="text-xs text-neutral-600">
