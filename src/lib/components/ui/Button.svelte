@@ -28,14 +28,14 @@
 </script>
 
 {#if href && !isDisabled}
-	<a {href} {onclick} {rest} class={cn('ovyn-button', `ovyn-button--${variant}`, className)}>
+	<a {href} {onclick} {...rest} class={cn('ovyn-button', `ovyn-button--${variant}`, className)}>
 		{@render children()}
 	</a>
 {:else}
 	<button
 		{type}
 		{onclick}
-		{rest}
+		{...rest}
 		class={cn('ovyn-button', `ovyn-button--${variant}`, className)}
 		disabled={isDisabled}
 		aria-busy={loading}

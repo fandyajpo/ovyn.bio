@@ -124,7 +124,7 @@
 					minlength={2}
 					maxlength={32}
 					required
-					pattern="[A-Za-z0-9][A-Za-z0-9._-]{0,30}[A-Za-z0-9]"
+					pattern={'[A-Za-z0-9][A-Za-z0-9._-]{0,30}[A-Za-z0-9]'}
 					autocomplete="username"
 					hint="Your public link uses this unique username."
 					error={form?.errors?.username?.[0]}

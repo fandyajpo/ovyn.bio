@@ -129,6 +129,8 @@ export async function createCheckout(userId: string, productId: string) {
 				currency: product.currency
 			})
 			.returning();
+
+		if (!created) throw new Error('Order could not be created');
 		return created;
 	});
 
@@ -168,7 +170,9 @@ export async function createCheckout(userId: string, productId: string) {
 // Status handling (webhooks + check-status sync share this)
 // ---------------------------------------------------------------------------
 
-const SNAP_STATUS_TO_PAYMENT: Record<string, 'succeeded' | 'pending' | 'failed' | 'cancelled' | 'refunded'> = {
+type PaymentStatus = 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
+
+const SNAP_STATUS_TO_PAYMENT: Record<string, PaymentStatus> = {
 	'00': 'succeeded',
 	'03': 'pending',
 	'04': 'refunded',
@@ -176,7 +180,7 @@ const SNAP_STATUS_TO_PAYMENT: Record<string, 'succeeded' | 'pending' | 'failed' 
 	'06': 'failed'
 };
 
-const PAYMENT_TO_ORDER: Record<string, 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'> = {
+const PAYMENT_TO_ORDER: Record<PaymentStatus, 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'> = {
 	pending: 'pending',
 	succeeded: 'paid',
 	failed: 'failed',
@@ -187,7 +191,7 @@ const PAYMENT_TO_ORDER: Record<string, 'pending' | 'paid' | 'failed' | 'expired'
 
 type ApplyStatusInput = {
 	orderId: string;
-	paymentStatus: keyof typeof PAYMENT_TO_ORDER;
+	paymentStatus: PaymentStatus;
 	providerTransactionId?: string | null;
 	paidAt?: Date | null;
 };
@@ -320,6 +324,7 @@ export async function syncPaymentStatus(orderId: string, userId?: string) {
 				.from(payments)
 				.where(eq(payments.orderId, orderId))
 				.limit(1);
+			if (!payment) return;
 			await tx.insert(paymentEvents).values({
 				paymentId: payment.id,
 				providerEventId: `check-status:${orderId}:${status.latestTransactionStatus}:${status.paidAt ?? ''}`,

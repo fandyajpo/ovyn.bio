@@ -54,7 +54,7 @@
 			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your guild</p>
 			{#if data.guild}
 				<a href="/guild" class="mt-3 block font-medium text-lime-300 hover:underline">{data.guild.name}</a>
-				<p class="font-mono text-xs text-neutral-500">Joined {formatDate(data.membership.joinedAt)}</p>
+				<p class="font-mono text-xs text-neutral-500">Joined {formatDate(data.membership?.joinedAt ?? data.guild.createdAt)}</p>
 			{:else}
 				<p class="mt-3 text-sm text-neutral-400">You're not in a guild yet.</p>
 				<div class="mt-3 flex flex-col gap-2 sm:flex-row">

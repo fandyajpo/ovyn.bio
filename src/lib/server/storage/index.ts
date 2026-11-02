@@ -36,9 +36,14 @@ function s3(): S3Client {
 let cached: { client: S3Client; bucket: string } | null = null;
 
 function s3WithBucket(): { client: S3Client; bucket: string } {
-	if (!cached) {
-		cached = { client: s3(), bucket: S3_BUCKET };
+	if (cached) return cached;
+
+	const bucket = S3_BUCKET;
+	if (!bucket) {
+		throw new AppError(500, 'Object storage is not configured');
 	}
+
+	cached = { client: s3(), bucket };
 	return cached;
 }
 

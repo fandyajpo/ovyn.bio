@@ -8,7 +8,8 @@ import {
 	setProfileAvatar,
 	setProfileBackground,
 	setProfileBackgroundKey,
-	setProfileCursorKey
+	setProfileCursorKey,
+	setProfileUsernameColor
 } from '#lib/server/services/profiles';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';

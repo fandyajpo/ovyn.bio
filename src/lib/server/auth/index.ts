@@ -52,7 +52,7 @@ export const auth = betterAuth({
 	emailAndPassword: { enabled: false },
 	socialProviders,
 	// Discord accounts without email use a stable placeholder address.
-	mapProfileToUser: (profile) => ({
+	mapProfileToUser: (profile: { id: string; email?: string | null }) => ({
 		email: profile.email ?? `${profile.id}@oauth.ovyn.bio`,
 		emailVerified: false
 	}),

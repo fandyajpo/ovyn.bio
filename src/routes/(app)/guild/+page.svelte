@@ -44,7 +44,7 @@
 					<h2 class="text-2xl font-semibold">{data.guild.name}</h2>
 					<p class="font-mono text-xs text-neutral-500">
 						/{data.guild.slug} · {data.members.length} member{data.members.length === 1 ? '' : 's'} ·
-						your role: <span class="text-lime-300">{data.membership.role}</span>
+						your role: <span class="text-lime-300">{data.membership?.role ?? 'member'}</span>
 					</p>
 				</div>
 				{#if canManage}

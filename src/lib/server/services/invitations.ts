@@ -71,6 +71,8 @@ export async function createInvitation(
 					expiresAt: new Date(Date.now() + INVITATION_TTL_MS)
 				})
 				.returning();
+
+			if (!invitation) throw new Error('Invitation could not be created');
 			return invitation;
 		} catch (err) {
 			if ((err as { code?: string }).code === '23505') {

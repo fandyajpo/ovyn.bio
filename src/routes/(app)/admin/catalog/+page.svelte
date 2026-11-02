@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import type { PageData } from './$types';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -8,6 +9,9 @@
 	type CatalogRow = PageData['products'][number];
 
 	let { data }: { data: PageData } = $props();
+
+	const created = $derived(page.url.searchParams.get('created'));
+	const updated = $derived(page.url.searchParams.get('updated'));
 
 	const KIND_LABEL = { frame: 'Avatar frame', wallpaper: 'Wallpaper', badge: 'Badge' } as const;
 
@@ -40,11 +44,11 @@
 		<Button href="/admin/catalog/new">New product</Button>
 	</header>
 
-	{#if data.created}
-		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Created {data.created}.</p>
+	{#if created}
+		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Created {created}.</p>
 	{/if}
-	{#if data.updated}
-		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Saved changes to {data.updated}.</p>
+	{#if updated}
+		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Saved changes to {updated}.</p>
 	{/if}
 
 	{#if data.products.length === 0}

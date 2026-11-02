@@ -13,6 +13,6 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		profileSlug: profile.slug,
 		currentPlan: plan,
 		userName: locals.user.name,
-		userImage: locals.user.image
+		userImage: locals.user.image ?? null
 	};
 };

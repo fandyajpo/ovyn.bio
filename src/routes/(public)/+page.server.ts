@@ -10,5 +10,5 @@ export const load: PageServerLoad = async () => {
 		db.select({ total: count() }).from(profiles)
 	]);
 
-	return { stats: { guilds: g.total, members: m.total, profiles: p.total } };
+	return { stats: { guilds: g?.total ?? 0, members: m?.total ?? 0, profiles: p?.total ?? 0 } };
 };

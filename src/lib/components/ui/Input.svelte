@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { FullAutoFill } from 'svelte/elements';
 	import { cn } from '#lib/utils';
 
 	let {
@@ -46,7 +47,7 @@
 		pattern?: string;
 		accept?: string;
 		multiple?: boolean;
-		autocomplete?: string;
+		autocomplete?: FullAutoFill;
 		inputmode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
 		disabled?: boolean;
 		readonly?: boolean;

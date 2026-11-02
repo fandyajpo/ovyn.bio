@@ -17,7 +17,7 @@ type Role = 'owner' | 'officer' | 'member';
 
 export type GuildInput = {
 	name: string;
-	slug: string;
+	slug?: string;
 	description?: string | null;
 	visibility: 'public' | 'private';
 	iconKey?: string | null;
@@ -164,6 +164,8 @@ export async function createGuild(userId: string, input: GuildInput) {
 				})
 				.returning();
 
+			if (!guild) throw new Error('Guild could not be created');
+
 			await tx.insert(guildMembers).values({ userId, guildId: guild.id, role: 'owner' });
 
 			return guild;
@@ -214,12 +216,12 @@ export async function leaveGuild(userId: string) {
 		if (!guild) throw new NotFoundError('Guild not found');
 
 		if (membership.role === 'owner') {
-			const [{ total }] = await tx
+			const [countRow] = await tx
 				.select({ total: count() })
 				.from(guildMembers)
 				.where(eq(guildMembers.guildId, guild.id));
 
-			if (Number(total) > 1) {
+			if (Number(countRow?.total ?? 0) > 1) {
 				throw new ConflictError(
 					'Owners must transfer ownership before leaving. Disband the guild if you are the only member.'
 				);

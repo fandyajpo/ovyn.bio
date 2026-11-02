@@ -49,6 +49,7 @@ export const actions: Actions = {
 			}
 			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			const created = await createProfileTemplate(locals.user.id, parsed.data);
+			if (!created) return fail(500, { error: 'Could not create your template' });
 			createdId = created.id;
 			createdName = created.name;
 		} catch (err) {
