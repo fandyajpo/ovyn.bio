@@ -1,5 +1,17 @@
 <script lang="ts">
+	let { name = '' }: { name?: string } = $props();
+
 	const tags = ['personal brand', 'circle', 'flex', 'expression'];
+
+	const displayName = $derived(name.trim() || 'your name');
+	const handle = $derived(
+		displayName
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '')
+			.slice(0, 24) || 'your-name'
+	);
+	const initial = $derived(displayName.trim().charAt(0).toUpperCase() || 'Y');
 </script>
 
 <div
@@ -10,7 +22,7 @@
 	<div class="demo-frame">
 		<div class="demo-bar">
 			<span class="demo-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-			<span class="demo-url">ovyn.bio/your-name</span>
+			<span class="demo-url">ovyn.bio/{handle}</span>
 			<span class="demo-live"><span class="status-dot"></span>live</span>
 		</div>
 
@@ -20,10 +32,10 @@
 			</div>
 
 			<div class="demo-identity demo-piece" style="--i: 1">
-				<span class="demo-avatar">Y</span>
+				<span class="demo-avatar">{initial}</span>
 				<span class="demo-id-lines">
-					<i class="demo-name"></i>
-					<i class="demo-handle"></i>
+					<strong class="demo-name">{displayName}</strong>
+					<span class="demo-handle">@{handle}</span>
 				</span>
 			</div>
 
@@ -173,8 +185,27 @@
 
 	.demo-id-lines { display: grid; flex: 1; gap: 0.32rem; min-width: 0; }
 
-	.demo-name { display: block; width: 55%; height: 0.58rem; border-radius: 999px; background: color-mix(in srgb, var(--color-foreground) 72%, transparent); }
-	.demo-handle { display: block; width: 34%; height: 0.4rem; border-radius: 999px; background: color-mix(in srgb, var(--color-muted) 50%, transparent); }
+	.demo-name {
+		display: block;
+		overflow: hidden;
+		color: var(--color-foreground);
+		font-family: var(--font-display);
+		font-size: 0.98rem;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.demo-handle {
+		display: block;
+		overflow: hidden;
+		color: var(--color-accent);
+		font-family: var(--font-mono);
+		font-size: 0.62rem;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
 
 	.demo-bio { display: grid; gap: 0.3rem; padding-inline: 0.35rem; }
 

@@ -3,7 +3,7 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import LandingDemo from '#lib/components/LandingDemo.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
-	import { slide } from 'svelte/transition';
+	import { slide, fade, fly } from 'svelte/transition';
 
 	type Stats = { profiles: number; guilds: number; members: number };
 
@@ -30,6 +30,46 @@
 
 	let scrollY = $state(0);
 	const parallaxY = $derived(Math.min(scrollY * 0.12, 110));
+
+	// The landing is a small playground: the headline cycles, you can type your
+	// own name into the demo, and the primary button leans toward the cursor.
+	const headlines = ['impossible to ignore.', 'one link away.', 'unmistakably yours.'];
+
+	let headlineIndex = $state(0);
+	const headline = $derived(headlines[headlineIndex] ?? headlines[0] ?? '');
+	let pageName = $state('');
+	let magnetEl = $state<HTMLSpanElement | undefined>(undefined);
+
+	const handle = $derived(
+		(pageName.trim() || 'your name')
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, '-')
+			.replace(/^-+|-+$/g, '')
+			.slice(0, 24) || 'your-name'
+	);
+
+	onMount(() => {
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		const timer = setInterval(() => {
+			headlineIndex = (headlineIndex + 1) % headlines.length;
+		}, 4200);
+		return () => clearInterval(timer);
+	});
+
+	function moveMagnet(event: PointerEvent) {
+		const el = magnetEl;
+		if (!el || event.pointerType !== 'mouse') return;
+		const rect = el.getBoundingClientRect();
+		const x = (event.clientX - rect.left - rect.width / 2) / rect.width;
+		const y = (event.clientY - rect.top - rect.height / 2) / rect.height;
+		el.style.setProperty('--mag-x', `${(x * 12).toFixed(2)}px`);
+		el.style.setProperty('--mag-y', `${(y * 8).toFixed(2)}px`);
+	}
+
+	function resetMagnet() {
+		magnetEl?.style.removeProperty('--mag-x');
+		magnetEl?.style.removeProperty('--mag-y');
+	}
 
 	let openFaq = $state<number | null>(null);
 
@@ -116,7 +156,11 @@
 			<Reveal delay={70}>
 				<h1 class="max-w-3xl text-5xl font-semibold leading-[1.04] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
 					Make your corner<br />
-					<span class="landing-gradient">impossible to ignore.</span>
+					<span class="landing-line">
+						{#key headlineIndex}
+							<span class="landing-gradient landing-line-text" in:fly={{ y: 26, duration: 460 }} out:fade={{ duration: 200 }}>{headline}</span>
+						{/key}
+					</span>
 				</h1>
 			</Reveal>
 			<Reveal delay={140}>
@@ -126,11 +170,33 @@
 			</Reveal>
 			<Reveal delay={210}>
 				<div class="flex flex-wrap items-center gap-3">
-					<Button href="/login">Get started with Discord or Google</Button>
+					<span
+						class="landing-magnetic"
+						bind:this={magnetEl}
+						onpointermove={moveMagnet}
+						onpointerleave={resetMagnet}
+					>
+						<Button href="/login">Get started with Discord or Google</Button>
+					</span>
 					<Button href="/discover" variant="ghost">Find your circle <span aria-hidden="true">↗</span></Button>
 				</div>
 			</Reveal>
-			<Reveal delay={280}>
+			<Reveal delay={300}>
+				<label class="landing-claim">
+					<span class="landing-claim-prefix">ovyn.bio/</span>
+					<input
+						class="landing-claim-input"
+						bind:value={pageName}
+						maxlength="24"
+						placeholder="your name"
+						spellcheck="false"
+						autocomplete="off"
+						aria-label="Preview your page name"
+					/>
+					<span class="landing-claim-tag">preview</span>
+				</label>
+			</Reveal>
+			<Reveal delay={360}>
 				<div class="flex flex-wrap items-center gap-2">
 					<span class="landing-pill"><em>01</em> personal brand</span>
 					<span class="landing-pill"><em>02</em> circle</span>
@@ -142,7 +208,7 @@
 
 		<Reveal delay={150} class="landing-profile-stage relative mx-auto w-full lg:max-w-none">
 			<div class="landing-orbit landing-orbit--stage" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
-			<LandingDemo />
+			<LandingDemo name={pageName} />
 		</Reveal>
 	</div>
 </section>
@@ -276,7 +342,10 @@
 			<p class="landing-eyebrow justify-center" data-reveal-item style="--reveal-order: 0">YOUR TAB IS OPEN</p>
 			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
 			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
-			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 3">
+			<p class="landing-end-link" data-reveal-item style="--reveal-order: 3">
+				<span>ovyn.bio/</span><em>{handle}</em>
+			</p>
+			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 4">
 				<Button href="/login">Continue with Discord or Google</Button>
 				<Button href="/discover" variant="ghost">Meet the community</Button>
 			</div>
