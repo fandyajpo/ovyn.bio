@@ -210,12 +210,18 @@
 		return (event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value;
 	}
 
+	function publishState(instance: PreviewPublisher, immediate = false) {
+		// The editor's blocks are Svelte state, and a proxy cannot be structured
+		// cloned, so the preview always gets a plain snapshot of them.
+		instance.publish($state.snapshot(items), immediate);
+	}
+
 	onMount(() => {
 		previewSession = crypto.randomUUID().slice(0, 8);
 		if (!previewKey) return;
 		const instance = createPreviewPublisher(previewKeyFor(previewKey, previewSession));
 		publisher = instance;
-		instance.publish(items, true);
+		publishState(instance, true);
 		return () => {
 			instance.dispose();
 			publisher = null;
@@ -226,7 +232,7 @@
 		void serialized;
 		const instance = publisher;
 		if (!instance) return;
-		instance.publish(items);
+		publishState(instance);
 	});
 </script>
 

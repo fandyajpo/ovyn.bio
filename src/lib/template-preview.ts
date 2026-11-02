@@ -71,7 +71,13 @@ export function createPreviewPublisher(key: string): PreviewPublisher {
 	function send(blocks: TemplateBlock[]): void {
 		const snapshot: PreviewSnapshot = { key, blocks, updatedAt: Date.now() };
 		writeSnapshot(snapshot);
-		channel?.postMessage({ type: 'state', snapshot } satisfies PreviewMessage);
+		try {
+			channel?.postMessage({ type: 'state', snapshot } satisfies PreviewMessage);
+		} catch (error) {
+			// A value the browser cannot clone (a proxy, a DOM node) only costs the
+			// live tab; the stored snapshot above still holds this state.
+			console.warn('Template preview could not publish this change', error);
+		}
 	}
 
 	function onMessage(event: MessageEvent<PreviewMessage>): void {
