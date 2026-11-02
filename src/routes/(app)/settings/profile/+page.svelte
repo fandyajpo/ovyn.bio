@@ -16,6 +16,8 @@
 	);
 
 	let visibility = $derived(data.profile.visibility);
+	const bannerIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
+	const bannerVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 
 	async function onVisibilityChange() {
 		const res = await fetch('/settings/profile?/visibility', {
@@ -112,12 +114,18 @@
 		<div class="flex items-center gap-4">
 			<div class="h-14 w-24 overflow-hidden rounded-lg bg-neutral-800">
 				{#if data.bannerUrl}
-					<img src={data.bannerUrl} alt="Wallpaper preview" class="size-full object-cover" />
+					{#if bannerIsVideo}
+						<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="size-full object-cover">
+							<source src={data.bannerUrl} type={bannerVideoType} />
+						</video>
+					{:else}
+						<img src={data.bannerUrl} alt="Wallpaper preview" class="size-full object-cover" />
+					{/if}
 				{/if}
 			</div>
 			<div>
 				<p class="mb-1 text-sm text-neutral-300">Your page background image</p>
-				<p class="mb-1 text-xs text-neutral-500">JPG, PNG or WebP · max 5 MB</p>
+				<p class="mb-1 text-xs text-neutral-500">JPG, PNG, WebP, GIF, MP4 or WebM · max 25 MB</p>
 				<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload wallpaper" />
 			</div>
 		</div>

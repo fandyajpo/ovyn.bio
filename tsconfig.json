@@ -1,7 +1,7 @@
 {
 	"extends": "$app/tsconfig",
 	"include": ["src", "drizzle.config.ts", "vite.config.ts"],
-	"exclude": [],
+	"exclude": ["src/service-worker"],
 	"compilerOptions": {
 		"strict": true,
 		"noUncheckedIndexedAccess": true

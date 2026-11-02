@@ -43,20 +43,25 @@ function s3WithBucket(): { client: S3Client; bucket: string } {
 }
 
 export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
-export type ImageMime = (typeof IMAGE_MIME_TYPES)[number];
+export const BANNER_MIME_TYPES = [...IMAGE_MIME_TYPES, 'image/gif', 'video/mp4', 'video/webm'] as const;
+export type UploadMime = (typeof BANNER_MIME_TYPES)[number];
+export type UploadKind = 'banner' | 'icon' | 'cosmetic';
 
-export const UPLOAD_LIMITS = {
-	banner: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
+type UploadLimit = { maxSize: number; mimeTypes: readonly UploadMime[] };
+
+export const UPLOAD_LIMITS: Record<UploadKind, UploadLimit> = {
+	banner: { maxSize: 25 * 1024 * 1024, mimeTypes: BANNER_MIME_TYPES },
 	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
-} as const;
+};
 
-export type UploadKind = keyof typeof UPLOAD_LIMITS;
-
-const EXT_BY_MIME: Record<ImageMime, string> = {
+const EXT_BY_MIME: Record<UploadMime, string> = {
 	'image/jpeg': 'jpg',
 	'image/png': 'png',
-	'image/webp': 'webp'
+	'image/webp': 'webp',
+	'image/gif': 'gif',
+	'video/mp4': 'mp4',
+	'video/webm': 'webm'
 };
 
 export function validateUpload(
@@ -67,14 +72,14 @@ export function validateUpload(
 	const limits = UPLOAD_LIMITS[kind];
 	const mime = mimeType.toLowerCase();
 
-	if (!limits.mimeTypes.includes(mime as ImageMime)) {
+	if (!limits.mimeTypes.includes(mime as UploadMime)) {
 		throw new AppError(415, `Only ${limits.mimeTypes.join(', ')} files are allowed`);
 	}
 	if (sizeBytes <= 0 || sizeBytes > limits.maxSize) {
 		throw new AppError(413, `File must be between 1 byte and ${limits.maxSize} bytes`);
 	}
 
-	return { ext: EXT_BY_MIME[mime as ImageMime] };
+	return { ext: EXT_BY_MIME[mime as UploadMime] };
 }
 
 /** Presigned PUT: the client uploads the bytes directly to object storage. */

@@ -10,7 +10,7 @@
 
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
-	let currentKey = $state(existingKey);
+	let currentKey = $derived(existingKey);
 
 	async function pick() {
 		input?.click();
@@ -63,7 +63,7 @@
 <input
 	bind:this={input}
 	type="file"
-	accept="image/jpeg,image/png,image/webp"
+	accept={kind === 'banner' ? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'}
 	class="hidden"
 	onchange={onPicked}
 />

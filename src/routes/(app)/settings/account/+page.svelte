@@ -1,5 +1,7 @@
 <script lang="ts">
 	import Button from '#lib/components/ui/Button.svelte';
+	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import PushNotificationSettings from '#lib/components/PushNotificationSettings.svelte';
 	import { signOut } from '#lib/auth-client';
 
 	let { data } = $props();
@@ -20,13 +22,20 @@
 	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Account</h1>
 
 	<section class="rounded-xl border border-neutral-800 p-5">
-		<h2 class="font-medium text-neutral-200">Discord account</h2>
-		<p class="mt-1 text-sm text-neutral-400">
-			You signed in with <span class="font-mono text-neutral-200">{data.discord?.username}</span>.
-			OVYN has one identity per Discord account and no passwords.
-		</p>
+		<h2 class="font-medium text-neutral-200">Discord identity</h2>
+		<div class="mt-4 flex items-center gap-4">
+			<Avatar name={data.discord?.globalName ?? data.discord?.username ?? 'Discord'} src={data.discord?.avatarUrl} size="lg" />
+			<div class="min-w-0">
+				<p class="truncate font-medium text-neutral-100">{data.discord?.globalName ?? data.discord?.username ?? 'Discord account'}</p>
+				<p class="mt-1 font-mono text-xs text-neutral-400">@{data.discord?.username ?? 'unknown'}</p>
+				{#if data.discord?.discordId}<p class="mt-1 font-mono text-[10px] text-neutral-600">Discord ID · {data.discord.discordId}</p>{/if}
+			</div>
+		</div>
+		<p class="mt-3 text-sm text-neutral-500">Your Discord username, display name, avatar and profile bio sync when you sign in. OVYN preserves profile customizations.</p>
 		<Button variant="secondary" onclick={logout} class="mt-4">Sign out</Button>
 	</section>
+
+	<PushNotificationSettings />
 
 	<section class="rounded-xl border border-red-900/60 p-5">
 		<h2 class="font-medium text-red-300">Danger zone</h2>

@@ -12,6 +12,8 @@
 		const profile = data.profile;
 		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;
 	});
+	const bannerIsVideo = $derived(/\.(mp4|webm)$/i.test(p.bannerKey ?? ''));
+	const bannerVideoType = $derived(p.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 </script>
 
 <svelte:head>
@@ -35,7 +37,13 @@
 		{/if}
 
 		{#if data.bannerUrl}
-			<img src={data.bannerUrl} alt="" class="h-40 w-full rounded-2xl border border-white/10 object-cover" />
+			{#if bannerIsVideo}
+				<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="h-40 w-full rounded-2xl border border-white/10 object-cover">
+					<source src={data.bannerUrl} type={bannerVideoType} />
+				</video>
+			{:else}
+				<img src={data.bannerUrl} alt="" class="h-40 w-full rounded-2xl border border-white/10 object-cover" />
+			{/if}
 		{:else if !data.cosmetics?.wallpaperUrl}
 			<div class="profile-banner-doodle relative h-28 w-full overflow-hidden rounded-2xl border border-white/10">
 				<span class="absolute -right-4 -top-8 size-32 rounded-full border border-lime-300/20"></span>

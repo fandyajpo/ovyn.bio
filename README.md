@@ -61,6 +61,14 @@ You must add:
 - `DOKU_PARTNER_SERVICE_ID` — your 8-digit virtual account company code (BIN)
 - `DOKU_ENV=production` (optional; sandbox is the default), `DOKU_BASE_URL` (optional override)
 
+## PWA, typography and profile media
+
+OVYN can be installed from supported browsers as a standalone app. Its service worker caches versioned build and static assets, shows an offline fallback for navigation, and avoids caching personalized server-rendered pages.
+
+The UI bundles Vercel Geist locally: Sans for interface text, Serif for selected display headings, Mono for metadata, and Pixel for sticker labels. Profile wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB.
+
+Account settings let each device manage browser notification permission and event-category preferences, with a local test notification. The service worker can receive and filter push payloads, but remote push subscriptions and server delivery are not wired yet; VAPID support remains follow-up work.
+
 ## Key architecture notes
 
 - **Auth** is standalone Better Auth (`src/lib/server/auth`) with Discord
