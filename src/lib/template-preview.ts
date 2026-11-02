@@ -16,6 +16,14 @@ function storageKey(key: string): string {
 	return `${STORAGE_PREFIX}${key}`;
 }
 
+function plainBlocks(blocks: TemplateBlock[]): TemplateBlock[] {
+	try {
+		return JSON.parse(JSON.stringify(blocks)) as TemplateBlock[];
+	} catch {
+		return [];
+	}
+}
+
 function isSnapshot(value: unknown, key: string): value is PreviewSnapshot {
 	if (!value || typeof value !== 'object') return false;
 	const snapshot = value as Partial<PreviewSnapshot>;
@@ -69,7 +77,9 @@ export function createPreviewPublisher(key: string): PreviewPublisher {
 	let disposed = false;
 
 	function send(blocks: TemplateBlock[]): void {
-		const snapshot: PreviewSnapshot = { key, blocks, updatedAt: Date.now() };
+		// Proxies and other exotic values cannot be structured-cloned, so storage
+		// and the channel always receive plain JSON.
+		const snapshot: PreviewSnapshot = { key, blocks: plainBlocks(blocks), updatedAt: Date.now() };
 		writeSnapshot(snapshot);
 		try {
 			channel?.postMessage({ type: 'state', snapshot } satisfies PreviewMessage);
