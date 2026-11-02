@@ -3,9 +3,10 @@
 
 	let {
 		delay = 0,
+		stagger = false,
 		class: className = '',
 		children
-	}: { delay?: number; class?: string; children: Snippet } = $props();
+	}: { delay?: number; stagger?: boolean; class?: string; children: Snippet } = $props();
 
 	let enhanced = $state(false);
 	let visible = $state(false);
@@ -39,6 +40,7 @@
 	class="ovyn-reveal {className}"
 	data-enhanced={enhanced ? 'true' : undefined}
 	data-visible={visible ? 'true' : undefined}
+	data-stagger={stagger ? 'true' : undefined}
 	style={`--reveal-delay: ${delay}ms`}
 >
 	{@render children()}

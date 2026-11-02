@@ -95,14 +95,14 @@
 			</Reveal>
 		</div>
 
-		<Reveal delay={150} class="landing-profile-stage relative mx-auto w-full max-w-lg">
+		<Reveal delay={150} stagger class="landing-profile-stage relative mx-auto w-full max-w-lg">
 			<div class="landing-profile-orbit" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
 			<div class="landing-profile-preview relative">
-				<div class="flex items-center justify-between gap-4">
+				<div class="flex items-center justify-between gap-4" data-reveal-item style="--reveal-order: 0">
 					<p class="landing-eyebrow">ovyn / your space</p>
 					<span class="profile-live"><span class="status-dot"></span> YOUR PAGE</span>
 				</div>
-				<div class="mt-10 flex items-center gap-5">
+				<div class="mt-10 flex items-center gap-5" data-reveal-item style="--reveal-order: 1">
 					<div class="relative">
 						<Avatar name="your name" size="xl" />
 						<span class="avatar-orbit" aria-hidden="true"></span>
@@ -112,8 +112,8 @@
 						<p class="mt-1 text-sm text-neutral-500">@your-corner</p>
 					</div>
 				</div>
-				<p class="mt-7 max-w-sm text-sm leading-7 text-neutral-400">A little bit of your world, the things you love, and every place your people can find you.</p>
-				<div class="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm text-neutral-300">
+				<p class="mt-7 max-w-sm text-sm leading-7 text-neutral-400" data-reveal-item style="--reveal-order: 2">A little bit of your world, the things you love, and every place your people can find you.</p>
+				<div class="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm text-neutral-300" data-reveal-item style="--reveal-order: 3">
 					<a href="/discover">Your people <span class="text-pop-pink">↗</span></a>
 					<a href="/shop">Your style <span class="text-pop-blue">↗</span></a>
 					<a href="/login">Your link <span class="text-lime-300">↗</span></a>
@@ -151,11 +151,11 @@
 </section>
 
 {#if data.stats}
-	<Reveal>
+	<Reveal stagger>
 		<section class="community-strip flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-12 text-center" aria-label="ovyn community stats">
-			<div><strong>{data.stats.profiles}</strong><span>identities</span></div>
-			<div><strong>{data.stats.guilds}</strong><span>circles</span></div>
-			<div><strong>{data.stats.members}</strong><span>members</span></div>
+			<div data-reveal-item style="--reveal-order: 0"><strong>{data.stats.profiles}</strong><span>identities</span></div>
+			<div data-reveal-item style="--reveal-order: 1"><strong>{data.stats.guilds}</strong><span>circles</span></div>
+			<div data-reveal-item style="--reveal-order: 2"><strong>{data.stats.members}</strong><span>members</span></div>
 		</section>
 	</Reveal>
 {/if}
@@ -223,14 +223,14 @@
 	</div>
 </section>
 
-<Reveal>
+<Reveal stagger>
 	<section class="landing-end relative overflow-hidden py-14 text-center sm:py-20">
 		<div class="landing-end-ring" aria-hidden="true"></div>
 		<div class="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
-			<p class="landing-eyebrow justify-center">YOUR TAB IS OPEN</p>
-			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl">Make your mark.</h2>
-			<p class="max-w-xl text-neutral-400">Claim a name, shape your space, and let your people find you.</p>
-			<div class="flex flex-wrap justify-center gap-3">
+			<p class="landing-eyebrow justify-center" data-reveal-item style="--reveal-order: 0">YOUR TAB IS OPEN</p>
+			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
+			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
+			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 3">
 				{#if data.user}<Button href="/account">Open your space</Button>{:else}<Button href="/login">Continue with Discord or Google</Button>{/if}
 				<Button href="/discover" variant="ghost">Meet the community</Button>
 			</div>

@@ -1088,3 +1088,55 @@ html[data-theme='light'] body {
 		padding-top: calc(4.25rem + env(safe-area-inset-top));
 	}
 }
+
+
+
+/* Landing motion: entrance sequencing and hover hints.
+   These rules only animate existing elements with transform and opacity. */
+@keyframes landing-reveal-item {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 10px, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes landing-status-pulse {
+	0%,
+	100% { transform: scale(1); }
+	50% { transform: scale(1.22); }
+}
+
+.ovyn-reveal[data-stagger='true'][data-visible='true'] [data-reveal-item] {
+	animation: landing-reveal-item 540ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+	animation-delay: calc(var(--reveal-delay, 0ms) + var(--reveal-order, 0) * 80ms);
+}
+
+.status-dot { animation: landing-status-pulse 3200ms ease-in-out infinite; }
+.feature-row .feature-symbol { transition: transform 240ms ease; }
+.plan-card .plan-price { transition: transform 240ms ease; }
+
+@media (hover: hover) and (pointer: fine) {
+	.feature-row:hover .feature-symbol { transform: translate3d(0, -2px, 0) rotate(8deg); }
+	.plan-card:hover .plan-price { transform: translate3d(0, -1px, 0); }
+	.landing-profile-preview a:hover { transform: translate3d(0, -1px, 0); }
+	.faq-item:not(.is-open):hover .faq-toggle { transform: scale(1.12); }
+	.app-footer nav a:hover { transform: translate3d(0, -1px, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.ovyn-reveal[data-stagger='true'] [data-reveal-item],
+	.status-dot { animation: none !important; }
+
+	.feature-row .feature-symbol,
+	.plan-card .plan-price { transition: none !important; }
+
+	.feature-row:hover .feature-symbol,
+	.plan-card:hover .plan-price,
+	.landing-profile-preview a:hover,
+	.faq-item:not(.is-open):hover .faq-toggle,
+	.app-footer nav a:hover { transform: none !important; }
+}
