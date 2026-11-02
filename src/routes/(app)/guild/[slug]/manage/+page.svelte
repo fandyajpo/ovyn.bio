@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -8,9 +9,9 @@
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
 
-	let name = $state(data.guild.name);
-	let description = $state(data.guild.description ?? '');
-	let visibility = $state<string>(data.guild.visibility);
+	let name = $state(untrack(() => data.guild.name));
+	let description = $state(untrack(() => data.guild.description ?? ''));
+	let visibility = $state<string>(untrack(() => data.guild.visibility));
 
 	let inviteQuery = $state('');
 	let candidates = $state<Array<{ userId: string; slug: string; displayName: string | null }>>([]);

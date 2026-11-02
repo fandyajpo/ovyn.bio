@@ -87,25 +87,25 @@
 		transition: opacity 140ms ease, transform 160ms ease, visibility 0s linear 160ms;
 	}
 
-	[data-placement='top'] .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='top'] .ovyn-tooltip-bubble {
 		bottom: calc(100% + 0.55rem);
 		left: 50%;
 		transform: translate(-50%, 0.3rem);
 	}
 
-	[data-placement='bottom'] .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='bottom'] .ovyn-tooltip-bubble {
 		top: calc(100% + 0.55rem);
 		left: 50%;
 		transform: translate(-50%, -0.3rem);
 	}
 
-	[data-placement='left'] .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='left'] .ovyn-tooltip-bubble {
 		top: 50%;
 		right: calc(100% + 0.55rem);
 		transform: translate(0.3rem, -50%);
 	}
 
-	[data-placement='right'] .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='right'] .ovyn-tooltip-bubble {
 		top: 50%;
 		left: calc(100% + 0.55rem);
 		transform: translate(-0.3rem, -50%);
@@ -118,17 +118,17 @@
 		transition-delay: 0s;
 	}
 
-	[data-placement='top'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
-	[data-placement='top'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble,
-	[data-placement='bottom'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
-	[data-placement='bottom'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='top']:hover .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='top']:focus-within .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='bottom']:hover .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='bottom']:focus-within .ovyn-tooltip-bubble {
 		transform: translate(-50%, 0);
 	}
 
-	[data-placement='left'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
-	[data-placement='left'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble,
-	[data-placement='right'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
-	[data-placement='right'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble {
+	.ovyn-tooltip[data-placement='left']:hover .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='left']:focus-within .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='right']:hover .ovyn-tooltip-bubble,
+	.ovyn-tooltip[data-placement='right']:focus-within .ovyn-tooltip-bubble {
 		transform: translate(0, -50%);
 	}
 

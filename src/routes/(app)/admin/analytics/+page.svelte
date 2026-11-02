@@ -8,8 +8,8 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const maxRevenue = Math.max(1, ...data.analytics.daily.map((day) => day.revenue));
-	const maxOrders = Math.max(1, ...data.analytics.daily.map((day) => day.orders));
+	const maxRevenue = $derived(Math.max(1, ...data.analytics.daily.map((day) => day.revenue)));
+	const maxOrders = $derived(Math.max(1, ...data.analytics.daily.map((day) => day.orders)));
 	const dateFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
 
 	function formatDay(day: string) {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Markdown from './Markdown.svelte';
 	import TemplateBlocks from './TemplateBlocks.svelte';
 	import {
@@ -11,7 +12,7 @@
 
 	let { blocks = [], name = 'blocks' }: { blocks?: TemplateBlock[]; name?: string } = $props();
 
-	let items = $state<TemplateBlock[]>(blocks.map((block) => ({ ...block })));
+	let items = $state<TemplateBlock[]>(untrack(() => blocks.map((block) => ({ ...block }))));
 	let draggingIndex = $state<number | null>(null);
 	let overIndex = $state<number | null>(null);
 	let paletteType = $state<TemplateBlockType | null>(null);
@@ -291,6 +292,8 @@
 
 		<div
 			class="drop-end {overIndex === items.length ? 'is-over' : ''}"
+			role="group"
+			aria-label="Drop here to add at the end"
 			ondragover={(event) => onDragOver(event, items.length)}
 			ondragleave={() => { if (overIndex === items.length) overIndex = null; }}
 			ondrop={(event) => onDrop(event, items.length)}

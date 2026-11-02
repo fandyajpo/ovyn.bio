@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import AdminCosmeticAssetUpload from '#lib/components/AdminCosmeticAssetUpload.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
@@ -39,7 +40,7 @@
 		errors?: Record<string, string>;
 	} = $props();
 
-	const isCreate = mode === 'create';
+	const isCreate = $derived(mode === 'create');
 
 	const productTypeOptions = [
 		{ value: 'cosmetic', label: 'Cosmetic' },
@@ -51,7 +52,7 @@
 		{ value: 'badge', label: 'Badge' }
 	];
 
-	let category = $state<string>(values.category ?? product?.category ?? 'cosmetic');
+	let category = $state<string>(untrack(() => values.category ?? product?.category ?? 'cosmetic'));
 	const showsCosmetic = $derived(isCreate ? category === 'cosmetic' : product?.category === 'cosmetic');
 
 	function fieldValue(key: string, fallback: string) {

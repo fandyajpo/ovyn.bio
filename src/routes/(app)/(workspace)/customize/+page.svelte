@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -15,7 +16,7 @@
 	const coverVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.backgroundKey ?? ''));
 	const backgroundVideoType = $derived(data.profile.backgroundKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
-	let usernameColor = $state(data.profile.usernameColor ?? '');
+	let usernameColor = $state(untrack(() => data.profile.usernameColor ?? ''));
 	const colorPreview = $derived(/^#[0-9a-f]{6}$/i.test(usernameColor) ? usernameColor : 'var(--color-accent)');
 </script>
 

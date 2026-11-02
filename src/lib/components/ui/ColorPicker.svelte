@@ -19,6 +19,7 @@
 		class?: string;
 	} = $props();
 
+	const id = $props.id();
 	let open = $state(false);
 	let root = $state<HTMLDivElement | undefined>(undefined);
 	let trigger = $state<HTMLButtonElement | undefined>(undefined);
@@ -26,6 +27,9 @@
 
 	const normalised = $derived(/^#[0-9a-f]{6}$/i.test(value) ? value : '');
 	const swatch = $derived(normalised || 'var(--color-accent)');
+	const describedBy = $derived(
+		[hint ? `${id}-hint` : null, error ? `${id}-error` : null].filter(Boolean).join(' ') || undefined
+	);
 
 	function toggle() {
 		open = !open;
@@ -69,7 +73,7 @@
 		class="color-trigger"
 		aria-haspopup="dialog"
 		aria-expanded={open}
-		aria-invalid={Boolean(error)}
+		aria-describedby={describedBy}
 		onclick={toggle}
 	>
 		<span class="color-dot" style={`background: ${swatch}`} aria-hidden="true"></span>
@@ -115,8 +119,8 @@
 		</div>
 	{/if}
 
-	{#if hint}<p class="color-hint">{hint}</p>{/if}
-	{#if error}<p class="color-error" role="alert">{error}</p>{/if}
+	{#if hint}<p id="{id}-hint" class="color-hint">{hint}</p>{/if}
+	{#if error}<p id="{id}-error" class="color-error" role="alert">{error}</p>{/if}
 </div>
 
 <style>
@@ -159,8 +163,6 @@
 		outline: none;
 		box-shadow: 0 0 0 4px var(--color-accent-soft);
 	}
-
-	.color-trigger[aria-invalid='true'] { border-color: color-mix(in srgb, var(--color-danger) 60%, transparent); }
 
 	.color-dot {
 		width: 1.5rem;
