@@ -17,23 +17,28 @@
 </svelte:head>
 
 {#if data.private}
-	<div class="mx-auto max-w-md py-24 text-center text-neutral-500">
-		This profile is private.
+	<div class="mx-auto flex max-w-md flex-col items-center gap-4 py-24 text-center text-neutral-400">
+		<span class="sticker sticker--pink">PRIVATE CORNER</span>
+		<p>This profile is private.</p>
 	</div>
 {:else}
-	<article class="relative mx-auto flex max-w-2xl flex-col gap-6">
+	<article class="profile-sheet relative isolate mx-auto flex max-w-2xl flex-col gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950/75 p-4 sm:p-7">
+		<div class="pointer-events-none absolute right-5 top-5 z-10 rotate-3" aria-hidden="true"><span class="sticker sticker--lilac">YOUR SPACE</span></div>
 		{#if data.cosmetics?.wallpaperUrl}
 			<img
 				src={data.cosmetics.wallpaperUrl}
 				alt=""
-				class="absolute inset-0 -z-10 h-64 w-full rounded-xl object-cover opacity-40"
+				class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-20"
 			/>
 		{/if}
 
 		{#if data.bannerUrl}
-			<img src={data.bannerUrl} alt="" class="h-40 w-full rounded-xl object-cover" />
+			<img src={data.bannerUrl} alt="" class="h-40 w-full rounded-2xl border border-white/10 object-cover" />
 		{:else if !data.cosmetics?.wallpaperUrl}
-			<div class="h-24 w-full rounded-xl bg-gradient-to-r from-neutral-900 to-neutral-800"></div>
+			<div class="profile-banner-doodle relative h-28 w-full overflow-hidden rounded-2xl border border-white/10">
+				<span class="absolute -right-4 -top-8 size-32 rounded-full border border-lime-300/20"></span>
+				<span class="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">made of you / ovyn</span>
+			</div>
 		{:else}
 			<div class="h-8"></div>
 		{/if}
@@ -56,21 +61,20 @@
 						<img src={data.cosmetics.badgeUrl} alt="Badge" class="inline size-6 object-contain" />
 					{/if}
 				</h1>
-				<p class="font-mono text-sm text-neutral-500">@{p.slug}</p>
+				<p class="mt-1 font-mono text-sm text-lime-300">@{p.slug}</p>
 				{#if data.discord}
-					<p class="mt-1 font-mono text-xs text-neutral-600">
-						discord: {data.discord.username}
-					</p>
+					<p class="mt-2 inline-flex"><span class="sticker sticker--blue">DISCORD / {data.discord.username}</span></p>
 				{/if}
 			</div>
 		</div>
 
 		{#if p.bio}
-			<p class="whitespace-pre-line text-neutral-300">{p.bio}</p>
+			<p class="collage-card collage-card--blue rounded-2xl bg-[#151a1c]/90 p-4 text-base leading-7 text-neutral-200">{p.bio}</p>
 		{/if}
 
 		{#if data.guild}
-			<Card class="p-4">
+			<Card class="collage-card rounded-2xl bg-[#1b1d19]/90 p-4">
+				<p class="mb-2 inline-flex"><span class="sticker sticker--lilac">YOUR CIRCLE</span></p>
 				<p class="font-mono text-xs text-neutral-500 uppercase tracking-wider">Current guild</p>
 				<a href="/guild/{data.guild.slug}" class="mt-1 text-lg font-semibold text-lime-300 hover:underline">
 					{data.guild.name}
@@ -80,9 +84,9 @@
 			<p class="text-sm text-neutral-500">Not part of a guild yet.</p>
 		{/if}
 
-		<p class="font-mono text-xs text-neutral-600">Member since {formatDate(p.createdAt)}</p>
+		<p class="font-mono text-xs uppercase tracking-widest text-neutral-600">Member since {formatDate(p.createdAt)}</p>
 		{#if data.viewerTracked}
-			<p class="text-xs text-neutral-600">As a signed-in visitor, your visit may appear in this profile's analytics.</p>
+			<p class="rounded-full border border-white/10 bg-neutral-900/70 px-3 py-2 text-xs text-neutral-500">Signed-in visits may appear in this profile's analytics.</p>
 		{/if}
 	</article>
 {/if}

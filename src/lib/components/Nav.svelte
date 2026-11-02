@@ -31,20 +31,24 @@
 
 <header class="sticky top-0 z-40 border-b border-neutral-800/80 bg-[#111210]/90 backdrop-blur">
 	<nav class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-		<a href="/" class="font-[family-name:var(--font-display)] text-lg font-semibold tracking-tight">
-			OVYN<span class="text-lime-300">.</span>
+		<a href="/" class="group flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
+			<span class="grid size-8 rotate-[-6deg] place-items-center rounded-xl border-2 border-[#111210] bg-lime-300 font-mono text-sm text-neutral-950 shadow-[2px_2px_0_rgba(255,255,255,0.3)] transition-transform group-hover:rotate-6">O</span>
+			<span>OVYN<span class="text-lime-300">.</span></span>
+			<span class="sticker sticker--dark hidden sm:inline-flex">YOUR CORNER</span>
 		</a>
 
-		<div class="flex items-center gap-1 sm:gap-4">
-			{#each links as link (link.href)}
-				<a
-					href={link.href}
-					class="rounded-md px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-neutral-800/60 hover:text-neutral-100 data-[active=true]:text-lime-300"
-					data-active={page.url.pathname === link.href}
-				>
-					{link.label}
-				</a>
-			{/each}
+		<div class="flex min-w-0 items-center gap-1 sm:gap-4">
+			<div class="flex max-w-[48vw] items-center gap-1 overflow-x-auto whitespace-nowrap sm:max-w-none sm:gap-4 sm:overflow-visible">
+				{#each links as link (link.href)}
+					<a
+						href={link.href}
+						class="rounded-full px-3 py-1.5 text-sm text-neutral-400 transition-colors hover:bg-neutral-800/80 hover:text-neutral-100 data-[active=true]:bg-neutral-800 data-[active=true]:text-lime-300"
+						data-active={page.url.pathname === link.href}
+					>
+						{link.label}
+					</a>
+				{/each}
+			</div>
 
 			{#if user}
 				<div class="relative">

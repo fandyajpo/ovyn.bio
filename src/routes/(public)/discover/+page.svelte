@@ -11,7 +11,8 @@
 
 <div class="flex flex-col gap-6">
 	<div>
-		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Discover guilds</h1>
+		<span class="sticker sticker--blue">FIND YOUR PEOPLE</span>
+		<h1 class="mt-4 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight">Discover guilds</h1>
 		<p class="mt-1 text-neutral-400">
 			{#if data.membership}
 				You are a member of <a href="/guild/{data.membership.guild.slug}" class="text-lime-300">{data.membership.guild.name}</a>.
@@ -45,7 +46,7 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.guilds as row (row.guild.id)}
-				<div class="flex h-full flex-col justify-between gap-4 rounded-xl border {row.featured ? 'border-lime-300/60 shadow-lg shadow-lime-300/5' : 'border-neutral-800'} bg-neutral-900/50 p-5">
+				<div class="collage-card flex h-full flex-col justify-between gap-4 rounded-2xl border {row.featured ? 'border-lime-300/60 shadow-lg shadow-lime-300/5' : 'border-neutral-800'} bg-neutral-900/70 p-5">
 					<div>
 						<div class="flex items-center justify-between gap-2">
 							<a href="/guild/{row.guild.slug}" class="text-lg font-semibold text-neutral-100 hover:text-lime-300">

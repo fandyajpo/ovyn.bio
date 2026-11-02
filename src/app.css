@@ -8,14 +8,28 @@
 	--color-foreground: #f1f0e9;
 	--color-muted: #92958a;
 	--color-accent: #d5ff35;
+	--color-pop-pink: #ff78a8;
+	--color-pop-blue: #83e6ff;
+	--color-pop-lilac: #c4a5ff;
 
 	--font-display: 'Space Grotesk Variable', system-ui, sans-serif;
 	--font-sans: 'Inter Variable', system-ui, sans-serif;
 }
 
+:root {
+	color-scheme: dark;
+}
+
 body {
+	min-height: 100vh;
 	font-family: var(--font-sans);
 	background-color: var(--color-background);
+	background-image:
+		radial-gradient(55rem 28rem at 8% -6%, rgb(213 255 53 / 11%), transparent 62%),
+		radial-gradient(42rem 32rem at 100% 12%, rgb(255 120 168 / 8%), transparent 64%),
+		radial-gradient(rgb(255 255 255 / 5%) 0.7px, transparent 0.7px);
+	background-size: auto, auto, 18px 18px;
+	background-attachment: fixed;
 	color: var(--color-foreground);
 }
 
@@ -24,8 +38,133 @@ body {
 	color: #111210;
 }
 
+.ovyn-card {
+	border-color: rgb(255 255 255 / 11%);
+	box-shadow: 3px 3px 0 rgb(213 255 53 / 13%);
+}
+
+.ovyn-button {
+	box-shadow: 3px 3px 0 rgb(0 0 0 / 55%);
+	transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.ovyn-button:hover:not(:disabled) {
+	transform: translate(-2px, -2px);
+	box-shadow: 5px 5px 0 rgb(0 0 0 / 55%);
+}
+
+.ovyn-button:active:not(:disabled) {
+	transform: translate(1px, 1px);
+	box-shadow: 1px 1px 0 rgb(0 0 0 / 55%);
+}
+
+.collage-card {
+	border: 1px solid rgb(255 255 255 / 12%);
+	box-shadow: 5px 5px 0 rgb(213 255 53 / 16%);
+	transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.collage-card:hover,
+.collage-card:focus-within {
+	transform: translate(-2px, -3px) rotate(-0.35deg);
+	border-color: rgb(213 255 53 / 44%);
+	box-shadow: 8px 9px 0 rgb(213 255 53 / 20%);
+}
+
+.collage-card--pink {
+	box-shadow: 5px 5px 0 rgb(255 120 168 / 20%);
+}
+
+.collage-card--blue {
+	box-shadow: 5px 5px 0 rgb(131 230 255 / 18%);
+}
+
+.collage-card--pink:hover,
+.collage-card--pink:focus-within {
+	box-shadow: 8px 9px 0 rgb(255 120 168 / 24%);
+}
+
+.collage-card--blue:hover,
+.collage-card--blue:focus-within {
+	box-shadow: 8px 9px 0 rgb(131 230 255 / 22%);
+}
+
+.profile-sheet {
+	box-shadow: 7px 7px 0 rgb(255 120 168 / 15%);
+}
+
+.profile-banner-doodle {
+	background:
+		radial-gradient(circle at 82% 25%, rgb(131 230 255 / 18%), transparent 30%),
+		radial-gradient(circle at 18% 100%, rgb(213 255 53 / 12%), transparent 35%),
+		#1a1c18;
+}
+
+.sticker {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	border: 2px solid #111210;
+	border-radius: 999px;
+	background: var(--color-accent);
+	padding: 0.38rem 0.68rem;
+	color: #111210;
+	box-shadow: 3px 3px 0 rgb(0 0 0 / 48%);
+	font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+	font-size: 0.62rem;
+	font-weight: 800;
+	letter-spacing: 0.1em;
+	line-height: 1;
+	text-transform: uppercase;
+}
+
+.sticker--pink {
+	background: var(--color-pop-pink);
+}
+
+.sticker--blue {
+	background: var(--color-pop-blue);
+}
+
+.sticker--lilac {
+	background: var(--color-pop-lilac);
+}
+
+.sticker--dark {
+	border-color: rgb(255 255 255 / 18%);
+	background: #242720;
+	color: var(--color-foreground);
+	box-shadow: 3px 3px 0 rgb(0 0 0 / 40%);
+}
+
+.hero-stage {
+	background:
+		radial-gradient(ellipse at 72% 42%, rgb(213 255 53 / 10%), transparent 52%),
+		linear-gradient(145deg, rgb(27 29 25 / 96%), rgb(17 18 16 / 94%));
+}
+
+.hero-doodle {
+	animation: ovyn-float 5s ease-in-out infinite;
+}
+
+@keyframes ovyn-float {
+	0%, 100% { transform: translateY(0) rotate(-3deg); }
+	50% { transform: translateY(-7px) rotate(2deg); }
+}
+
 .skeleton {
 	animation: pulse 1.5s ease-in-out infinite;
 	border-radius: 0.5rem;
 	background: #1b1d19;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+	}
 }

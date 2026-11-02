@@ -15,9 +15,10 @@
 
 <div class="flex flex-col gap-6">
 	<div>
-		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Shop</h1>
-		<p class="mt-1 text-neutral-400">
-			Deck out your profile — frames, wallpapers and badges. Paid via DOKU.
+		<span class="sticker sticker--pink">PROFILE ACCESSORIES</span>
+		<h1 class="mt-4 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight">The little flex shop.</h1>
+		<p class="mt-2 text-neutral-400">
+			Frames, wallpapers, and badges to make your page feel like yours. Buy with DOKU or redeem with points.
 		</p>
 	</div>
 
@@ -32,10 +33,11 @@
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.items as item (item.id)}
-				<Card class="flex h-full flex-col gap-3 p-5">
+				<Card class="collage-card flex h-full flex-col gap-3 p-5">
 					<div
-						class="relative flex h-32 items-center justify-center overflow-hidden rounded-lg bg-neutral-800/60"
+						class="relative flex h-32 items-center justify-center overflow-hidden rounded-2xl bg-neutral-800/60"
 					>
+						{#if item.stockLimit !== null || item.dropEndsAt}<span class="sticker sticker--pink absolute left-3 top-3 z-10">LIMITED DROP</span>{/if}
 						{#if item.assetUrl}
 							<img src={item.assetUrl} alt={item.name} class="max-h-full max-w-full object-contain" />
 						{:else}
