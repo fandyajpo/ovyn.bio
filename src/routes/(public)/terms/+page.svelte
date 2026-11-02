@@ -67,7 +67,7 @@
 		{
 			title: '9. Contact',
 			paragraphs: [
-				'Questions about these terms can be sent to hello@ovyn.bio.'
+				'Questions about these terms can be sent to hello@ovyn.me.'
 			]
 		}
 	];

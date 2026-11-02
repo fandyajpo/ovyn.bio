@@ -52,7 +52,7 @@
 			<span class="color-swatch" style={`background: ${colorPreview}`} aria-hidden="true"></span>
 			<Button type="submit">Save colour</Button>
 		</form>
-		<p class="font-mono text-sm" style={`color: ${colorPreview}`}>ovyn.bio/{data.profile.slug}</p>
+		<p class="font-mono text-sm" style={`color: ${colorPreview}`}>ovyn.me/{data.profile.slug}</p>
 	</Card>
 
 	<Card class="flex flex-col gap-4 p-5">

@@ -64,6 +64,13 @@
       "when": 1793620000000,
       "tag": "0008_rate_limits",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793630000000,
+      "tag": "0009_onboarding",
+      "breakpoints": true
     }
   ]
 }

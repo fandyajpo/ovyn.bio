@@ -17,7 +17,7 @@
 		},
 		{
 			title: 'Sharing and links',
-				body: 'Your public page is ovyn.bio/your-username. Links you add are shown to visitors of your public profile.',
+				body: 'Your public page is ovyn.me/your-username. Links you add are shown to visitors of your public profile.',
 				link: '/links',
 				label: 'Manage links'
 		},

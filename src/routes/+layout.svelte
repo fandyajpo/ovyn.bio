@@ -3,6 +3,7 @@
 	import { page } from '$app/state';
 	import '../app.css';
 	import Nav from '#lib/components/Nav.svelte';
+	import PageHelp from '#lib/components/PageHelp.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
@@ -18,10 +19,11 @@
 	const isProfilePage = $derived(page.route.id?.endsWith('/[username]') ?? false);
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
 	const isAdminPage = $derived(page.route.id?.includes('(app)/admin') ?? false);
-	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage);
+	const isOnboarding = $derived(page.route.id?.includes('(app)/onboarding') ?? false);
+	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage && !isOnboarding);
 </script>
 
-<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'}>
+<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		{#if showsSiteChrome}<Nav />{/if}
 
@@ -59,6 +61,7 @@
 		{/if}
 	</div>
 
+	<PageHelp />
 	<Toasts />
 
 <style>

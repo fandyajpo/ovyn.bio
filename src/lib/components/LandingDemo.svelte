@@ -22,7 +22,7 @@
 	<div class="demo-frame">
 		<div class="demo-bar">
 			<span class="demo-dots" aria-hidden="true"><i></i><i></i><i></i></span>
-			<span class="demo-url">ovyn.bio/{handle}</span>
+			<span class="demo-url">ovyn.me/{handle}</span>
 			<span class="demo-live"><span class="status-dot"></span>live</span>
 		</div>
 

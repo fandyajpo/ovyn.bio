@@ -41,7 +41,7 @@
 				<Avatar name={data.profile.displayName || data.profile.slug} src={data.avatarUrl} size="md" />
 				<div>
 					<a href="/{data.profile.slug}" class="font-medium text-lime-300 hover:underline">
-						ovyn.bio/{data.profile.slug}
+						ovyn.me/{data.profile.slug}
 					</a>
 					<p class="font-mono text-xs text-neutral-500">
 						{data.profile.visibility === 'public' ? 'Public profile' : 'Private profile'}

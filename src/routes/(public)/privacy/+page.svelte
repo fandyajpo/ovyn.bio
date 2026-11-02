@@ -79,7 +79,7 @@
 			title: '9. Changes and contact',
 			paragraphs: [
 				'We may update this policy as the product changes. Significant updates will be announced in the app.',
-				'Privacy questions and deletion requests can be sent to hello@ovyn.bio.'
+				'Privacy questions and deletion requests can be sent to hello@ovyn.me.'
 			]
 		}
 	];

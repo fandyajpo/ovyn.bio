@@ -47,7 +47,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		invitations,
 		pendingOrder: orders.find((o) => o.order.status === 'pending')?.order ?? null,
 		rewards,
-		referralUrl: `${(BETTER_AUTH_URL ?? 'https://ovyn.bio').replace(/\/$/, '')}/invite/${referralCode}`,
+		referralUrl: `${(BETTER_AUTH_URL ?? 'https://ovyn.me').replace(/\/$/, '')}/invite/${referralCode}`,
 		referralSummary,
 		rewardValues: REWARD_VALUES,
 		analytics

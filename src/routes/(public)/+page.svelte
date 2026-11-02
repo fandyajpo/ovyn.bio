@@ -3,7 +3,7 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import LandingDemo from '#lib/components/LandingDemo.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
-	import { slide, fade, fly } from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 
 	type Stats = { profiles: number; guilds: number; members: number };
 
@@ -157,9 +157,13 @@
 				<h1 class="max-w-3xl text-5xl font-semibold leading-[1.04] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
 					Make your corner<br />
 					<span class="landing-line">
-						{#key headlineIndex}
-							<span class="landing-gradient landing-line-text" in:fly={{ y: 26, duration: 460 }} out:fade={{ duration: 200 }}>{headline}</span>
-						{/key}
+						{#each headlines as line (line)}
+							<span
+								class="landing-gradient landing-line-text"
+								class:is-active={line === headline}
+								aria-hidden={line === headline ? undefined : 'true'}
+							>{line}</span>
+						{/each}
 					</span>
 				</h1>
 			</Reveal>
@@ -183,7 +187,7 @@
 			</Reveal>
 			<Reveal delay={300}>
 				<label class="landing-claim">
-					<span class="landing-claim-prefix">ovyn.bio/</span>
+					<span class="landing-claim-prefix">ovyn.me/</span>
 					<input
 						class="landing-claim-input"
 						bind:value={pageName}
@@ -343,7 +347,7 @@
 			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
 			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
 			<p class="landing-end-link" data-reveal-item style="--reveal-order: 3">
-				<span>ovyn.bio/</span><em>{handle}</em>
+				<span>ovyn.me/</span><em>{handle}</em>
 			</p>
 			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 4">
 				<Button href="/login">Continue with Discord or Google</Button>

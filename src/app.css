@@ -1243,9 +1243,25 @@ html[data-theme='light'] body {
 
 
 /* Landing playground: rotating headline, name field and magnetic CTA */
-.landing-line,
+.landing-line {
+	display: inline-grid;
+}
+
+/* Every phrase shares one grid cell, so the line never changes height and the
+   swap can cross-fade and lift without moving anything else. */
 .landing-line-text {
-	display: inline-block;
+	grid-area: 1 / 1;
+	opacity: 0;
+	transform: translateY(0.38em) scale(0.985);
+	transition: opacity 520ms ease, transform 640ms cubic-bezier(0.22, 0.9, 0.24, 1);
+	will-change: transform, opacity;
+	pointer-events: none;
+}
+
+.landing-line-text.is-active {
+	opacity: 1;
+	transform: translateY(0) scale(1);
+	pointer-events: auto;
 }
 
 .landing-magnetic {
@@ -1320,5 +1336,11 @@ html[data-theme='light'] body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	.landing-line-text { transition: none; }
 	.landing-magnetic { transform: none; transition: none; }
 }
+
+
+/* Onboarding runs edge to edge, without the site chrome */
+.app-frame[data-onboarding='true'] .page-content { padding: 0; }
+.app-frame[data-onboarding='true'] .page-container { max-width: none; }

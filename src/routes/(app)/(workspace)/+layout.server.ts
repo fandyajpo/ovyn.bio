@@ -9,6 +9,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		getProfileByUserId(locals.user.id),
 		getUserPlan(locals.user.id)
 	]);
+	// A fresh account answers the two onboarding questions before it lands here.
+	if (!profile.onboardedAt) redirect(302, '/onboarding');
 	return {
 		profileSlug: profile.slug,
 		currentPlan: plan,

@@ -43,7 +43,7 @@
 		const id = newId();
 		if (type === 'heading') return { id, type, text: 'A new section' };
 		if (type === 'text') {
-			return { id, type, markdown: 'Write something here. **Bold**, *italic*, `code` and [links](https://ovyn.bio) all work.' };
+			return { id, type, markdown: 'Write something here. **Bold**, *italic*, `code` and [links](https://ovyn.me) all work.' };
 		}
 		if (type === 'blog') {
 			return {

@@ -82,6 +82,12 @@ export const profiles = pgTable(
 		/** Ordered page blocks applied from a template; rendered on the public page. */
 		blocks: jsonb('blocks').$type<TemplateBlock[]>().notNull().default(sql`'[]'::jsonb`),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
+		/** Self-described persona picked during onboarding. */
+		persona: text('persona'),
+		/** Where the account first heard about ovyn. */
+		foundVia: text('found_via'),
+		/** Set once onboarding is finished; a null value means it still runs. */
+		onboardedAt: timestamp('onboarded_at', { withTimezone: true }),
 		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, { onDelete: 'set null' }),
 		equippedWallpaperId: uuid('equipped_wallpaper_id').references(() => cosmetics.id, { onDelete: 'set null' }),
 		equippedBadgeId: uuid('equipped_badge_id').references(() => cosmetics.id, { onDelete: 'set null' }),

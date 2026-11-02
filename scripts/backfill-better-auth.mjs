@@ -29,7 +29,7 @@ const COPY_USERS = sql`
 	SELECT
 		u.id,
 		COALESCE(u.name, 'ovyn'),
-		COALESCE(u.email, u.id || '@discord.ovyn.bio'),
+		COALESCE(u.email, u.id || '@discord.ovyn.me'),
 		COALESCE(u."emailVerified", true),
 		u.image,
 		'active',

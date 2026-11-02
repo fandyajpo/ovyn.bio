@@ -95,7 +95,7 @@
 		<Avatar name={displayName} src={data.avatarUrl} size="lg" />
 		<div class="min-w-0">
 			<p class="truncate font-medium text-neutral-100">{displayName}</p>
-			<p class="font-mono text-xs text-neutral-500">ovyn.bio/{data.profile.slug}</p>
+			<p class="font-mono text-xs text-neutral-500">ovyn.me/{data.profile.slug}</p>
 			{#if data.discord}
 				<p class="font-mono text-xs text-neutral-600">discord: {data.discord.username}</p>
 			{/if}
@@ -230,7 +230,7 @@
 					onVisibilityChange();
 				}}
 			/>
-			Anyone can visit ovyn.bio/{data.profile.slug}
+			Anyone can visit ovyn.me/{data.profile.slug}
 		</label>
 		{#if form?.error && !form?.values}
 			<p class="mt-2 text-sm text-red-400" role="alert">{form.error}</p>

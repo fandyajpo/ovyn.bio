@@ -1,6 +1,6 @@
 # ovyn
 
-**Your identity. Your circle.** - a digital identity and community platform at `ovyn.bio`.
+**Your identity. Your circle.** - a digital identity and community platform at `ovyn.me`.
 
 Personal profiles, guild discovery, and membership with one strict rule: **one guild per user**.
 
@@ -75,15 +75,15 @@ You must add:
 
 - `BETTER_AUTH_SECRET` - signing secret for sessions: `openssl rand -base64 32`
 - `BETTER_AUTH_URL` - the exact origin your app runs on: `http://localhost:5173`
-  locally, `https://ovyn.bio` in production (also set it in Vercel)
+  locally, `https://ovyn.me` in production (also set it in Vercel)
 - `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` - from the Discord Developer
   Portal. In your Discord app → OAuth2 → Redirects, add:
   - `http://localhost:5173/api/auth/callback/discord` (dev)
-  - `https://ovyn.bio/api/auth/callback/discord` (production)
+  - `https://ovyn.me/api/auth/callback/discord` (production)
 - `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - optional Google OAuth credentials
   from Google Cloud Console. Add these authorized redirect URIs:
   - `http://localhost:5173/api/auth/callback/google` (dev)
-  - `https://ovyn.bio/api/auth/callback/google` (production)
+  - `https://ovyn.me/api/auth/callback/google` (production)
 - `OVYN_ADMIN_DISCORD_IDS` - comma-separated Discord user IDs authorized for
   `/admin`. Find your ID with Discord Developer Mode → right-click your profile
   → Copy User ID. Set this only in local `.env` and Vercel server environment
@@ -182,6 +182,11 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 - **Plans** - Free is the default. Premium is Rp 30.000 for 30 days, renewed manually with no automatic charge. Access is derived server-side from successful payment records; an admin override may also grant or force a plan; legacy time-limited plans remain supported for existing orders.
 - **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Account and admin areas hide the public navbar and footer on every screen size and link back to the landing page. Platform admins get the `/admin` entry from their account overview, never from the public navigation. Admin and guild permissions remain enforced server-side.
 - **Profile links and templates** - public links are scheme-validated before display. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
+- **Onboarding and page help** - a new account finishes a two-step, full-screen
+  onboarding (who you are, how you found ovyn) before the workspace opens; the
+  answers are stored on the profile and the welcome step animates into the
+  account overview. Every signed-in page also carries a question mark button that
+  opens a modal explaining that page.
 - **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
 Whenever the schema changes, run `pnpm run db:generate`, review the generated migration, then run `pnpm run db:migrate`. After migrations, run `pnpm run db:seed-shop` once to add starter cosmetics and the Rp 30.000 monthly Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
@@ -207,7 +212,7 @@ managed here yet.
 
 - Create VA: `POST /virtual-accounts/bi-snap-va/v1.1/transfer-va/create-va`
 - Check status: `POST /orders/v1.0/transfer-va/status`
-- Webhook: register `https://ovyn.bio/api/webhooks/doku` in DOKU Dashboard →
+- Webhook: register `https://ovyn.me/api/webhooks/doku` in DOKU Dashboard →
   Settings → Payment Settings → Webhook
 
 ## Roadmap / not yet done

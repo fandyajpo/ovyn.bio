@@ -44,7 +44,7 @@
 				<Avatar name={data.profile.displayName || data.profile.slug} src={data.avatarUrl} size="lg" />
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-[family-name:var(--font-display)] text-xl font-semibold">{data.profile.displayName || data.profile.slug}</p>
-					<p class="font-mono text-sm text-lime-300">ovyn.bio/{data.profile.slug}</p>
+					<p class="font-mono text-sm text-lime-300">ovyn.me/{data.profile.slug}</p>
 					<p class="text-xs text-neutral-500">{data.profile.visibility === 'public' ? 'Public page' : 'Private page'} · member since {formatDate(data.profile.createdAt)}</p>
 				</div>
 			</div>
