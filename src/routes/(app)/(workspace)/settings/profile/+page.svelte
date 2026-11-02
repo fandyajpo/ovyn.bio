@@ -76,7 +76,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile settings — OVYN</title>
+	<title>Profile settings - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-8">
@@ -254,7 +254,7 @@
 					onVisibilityChange();
 				}}
 			/>
-			Public profile — anyone can visit ovyn.bio/{data.profile.slug}
+			Anyone can visit ovyn.bio/{data.profile.slug}
 		</label>
 		{#if form?.error && !form?.values}
 			<p class="mt-2 text-sm text-red-400" role="alert">{form.error}</p>

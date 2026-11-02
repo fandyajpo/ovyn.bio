@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-	<title>Shop — OVYN</title>
+	<title>Shop - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -30,7 +30,7 @@
 	{/if}
 
 	{#if data.items.length === 0}
-		<Card class="p-10 text-center text-neutral-500">Nothing in the shop yet — come back soon!</Card>
+		<Card class="p-10 text-center text-neutral-500">No items in the shop yet. Check back soon.</Card>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.items as item (item.id)}

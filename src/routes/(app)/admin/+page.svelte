@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>Admin dashboard — OVYN</title>
+	<title>Admin dashboard - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6 sm:gap-8">
@@ -28,7 +28,7 @@
 			<div class="min-w-0">
 				<span class="sticker sticker--pink">OVYN / CONTROL ROOM</span>
 				<h1 class="mt-4 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl">Monetization dashboard</h1>
-				<p class="mt-2 max-w-xl text-sm leading-6 text-neutral-400 sm:text-base">A clear view of your catalog, sales, and payments—all in one place.</p>
+				<p class="mt-2 max-w-xl text-sm leading-6 text-neutral-400 sm:text-base">A clear view of your catalog, sales, and payments in one place.</p>
 				<div class="mt-4 flex flex-wrap gap-2">
 					<span class="sticker sticker--dark">{data.overview.orders} total orders</span>
 					<span class="sticker sticker--blue">{data.overview.pendingPayments} pending payments</span>

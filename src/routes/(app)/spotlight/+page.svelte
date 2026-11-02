@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Shop — OVYN</title>
+	<title>Shop - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-xl flex-col items-start gap-5 py-16">

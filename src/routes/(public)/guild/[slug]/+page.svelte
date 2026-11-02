@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.guild.name} — OVYN guild</title>
+	<title>{data.guild.name} - OVYN guild</title>
 </svelte:head>
 
 {#if data.disbanded}

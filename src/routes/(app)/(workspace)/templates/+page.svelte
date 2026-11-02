@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile templates — OVYN</title>
+	<title>Profile templates - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

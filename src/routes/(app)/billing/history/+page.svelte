@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Payment history — OVYN</title>
+	<title>Payment history - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">

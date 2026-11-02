@@ -15,9 +15,9 @@
 </script>
 
 <svelte:head>
-	<title>{displayName} (@{p.slug}) — OVYN</title>
+	<title>{displayName} (@{p.slug}) - OVYN</title>
 	<meta name="description" content={p.bio || `${displayName}'s space on OVYN.`} />
-	<meta property="og:title" content={`${displayName} (@${p.slug}) — OVYN`} />
+	<meta property="og:title" content={`${displayName} (@${p.slug}) - OVYN`} />
 	<meta property="og:description" content={p.bio || `Find ${displayName} on OVYN.`} />
 	<meta property="og:type" content="profile" />
 </svelte:head>

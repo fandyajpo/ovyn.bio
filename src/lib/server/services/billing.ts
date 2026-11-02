@@ -177,7 +177,7 @@ export async function createCheckout(userId: string, productId: string, target?:
 	const expiredDate = dokuTimestamp(new Date(Date.now() + VA_TTL_MINUTES * 60_000));
 
 	// If DOKU rejects the VA creation, fail the order instead of leaving it
-	// pending — a stuck pending order would block future checkouts / drop stock.
+	// pending - a stuck pending order would block future checkouts / drop stock.
 	let va;
 	try {
 		va = await createVirtualAccount({

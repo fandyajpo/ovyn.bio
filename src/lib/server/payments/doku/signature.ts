@@ -9,7 +9,7 @@ import {
 } from '$app/env/private';
 
 /**
- * DOKU Direct API (SNAP) — implements exactly what the official docs specify:
+ * DOKU Direct API (SNAP) - implements exactly what the official docs specify:
  *
  * - B2B access token: POST /authorization/v1/access-token/b2b
  *     X-SIGNATURE = SHA256withRSA(privateKey, clientID + "|" + timestamp)
@@ -53,7 +53,7 @@ export function symmetricSignature(clientSecret: string, stringToSign: string): 
 	return createHmac('sha512', clientSecret).update(stringToSign, 'utf8').digest('base64');
 }
 
-/** SHA256withRSA over `clientID|timestamp` — used only for the B2B token request. */
+/** SHA256withRSA over `clientID|timestamp` - used only for the B2B token request. */
 export function asymmetricSignature(privateKey: string, clientId: string, timestamp: string): string {
 	return cryptoSign('sha256', Buffer.from(`${clientId}|${timestamp}`, 'utf8'), {
 		key: privateKey.replace(/\\n/g, '\n'),

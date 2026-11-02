@@ -2,11 +2,10 @@
 	import { page } from '$app/state';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
-	import ThemeToggle from './ThemeToggle.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { toast } from './ui/toasts.svelte.ts';
 
-	let { user, isAdmin, isLanding }: { user: { name: string; image: string | null } | null; isAdmin: boolean; isLanding: boolean } = $props();
+	let { user, isAdmin }: { user: { name: string; image: string | null } | null; isAdmin: boolean } = $props();
 
 	let accountMenuOpen = $state(false);
 	let mobileMenuOpen = $state(false);
@@ -16,24 +15,17 @@
 	let mobileMenuPanel = $state<HTMLElement | undefined>(undefined);
 
 	const links = $derived([
-		...(isLanding ? [
-			{ href: '#features', label: 'Features', icon: '✦', tone: 'blue' },
-			{ href: '#plans', label: 'Plans', icon: '＋', tone: 'lilac' }
-		] : []),
+		{ href: '/#features', label: 'Features', icon: '✦', tone: 'blue' },
 		{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' },
-		...(user
-			? [
-					{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
-					{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' },
-					{ href: '/account', label: 'My space', icon: '⌂', tone: 'lime' }
-				]
-			: []),
+		{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
+		{ href: '/#plans', label: 'Plans', icon: '＋', tone: 'lilac' },
+		...(user ? [{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' }, { href: '/account', label: 'My space', icon: '⌂', tone: 'lime' }] : []),
 		...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: '⚙', tone: 'pink' }] : []),
-		...(isLanding ? [{ href: '#faq', label: 'FAQ', icon: '?', tone: 'lilac' }] : [])
+		{ href: '/#faq', label: 'FAQ', icon: '?', tone: 'lilac' }
 	]);
 
 	function isActive(href: string) {
-		if (href.startsWith('#')) return isLanding && page.url.hash === href;
+		if (href.startsWith('/#')) return page.url.pathname === '/' && page.url.hash === href.slice(1);
 		return page.url.pathname === href || page.url.pathname.startsWith(`${href}/`);
 	}
 
@@ -98,12 +90,10 @@
 			<span class="menu-glyph" aria-hidden="true"><span></span></span>
 		</button>
 
-		<ThemeToggle />
-
 		{#if user}
 			<div class="relative">
-				<button type="button" bind:this={accountButton} onclick={toggleAccountMenu} class="account-trigger flex min-h-11 items-center gap-2 rounded-full p-1 transition-colors" aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'} aria-expanded={accountMenuOpen} aria-controls="account-menu">
-					<Avatar name={user.name} src={user.image} size="sm" />
+				<button type="button" bind:this={accountButton} onclick={toggleAccountMenu} class="account-trigger flex min-h-12 min-w-14 items-center justify-center gap-2.5 rounded-full px-2.5 transition-colors" aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'} aria-expanded={accountMenuOpen} aria-controls="account-menu">
+					<Avatar name={user.name} src={user.image} size="md" />
 					<span class="hidden text-sm text-neutral-300 xl:inline">Account</span>
 				</button>
 

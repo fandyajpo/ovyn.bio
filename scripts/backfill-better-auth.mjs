@@ -4,7 +4,7 @@
  * PRESERVING the same user ids, so existing profiles, guild memberships,
  * and orders keep working without remapping.
  *
- * Idempotent — safe to run more than once (ON CONFLICT DO NOTHING).
+ * Idempotent and safe to run more than once (ON CONFLICT DO NOTHING).
  *
  * Usage:  npm run db:backfill
  *

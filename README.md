@@ -1,6 +1,6 @@
 # OVYN
 
-**Your identity. Your circle.** — a digital identity and community platform at `ovyn.bio`.
+**Your identity. Your circle.** - a digital identity and community platform at `ovyn.bio`.
 
 Personal profiles, guild discovery, and membership with one strict rule: **one guild per user**.
 
@@ -13,14 +13,14 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Hosting | Vercel (`@sveltejs/adapter-vercel`, Node runtime) |
 | Database | Neon PostgreSQL (pooled connection for app, direct for migrations) |
 | ORM | Drizzle ORM |
-| Auth | Standalone Better Auth — Discord OAuth only (configured in this app) |
+| Auth | Standalone Better Auth - Discord and optional Google OAuth |
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Client data | TanStack Query (checkout status polling) |
 | Validation | Zod 4 |
 
 Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
-`sveltekit()` plugin options — there is no `svelte.config.js`), imports use the
+`sveltekit()` plugin options - there is no `svelte.config.js`), imports use the
 `#lib/*` subpath alias declared in `package.json`, and `$app/env/*` replaces the
 old `$env/*` modules. Server-only modules read `process.env` directly, which
 works unchanged on Vercel Functions.
@@ -39,30 +39,30 @@ npm run dev
 
 Already provisioned for you (see `.env.example`):
 
-- `DATABASE_URL`, `DATABASE_URL_POOLED` — Neon PostgreSQL
-- `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET` — Neon Object Storage
-- `DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, `DOKU_API_KEY` — DOKU
+- `DATABASE_URL`, `DATABASE_URL_POOLED` - Neon PostgreSQL
+- `AWS_ENDPOINT_URL_S3`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET` - Neon Object Storage
+- `DOKU_CLIENT_ID`, `DOKU_SECRET_KEY`, `DOKU_API_KEY` - DOKU
 
 You must add:
 
-- `BETTER_AUTH_SECRET` — signing secret for sessions: `openssl rand -base64 32`
-- `BETTER_AUTH_URL` — the exact origin your app runs on: `http://localhost:5173`
+- `BETTER_AUTH_SECRET` - signing secret for sessions: `openssl rand -base64 32`
+- `BETTER_AUTH_URL` - the exact origin your app runs on: `http://localhost:5173`
   locally, `https://ovyn.bio` in production (also set it in Vercel)
-- `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` — from the Discord Developer
+- `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` - from the Discord Developer
   Portal. In your Discord app → OAuth2 → Redirects, add:
   - `http://localhost:5173/api/auth/callback/discord` (dev)
   - `https://ovyn.bio/api/auth/callback/discord` (production)
-- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — optional Google OAuth credentials
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` - optional Google OAuth credentials
   from Google Cloud Console. Add these authorized redirect URIs:
   - `http://localhost:5173/api/auth/callback/google` (dev)
   - `https://ovyn.bio/api/auth/callback/google` (production)
-- `OVYN_ADMIN_DISCORD_IDS` — comma-separated Discord user IDs authorized for
+- `OVYN_ADMIN_DISCORD_IDS` - comma-separated Discord user IDs authorized for
   `/admin`. Find your ID with Discord Developer Mode → right-click your profile
   → Copy User ID. Set this only in local `.env` and Vercel server environment
   variables; the server checks it against the authenticated Discord account.
-- `DOKU_PRIVATE_KEY` — the RSA private key DOKU gives you for SNAP B2B token
+- `DOKU_PRIVATE_KEY` - the RSA private key DOKU gives you for SNAP B2B token
   requests (`X-SIGNATURE = SHA256withRSA(privateKey, clientID + "|" + timestamp)`)
-- `DOKU_PARTNER_SERVICE_ID` — your 8-digit virtual account company code (BIN)
+- `DOKU_PARTNER_SERVICE_ID` - your 8-digit virtual account company code (BIN)
 - `DOKU_ENV=production` (optional; sandbox is the default), `DOKU_BASE_URL` (optional override)
 
 ## PWA, typography and profile media
@@ -88,7 +88,7 @@ Account settings let each device manage browser notification permission and even
   avatar are OVYN-owned and remain editable. An uploaded avatar overrides the
   sign-in provider's picture until the user resets it.
 - **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
-  one-time data backfill with `npm run db:backfill` — it copies users and
+  one-time data backfill with `npm run db:backfill` - it copies users and
   Discord accounts from the managed `neon_auth` schema into the standalone
   tables with the SAME user ids, so profiles, guild memberships, and orders
   keep working. It's idempotent (safe to re-run). Do not disable Neon Managed
@@ -104,7 +104,7 @@ Account settings let each device manage browser notification permission and even
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
   a key is attached to a profile.
-- **Shop & cosmetics** — cosmetic items (avatar frames, wallpapers, badges)
+- **Shop & cosmetics** - cosmetic items (avatar frames, wallpapers, badges)
   are products: buying one through the normal DOKU checkout grants it
   automatically via the payment webhook (fulfilment is idempotent). Users
   equip/unequip owned cosmetics in profile settings; public profiles render
@@ -114,15 +114,15 @@ Account settings let each device manage browser notification permission and even
   sample profile. Use `/admin/catalog` to manage listings and upload replacement
   artwork to Neon Object Storage.
 
-- **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
-- **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
-- **Profile analytics** — counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
-- **Plans** — Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
-- **Workspace** — signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Admin and guild permissions remain enforced server-side.
-- **Profile links and templates** — public links are scheme-validated before display. Templates contain preset themes only, are private by default, and enter the community gallery only when their owner shares them.
-- **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
+- **Limited drops** - cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
+- **Daily check-ins & rewards** - one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
+- **Profile analytics** - counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
+- **Plans** - Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
+- **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Admin and guild permissions remain enforced server-side.
+- **Profile links and templates** - public links are scheme-validated before display. Templates contain preset themes only, are private by default, and enter the community gallery only when their owner shares them.
+- **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
-Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter products. Re-running it resets their sample prices, settings, and bundled art keys, so make catalog changes in the admin panel after seeding.
+Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter cosmetics and the Rp 100.000 lifetime Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
 
 ## Monetization administration
 
@@ -144,5 +144,5 @@ history and ownership remain intact. DOKU refunds are not managed here yet.
 ## Roadmap / not yet done
 
 - Payment cancellation calls (DOKU delete VA) and refund flows
-- `npm run check` / `npm run build` must be run locally — no CI configured yet
+- `npm run check` / `npm run build` must be run locally - no CI configured yet
 - Review starter cosmetic prices and reward values before production

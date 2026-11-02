@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<title>Account settings — OVYN</title>
+	<title>Account settings - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">
@@ -47,7 +47,7 @@
 			{/if}
 		</p>
 		<Button variant="danger" onclick={() => (confirmDelete ? confirmDelete = false : confirmDelete = true)} class="mt-4">
-			{confirmDelete ? 'Hold on — really delete?' : 'Delete account'}
+			{confirmDelete ? 'Hold on - really delete?' : 'Delete account'}
 		</Button>
 		{#if confirmDelete}
 			<p class="mt-2 text-xs text-neutral-500">

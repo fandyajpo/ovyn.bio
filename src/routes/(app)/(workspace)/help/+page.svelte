@@ -11,7 +11,7 @@
 		},
 		{
 			title: 'Customize your page',
-				body: 'Choose colors and a background, add optional audio, and unlock custom cursor effects and profile layouts with Premium.'
+				body: 'Choose colors and a background, add optional audio, and unlock custom cursor effects and profile layouts with Premium.',
 				link: '/customize',
 				label: 'Open customization'
 		},
@@ -31,7 +31,7 @@
 </script>
 
 <svelte:head>
-	<title>Help center — OVYN</title>
+	<title>Help center - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

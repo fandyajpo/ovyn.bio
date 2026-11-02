@@ -46,7 +46,7 @@
 <svelte:window bind:scrollY />
 
 <svelte:head>
-	<title>OVYN — Your space on the internet</title>
+	<title>OVYN - Your space on the internet</title>
 	<meta name="description" content="A personal corner of the internet to show your style, share your links and find your people." />
 </svelte:head>
 

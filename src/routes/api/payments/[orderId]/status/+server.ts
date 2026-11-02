@@ -5,7 +5,7 @@ import { rateLimit } from '#lib/server/utils/rate-limit';
 
 /**
  * Server-side payment status sync. The client polls this, but the status is
- * always reconciled with DOKU's Check Status API here — the frontend can
+ * always reconciled with DOKU's Check Status API here - the frontend can
  * never forge a payment state.
  */
 export const GET: RequestHandler = async ({ params, locals }) => {

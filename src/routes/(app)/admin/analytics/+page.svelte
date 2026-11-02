@@ -26,7 +26,7 @@
 </script>
 
 <svelte:head>
-	<title>Sales analytics — OVYN Admin</title>
+	<title>Sales analytics - OVYN Admin</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-6xl flex-col gap-6 sm:gap-8">

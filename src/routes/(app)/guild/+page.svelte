@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.guild ? data.guild.name : 'My guild'} — OVYN</title>
+	<title>{data.guild ? data.guild.name : 'My guild'} - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-6">

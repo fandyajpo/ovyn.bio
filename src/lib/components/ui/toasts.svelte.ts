@@ -2,7 +2,7 @@ import { browser } from '$app/env';
 
 export type Toast = { id: number; kind: 'success' | 'error' | 'info'; message: string };
 
-/** Module-level runes state — imported directly by <Toasts />. */
+/** Module-level runes state - imported directly by <Toasts />. */
 export const toasts = $state<Toast[]>([]);
 
 let nextId = 1;

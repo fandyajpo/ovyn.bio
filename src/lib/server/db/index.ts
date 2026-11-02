@@ -5,7 +5,7 @@ import * as schema from '#lib/server/db/schema';
 
 /**
  * Application queries use Neon's pooled connection string.
- * Migrations (drizzle-kit) use DATABASE_URL directly — see drizzle.config.ts.
+ * Migrations (drizzle-kit) use DATABASE_URL directly - see drizzle.config.ts.
  */
 const connectionString = DATABASE_URL_POOLED || DATABASE_URL;
 

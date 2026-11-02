@@ -33,7 +33,7 @@ export const actions: Actions = {
 			redirect(302, `/guild/${guild.slug}/manage`);
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
-			// redirect() throws its own control-flow error — rethrow it.
+			// redirect() throws its own control-flow error - rethrow it.
 			throw err;
 		}
 	}

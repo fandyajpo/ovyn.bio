@@ -21,7 +21,7 @@ import { presignDownload } from '#lib/server/storage';
 import { BETTER_AUTH_URL } from '$app/env/private';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	// Layout and page server loads run in parallel — guard here too.
+	// Layout and page server loads run in parallel - guard here too.
 	if (!locals.user) redirect(302, '/login');
 	const user = locals.user;
 

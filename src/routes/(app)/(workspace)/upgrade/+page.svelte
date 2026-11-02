@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Plans — OVYN</title>
+	<title>Plans - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-5xl flex-col gap-8 py-3">
@@ -36,7 +36,7 @@
 			<p class="mt-1 text-xl font-semibold">{data.plan.tier === 'premium' ? 'OVYN Premium' : 'OVYN Free'}</p>
 		</div>
 		{#if data.plan.tier === 'premium'}
-			<p class="text-sm text-neutral-400">{data.plan.isLifetime ? 'Lifetime access · one-time payment' : `Legacy access until ${data.plan.premiumUntil ? formatDate(data.plan.premiumUntil) : '—'}`}</p>
+			<p class="text-sm text-neutral-400">{data.plan.isLifetime ? 'Lifetime access · one-time payment' : `Legacy access until ${data.plan.premiumUntil ? formatDate(data.plan.premiumUntil) : 'Date unavailable'}`}</p>
 		{:else}
 			<p class="text-sm text-neutral-400">You can upgrade whenever you’re ready.</p>
 		{/if}

@@ -2,7 +2,7 @@ import { relations } from 'drizzle-orm';
 import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
- * Standalone Better Auth core tables. Better Auth manages these — do not add
+ * Standalone Better Auth core tables. Better Auth manages these - do not add
  * app-specific tables here; they belong in ./app.ts.
  * `status` is an additional field declared in the auth config.
  *

@@ -138,7 +138,7 @@ export async function getMembership(userId: string) {
 }
 
 // ---------------------------------------------------------------------------
-// Mutations (all transactional — one guild per user is enforced server-side)
+// Mutations (all transactional - one guild per user is enforced server-side)
 // ---------------------------------------------------------------------------
 
 export async function createGuild(userId: string, input: GuildInput) {

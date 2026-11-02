@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>My badges — OVYN</title>
+	<title>My badges - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

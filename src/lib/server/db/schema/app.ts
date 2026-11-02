@@ -240,7 +240,7 @@ export const products = pgTable('products', {
 });
 
 /**
- * Profile cosmetics — avatars frames, wallpapers, badges.
+ * Profile cosmetics - avatars frames, wallpapers, badges.
  * A cosmetic IS a product: it shares the product row's id 1:1, so the
  * existing checkout/webhook flow fulfils cosmetic purchases automatically.
  */

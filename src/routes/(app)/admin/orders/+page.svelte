@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Sales history — OVYN Admin</title>
+	<title>Sales history - OVYN Admin</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -31,7 +31,7 @@
 						<p class="mt-3 text-sm text-neutral-400">{order.customerSlug ? `@${order.customerSlug}` : 'Buyer unavailable'}</p>
 						<dl class="mt-4 grid grid-cols-2 gap-3 border-t border-neutral-800 pt-3 text-sm">
 							<div><dt class="text-xs text-neutral-500">Date</dt><dd class="mt-1 text-neutral-400">{formatDate(order.createdAt)}</dd></div>
-							<div><dt class="text-xs text-neutral-500">Payment method</dt><dd class="mt-1 text-neutral-400">{order.paymentMethod ?? '—'}</dd></div>
+							<div><dt class="text-xs text-neutral-500">Payment method</dt><dd class="mt-1 text-neutral-400">{order.paymentMethod ?? 'Not listed'}</dd></div>
 							<div><dt class="text-xs text-neutral-500">Order status</dt><dd class="mt-1 text-neutral-300">{order.orderStatus}</dd></div>
 							<div><dt class="text-xs text-neutral-500">Payment status</dt><dd class="mt-1 text-neutral-400">{order.paymentStatus ?? 'No payment'}</dd></div>
 						</dl>
@@ -46,9 +46,9 @@
 							<tr>
 								<td class="whitespace-nowrap px-4 py-3 text-neutral-500">{formatDate(order.createdAt)}</td>
 								<td class="min-w-48 px-4 py-3"><span class="block text-neutral-100">{order.productName}</span><span class="font-mono text-[10px] uppercase text-neutral-600">{order.productCategory}</span></td>
-								<td class="px-4 py-3 text-neutral-400">{order.customerSlug ? `@${order.customerSlug}` : '—'}</td>
+								<td class="px-4 py-3 text-neutral-400">{order.customerSlug ? `@${order.customerSlug}` : 'Buyer unavailable'}</td>
 								<td class="whitespace-nowrap px-4 py-3 font-mono text-neutral-200">{formatIdr(order.amount)}</td>
-								<td class="px-4 py-3 text-neutral-500">{order.paymentMethod ?? '—'}</td>
+								<td class="px-4 py-3 text-neutral-500">{order.paymentMethod ?? 'Not listed'}</td>
 								<td class="whitespace-nowrap px-4 py-3"><span class="text-neutral-300">{order.orderStatus}</span><span class="text-neutral-600"> / {order.paymentStatus ?? 'no payment'}</span></td>
 							</tr>
 						{/each}

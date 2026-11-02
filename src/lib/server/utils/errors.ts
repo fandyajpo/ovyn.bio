@@ -1,6 +1,6 @@
 /**
  * Application error with an HTTP status and a user-safe message.
- * Messages are safe to show to users — never include internals.
+ * Messages are safe to show to users - never include internals.
  */
 export class AppError extends Error {
 	constructor(

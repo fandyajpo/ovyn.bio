@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard — OVYN</title>
+	<title>Dashboard - OVYN</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
@@ -68,7 +68,7 @@
 			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Billing</p>
 			{#if data.pendingOrder}
 				<a href="/checkout/{data.pendingOrder.id}" class="mt-3 block font-medium text-amber-300 hover:underline">
-					Payment pending — {formatIdr(data.pendingOrder.amount)}
+					Pending payment: {formatIdr(data.pendingOrder.amount)}
 				</a>
 			{:else}
 				<p class="mt-3 text-sm text-neutral-400">No pending payments.</p>

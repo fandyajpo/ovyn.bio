@@ -4,7 +4,7 @@ import { dokuEnv, generateExternalId, signedHeaders } from './signature';
 import { DOKU_BASE_URL, DOKU_ENV, DOKU_PARTNER_SERVICE_ID } from '$app/env/private';
 
 /**
- * DOKU Direct API — SNAP endpoints implemented per official docs:
+ * DOKU Direct API - SNAP endpoints implemented per official docs:
  * - Create VA:  POST /virtual-accounts/bi-snap-va/v1.1/transfer-va/create-va
  *   https://developers.doku.com/accept-payments/direct-api/snap/integration-guide/virtual-account
  * - Check status: POST /orders/v1.0/transfer-va/status
@@ -33,7 +33,7 @@ export const SNAP_CHANNELS = [
 export type SnapChannel = (typeof SNAP_CHANNELS)[number];
 
 export type CreateVaInput = {
-	/** Merchant order id (trxId) — our orders.id. */
+	/** Merchant order id (trxId) - our orders.id. */
 	trxId: string;
 	/** Amount in minor units (IDR rupiah). */
 	amountMinor: number;

@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-	<title>Sign in — OVYN</title>
+	<title>Sign in - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex min-h-[65svh] max-w-md flex-col items-center justify-center gap-6 py-16 text-center">

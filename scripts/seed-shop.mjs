@@ -1,7 +1,7 @@
 /**
- * Seeds the shop with starter cosmetics and spotlight products.
+ * Seeds the shop with starter cosmetics and the lifetime Premium plan.
  *
- * Idempotent — re-running updates starter values and restores bundled SVG art.
+ * Idempotent - re-running updates starter values and restores bundled SVG art.
  * Cosmetic artwork is served from `static/cosmetics` until an admin replaces
  * it with an upload to Neon Object Storage.
  *
@@ -126,29 +126,17 @@ try {
 		});
 	}
 
-	// Starter spotlight products. These prices/terms are sample defaults;
-	// edit the rows in products before launch to set your business pricing.
-	const spotlightProducts = [
-		{ name: 'Profile Spotlight — 1 day', category: 'profile_spotlight', price: 10000, days: 1 },
-		{ name: 'Profile Spotlight — 7 days', category: 'profile_spotlight', price: 50000, days: 7 },
-		{ name: 'Guild Spotlight — 1 day', category: 'guild_spotlight', price: 20000, days: 1 },
-		{ name: 'Guild Spotlight — 7 days', category: 'guild_spotlight', price: 90000, days: 7 }
-	];
-
-	for (const item of spotlightProducts) {
-		await sql`
-			INSERT INTO products (name, description, price, currency, active, category, duration_days)
-			VALUES (${item.name}, 'Featured placement in OVYN discovery.', ${item.price}, 'IDR', true, ${item.category}, ${item.days})
-			ON CONFLICT (name) DO UPDATE
-			SET description = EXCLUDED.description, price = EXCLUDED.price,
-				active = true, category = EXCLUDED.category, duration_days = EXCLUDED.duration_days
-		`;
-	}
+	await sql`
+		INSERT INTO products (name, description, price, currency, active, category, duration_days)
+		VALUES ('OVYN Premium Lifetime', 'One-time payment for lifetime profile customization.', 100000, 'IDR', true, 'plan', NULL)
+		ON CONFLICT (name) DO UPDATE
+		SET description = EXCLUDED.description, price = 100000,
+			active = true, category = 'plan', duration_days = NULL
+	`;
 
 	const [{ count }] = await sql`SELECT count(*)::int AS count FROM cosmetics`;
-	console.log(`Seed complete: ${count} cosmetics and ${spotlightProducts.length} spotlight plans in the catalog.`);
+	console.log(`Seed complete: ${count} cosmetics and the Premium lifetime plan.`);
 	console.log('Starter SVG artwork is bundled under static/cosmetics; replace it later from /admin/catalog if desired.');
-	console.log('Spotlight prices are sample defaults; change products.price before launch if needed.');
 } catch (err) {
 	console.error('Seed failed:', err instanceof Error ? err.message : err);
 	process.exitCode = 1;

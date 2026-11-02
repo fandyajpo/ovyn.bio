@@ -45,7 +45,7 @@
 </script>
 
 <svelte:head>
-	<title>Catalog manager — OVYN Admin</title>
+	<title>Catalog manager - OVYN Admin</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-5xl flex-col gap-7">

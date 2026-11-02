@@ -10,13 +10,13 @@
 </script>
 
 <svelte:head>
-	<title>Create a guild — OVYN</title>
+	<title>Create a guild - OVYN</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-xl flex-col gap-6">
 	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Create a guild</h1>
 	<p class="text-neutral-400">
-		One guild per person — creating this guild becomes your only membership. You'll be its owner.
+		You can belong to one guild at a time. Creating this guild makes you its owner.
 	</p>
 
 	<form method="POST" action="/guild/create" class="flex flex-col gap-5">
@@ -27,11 +27,11 @@
 			<legend class="mb-1.5 text-sm font-medium text-neutral-300">Visibility</legend>
 			<label class="flex items-center gap-2 text-sm text-neutral-300">
 				<input type="radio" name="visibility" value="public" bind:group={visibility} />
-				Public — anyone can discover and join
+				Public: anyone can discover and join
 			</label>
 			<label class="flex items-center gap-2 text-sm text-neutral-300">
 				<input type="radio" name="visibility" value="private" bind:group={visibility} />
-				Private — invitation only
+				Private: invitation only
 			</label>
 		</fieldset>
 

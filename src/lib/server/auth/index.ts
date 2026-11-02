@@ -29,7 +29,7 @@ const socialProviders = {
 				discord: {
 					clientId: discordClientId,
 					clientSecret: discordClientSecret,
-					// Identity only — we never require the user's email.
+					// Identity only - we never require the user's email.
 					scope: ['identify']
 				}
 			}
@@ -44,7 +44,7 @@ if (Object.keys(socialProviders).length === 0) {
 }
 
 export const auth = betterAuth({
-	// SvelteKit 3 doesn't populate process.env from .env — pass explicitly.
+	// SvelteKit 3 doesn't populate process.env from .env - pass explicitly.
 	secret: BETTER_AUTH_SECRET,
 	baseURL: BETTER_AUTH_URL,
 	database: drizzleAdapter(db, { provider: 'pg', schema }),

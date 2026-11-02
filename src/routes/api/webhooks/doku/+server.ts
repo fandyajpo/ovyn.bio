@@ -13,7 +13,7 @@ import { AppError } from '#lib/server/utils/errors';
  *   used to mark an order paid.
  */
 export const POST: RequestHandler = async ({ request, url }) => {
-	// Raw body must be used for the signature — not a re-serialization.
+	// Raw body must be used for the signature - not a re-serialization.
 	const rawBody = await request.text();
 
 	try {
