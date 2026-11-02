@@ -1,10 +1,9 @@
 /**
- * Seeds the shop with starter cosmetics. For each item it creates a product
- * row (the price you sell at) and a matching cosmetics row (kind + art).
+ * Seeds the shop with starter cosmetics and spotlight products.
  *
- * Idempotent — re-running updates prices/descriptions instead of duplicating.
- * Cosmetic `asset_key` starts as your chosen S3 key; upload the art to Neon
- * Object Storage at that key (or wire an admin upload page later).
+ * Idempotent — re-running updates starter values and restores bundled SVG art.
+ * Cosmetic artwork is served from `static/cosmetics` until an admin replaces
+ * it with an upload to Neon Object Storage.
  *
  * Usage: npm run db:seed-shop
  */
@@ -25,6 +24,7 @@ const SEED = [
 	{
 		name: 'Lime Glow',
 		kind: 'frame',
+		assetKey: 'static/cosmetics/frames/lime-glow.svg',
 		price: 5000,
 		pointsPrice: 250,
 		description: 'A subtle electric lime ring for your avatar.',
@@ -33,6 +33,7 @@ const SEED = [
 	{
 		name: 'Neon Ring',
 		kind: 'frame',
+		assetKey: 'static/cosmetics/frames/neon-ring.svg',
 		price: 10000,
 		pointsPrice: 400,
 		description: 'Cyan neon frame. Maximum internet energy.',
@@ -41,6 +42,7 @@ const SEED = [
 	{
 		name: 'Sunset Frame',
 		kind: 'frame',
+		assetKey: 'static/cosmetics/frames/sunset-frame.svg',
 		price: 10000,
 		pointsPrice: 400,
 		description: 'Warm gradient frame.',
@@ -49,6 +51,7 @@ const SEED = [
 	{
 		name: 'Lime Fade Wallpaper',
 		kind: 'wallpaper',
+		assetKey: 'static/cosmetics/wallpapers/lime-fade-wallpaper.svg',
 		price: 8000,
 		pointsPrice: 350,
 		description: 'Subtle lime wash for your profile header.',
@@ -57,6 +60,7 @@ const SEED = [
 	{
 		name: 'Midnight Grid',
 		kind: 'wallpaper',
+		assetKey: 'static/cosmetics/wallpapers/midnight-grid.svg',
 		price: 12000,
 		pointsPrice: 500,
 		description: 'Dark grid pattern wallpaper.',
@@ -65,6 +69,7 @@ const SEED = [
 	{
 		name: 'OG Member',
 		kind: 'badge',
+		assetKey: 'static/cosmetics/badges/og-member.svg',
 		price: 0,
 		pointsPrice: 0,
 		description: 'For the early ones. Free forever.',
@@ -73,6 +78,7 @@ const SEED = [
 	{
 		name: 'Verified Vibes',
 		kind: 'badge',
+		assetKey: 'static/cosmetics/badges/verified-vibes.svg',
 		price: 15000,
 		pointsPrice: 500,
 		description: 'A little checkmark with personality.',
@@ -81,6 +87,7 @@ const SEED = [
 	{
 		name: 'Limited Neon Eclipse',
 		kind: 'frame',
+		assetKey: 'static/cosmetics/frames/limited-neon-eclipse.svg',
 		price: 25000,
 		pointsPrice: 900,
 		stockLimit: 100,
@@ -106,11 +113,11 @@ try {
 				INSERT INTO cosmetics (id, kind, asset_key, accent_color, points_price, stock_limit, drop_ends_at)
 				VALUES (
 					${product.id}, ${item.kind},
-					${`cosmetics/${item.kind}s/${item.name.toLowerCase().replace(/\s+/g, '-')}.png`},
+					${item.assetKey},
 					${item.accent}, ${item.pointsPrice ?? null}, ${item.stockLimit ?? null}, ${dropEndsAt}
 				)
 				ON CONFLICT (id) DO UPDATE
-				SET kind = ${item.kind}, accent_color = ${item.accent},
+				SET kind = ${item.kind}, asset_key = EXCLUDED.asset_key, accent_color = ${item.accent},
 					points_price = EXCLUDED.points_price,
 					stock_limit = EXCLUDED.stock_limit,
 					drop_ends_at = COALESCE(cosmetics.drop_ends_at, EXCLUDED.drop_ends_at),
@@ -140,7 +147,7 @@ try {
 
 	const [{ count }] = await sql`SELECT count(*)::int AS count FROM cosmetics`;
 	console.log(`Seed complete: ${count} cosmetics and ${spotlightProducts.length} spotlight plans in the catalog.`);
-	console.log("Each cosmetic's asset_key points at cosmetics/<kind>/<slug>.png in your Neon Object Storage bucket — upload the art there.");
+	console.log('Starter SVG artwork is bundled under static/cosmetics; replace it later from /admin/catalog if desired.');
 	console.log('Spotlight prices are sample defaults; change products.price before launch if needed.');
 } catch (err) {
 	console.error('Seed failed:', err instanceof Error ? err.message : err);

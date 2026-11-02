@@ -90,7 +90,9 @@ export async function listAdminOrders(limit = 50) {
 
 function requireCosmeticFields(input: AdminCreateProduct | AdminUpdateProduct) {
 	if (!input.kind) throw new ValidationError('Choose a cosmetic type');
-	if (!input.assetKey?.startsWith('cosmetics/')) throw new ValidationError('Upload an image for this cosmetic');
+	if (!input.assetKey?.startsWith('cosmetics/') && !input.assetKey?.startsWith('static/cosmetics/')) {
+		throw new ValidationError('Upload an image for this cosmetic');
+	}
 }
 
 export async function createCatalogProduct(input: AdminCreateProduct): Promise<void> {

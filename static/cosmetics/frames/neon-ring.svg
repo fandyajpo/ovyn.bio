@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Neon Ring avatar frame</title>
+  <defs>
+    <filter id="cyanGlow" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="9" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <linearGradient id="cyan" x1="76" y1="88" x2="430" y2="426" gradientUnits="userSpaceOnUse"><stop stop-color="#B4F5FF"/><stop offset=".48" stop-color="#35D6FF"/><stop offset="1" stop-color="#2776F5"/></linearGradient>
+  </defs>
+  <circle cx="256" cy="256" r="219" fill="none" stroke="#35D6FF" stroke-opacity=".32" stroke-width="34" filter="url(#cyanGlow)"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="#111210" stroke-width="23"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="url(#cyan)" stroke-width="11"/>
+  <circle cx="256" cy="256" r="198" fill="none" stroke="#35D6FF" stroke-width="3" stroke-dasharray="8 18"/>
+  <path d="M256 22v35m0 398v35M22 256h35m398 0h35" stroke="#F1F0E9" stroke-width="6" stroke-linecap="round"/>
+  <path d="m256 8 12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z" fill="#83E6FF" stroke="#111210" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="413" cy="101" r="11" fill="#FF78A8" stroke="#111210" stroke-width="6"/>
+  <circle cx="94" cy="405" r="9" fill="#D5FF35" stroke="#111210" stroke-width="6"/>
+  <path d="m430 330 7 14 15 2-11 10 3 15-14-7-13 7 2-15-11-10 15-2 7-14Z" fill="#35D6FF" stroke="#111210" stroke-width="5" stroke-linejoin="round"/>
+</svg>

@@ -217,7 +217,7 @@ export const cosmetics = pgTable(
 			.primaryKey()
 			.references(() => products.id, { onDelete: 'cascade' }),
 		kind: cosmeticKindEnum('kind').notNull(),
-		/** Object storage key of the overlay/background/badge image. */
+		/** Bundled static asset path or Neon Object Storage key for the cosmetic image. */
 		assetKey: text('asset_key').notNull(),
 		/** Optional accent color used for preview/glow effects. */
 		accentColor: text('accent_color'),

@@ -20,6 +20,11 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 export type CosmeticKind = 'frame' | 'wallpaper' | 'badge';
 
+async function cosmeticAssetUrl(key: string): Promise<string> {
+	if (key.startsWith('static/cosmetics/')) return `/${key.slice('static/'.length)}`;
+	return presignDownload(key);
+}
+
 async function inventory(cosmeticId: string) {
 	const [owned] = await db
 		.select({ total: count() })
@@ -87,7 +92,7 @@ export async function listShop(userId: string | null) {
 			points,
 			remainingStock: item.stockLimit === null ? null : Math.max(0, item.stockLimit - reserved),
 			dropOpen: !item.dropEndsAt || item.dropEndsAt.getTime() > Date.now(),
-			assetUrl: item.assetKey ? await presignDownload(item.assetKey) : null
+			assetUrl: item.assetKey ? await cosmeticAssetUrl(item.assetKey) : null
 		};
 	}));
 }
@@ -225,7 +230,7 @@ export async function redeemCosmeticWithPoints(userId: string, cosmeticId: strin
 	});
 }
 
-/** Equipped cosmetics for a profile (by slug), with presigned asset URLs. */
+/** Equipped cosmetics for a profile (by slug), with resolved asset URLs. */
 export async function getEquippedForProfile(slug: string) {
 	const [row] = await db
 		.select({
@@ -242,9 +247,9 @@ export async function getEquippedForProfile(slug: string) {
 
 	if (!row) return { frameUrl: null, wallpaperUrl: null, badgeUrl: null };
 	const [frameUrl, wallpaperUrl, badgeUrl] = await Promise.all([
-		row.frameKey ? presignDownload(row.frameKey) : null,
-		row.wallpaperKey ? presignDownload(row.wallpaperKey) : null,
-		row.badgeKey ? presignDownload(row.badgeKey) : null
+		row.frameKey ? cosmeticAssetUrl(row.frameKey) : null,
+		row.wallpaperKey ? cosmeticAssetUrl(row.wallpaperKey) : null,
+		row.badgeKey ? cosmeticAssetUrl(row.badgeKey) : null
 	]);
 	return { frameUrl, wallpaperUrl, badgeUrl };
 }

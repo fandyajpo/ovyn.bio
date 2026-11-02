@@ -67,7 +67,7 @@ export const adminCreateProductSchema = z
 			if (!product.kind) {
 				context.addIssue({ code: 'custom', path: ['kind'], message: 'Choose a cosmetic type' });
 			}
-			if (!product.assetKey?.startsWith('cosmetics/')) {
+			if (!product.assetKey?.startsWith('cosmetics/') && !product.assetKey?.startsWith('static/cosmetics/')) {
 				context.addIssue({ code: 'custom', path: ['assetKey'], message: 'Upload an image for this cosmetic' });
 			}
 			if (product.price === 0 && product.pointsPrice === null) {

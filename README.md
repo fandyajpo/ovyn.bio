@@ -93,8 +93,9 @@ You must add:
   automatically via the payment webhook (fulfilment is idempotent). Users
   equip/unequip owned cosmetics in profile settings; public profiles render
   frames around the avatar, wallpapers behind the header, and badges next to
-  the name. Seed the starter catalog once with `npm run db:seed-shop`; then use
-  `/admin/catalog` to manage listings and upload their artwork.
+  the name. Seed the starter catalog once with `npm run db:seed-shop`; its SVG
+  artwork is bundled in `static/cosmetics/`. Use `/admin/catalog` to manage
+  listings and upload replacement artwork to Neon Object Storage.
 
 - **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
@@ -102,7 +103,7 @@ You must add:
 - **Featured placement** — `profile_spotlight` and `guild_spotlight` products purchase time-limited placement. A user can feature only their own public profile; only active guild owners can feature their guild. The seed script uses sample prices; review them before enabling payments.
 - **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
-Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter products. Re-running it resets their sample prices and settings, so make catalog changes in the admin panel after seeding.
+Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter products. Re-running it resets their sample prices, settings, and bundled art keys, so make catalog changes in the admin panel after seeding.
 
 ## Monetization administration
 

@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Limited Neon Eclipse avatar frame</title>
+  <defs>
+    <linearGradient id="eclipse" x1="58" y1="78" x2="452" y2="445" gradientUnits="userSpaceOnUse"><stop stop-color="#F4B6FF"/><stop offset=".5" stop-color="#A875FF"/><stop offset="1" stop-color="#6C4BDB"/></linearGradient>
+    <filter id="violetGlow" x="-35%" y="-35%" width="170%" height="170%"><feGaussianBlur stdDeviation="10" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <circle cx="256" cy="256" r="219" fill="none" stroke="#A875FF" stroke-opacity=".38" stroke-width="36" filter="url(#violetGlow)"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="#111210" stroke-width="25"/>
+  <circle cx="256" cy="256" r="218" fill="none" stroke="url(#eclipse)" stroke-width="12"/>
+  <circle cx="256" cy="256" r="198" fill="none" stroke="#F4B6FF" stroke-width="3" stroke-dasharray="2 15"/>
+  <circle cx="256" cy="34" r="22" fill="#D5FF35" stroke="#111210" stroke-width="8"/>
+  <circle cx="267" cy="28" r="20" fill="#A875FF"/>
+  <path d="m406 111 8 18 20 3-15 13 4 20-17-10-18 10 4-20-15-13 20-3 9-18Z" fill="#83E6FF" stroke="#111210" stroke-width="6" stroke-linejoin="round"/>
+  <path d="m95 355 7 15 17 3-12 12 3 17-15-8-15 8 3-17-12-12 17-3 7-15Z" fill="#FF78A8" stroke="#111210" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="438" cy="286" r="8" fill="#D5FF35"/><circle cx="74" cy="218" r="7" fill="#F4B6FF"/>
+</svg>

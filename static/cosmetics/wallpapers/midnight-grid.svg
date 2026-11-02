@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500" fill="none">
+  <title>Midnight Grid profile wallpaper</title>
+  <defs>
+    <linearGradient id="bg" x1="73" y1="40" x2="1100" y2="470" gradientUnits="userSpaceOnUse"><stop stop-color="#181522"/><stop offset=".55" stop-color="#111210"/><stop offset="1" stop-color="#171820"/></linearGradient>
+    <radialGradient id="pink" cx="0" cy="0" r="1" gradientTransform="matrix(319 0 0 204 211 141)" gradientUnits="userSpaceOnUse"><stop stop-color="#FF78A8" stop-opacity=".19"/><stop offset="1" stop-color="#FF78A8" stop-opacity="0"/></radialGradient>
+    <pattern id="grid" width="42" height="42" patternUnits="userSpaceOnUse"><path d="M42 0H0v42" stroke="#B9B2FF" stroke-opacity=".12"/></pattern>
+  </defs>
+  <path fill="url(#bg)" d="M0 0h1200v500H0z"/><path fill="url(#pink)" d="M0 0h1200v500H0z"/><path fill="url(#grid)" d="M0 0h1200v500H0z"/>
+  <path d="M728-44h278l-156 242H572L728-44Z" fill="#83E6FF" fill-opacity=".08" stroke="#83E6FF" stroke-opacity=".22" stroke-width="2"/>
+  <path d="M874 322h264L992 500H728l146-178Z" fill="#FF78A8" fill-opacity=".08" stroke="#FF78A8" stroke-opacity=".22" stroke-width="2"/>
+  <circle cx="260" cy="195" r="93" stroke="#D5FF35" stroke-opacity=".23" stroke-width="2"/>
+  <circle cx="260" cy="195" r="66" stroke="#D5FF35" stroke-opacity=".22" stroke-width="1.5" stroke-dasharray="3 10"/>
+  <path d="m260 65 12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24Z" fill="#D5FF35" stroke="#111210" stroke-width="7" stroke-linejoin="round"/>
+  <path d="m524 328 8 16 18 3-13 13 3 18-16-9-16 9 3-18-13-13 18-3 8-16Z" fill="#C4A5FF" stroke="#111210" stroke-width="6" stroke-linejoin="round"/>
+  <circle cx="1060" cy="106" r="7" fill="#D5FF35"/><circle cx="1092" cy="133" r="4" fill="#FF78A8"/><circle cx="89" cy="390" r="6" fill="#83E6FF"/>
+</svg>

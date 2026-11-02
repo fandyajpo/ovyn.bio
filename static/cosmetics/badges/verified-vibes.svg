@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <title>Verified Vibes badge</title>
+  <path d="m128 10 23 17 29-4 11 27 27 12-3 30 20 22-15 27 5 29-27 12-14 27-29-5-27 18-23-18-29 5-11-27-27-12 3-30-20-22 15-27-5-29 27-12 14-27 29 5 27-18Z" fill="#83E6FF" stroke="#111210" stroke-width="9" stroke-linejoin="round"/>
+  <circle cx="128" cy="128" r="74" fill="#17191A" stroke="#F1F0E9" stroke-width="4"/>
+  <circle cx="128" cy="128" r="61" fill="none" stroke="#83E6FF" stroke-width="2" stroke-dasharray="3 7"/>
+  <path d="m91 130 24 24 51-55" stroke="#D5FF35" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="128" cy="39" r="8" fill="#FF78A8" stroke="#111210" stroke-width="4"/>
+  <circle cx="217" cy="128" r="7" fill="#FF78A8" stroke="#111210" stroke-width="4"/>
+</svg>
