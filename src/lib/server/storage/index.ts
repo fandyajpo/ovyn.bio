@@ -47,7 +47,8 @@ export type ImageMime = (typeof IMAGE_MIME_TYPES)[number];
 
 export const UPLOAD_LIMITS = {
 	banner: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
-	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
+	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
+	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
 } as const;
 
 export type UploadKind = keyof typeof UPLOAD_LIMITS;

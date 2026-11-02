@@ -1,0 +1,207 @@
+import { randomUUID } from 'node:crypto';
+import { count, desc, eq, sql } from 'drizzle-orm';
+import { OVYN_ADMIN_DISCORD_IDS } from '$app/env/private';
+import { db } from '#lib/server/db';
+import { cosmetics, discordAccounts, orders, payments, products, profiles } from '#lib/server/db/schema';
+import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
+import type { AdminCreateProduct, AdminUpdateProduct } from '#lib/schemas/admin';
+
+function configuredAdminDiscordIds(): Set<string> {
+	return new Set(
+		(OVYN_ADMIN_DISCORD_IDS ?? '')
+			.split(',')
+			.map((id) => id.trim())
+			.filter((id) => /^\d{17,20}$/.test(id))
+	);
+}
+
+/** Admin access is based on the server-verified Discord ID, never client data. */
+export async function isPlatformAdmin(userId: string | null): Promise<boolean> {
+	if (!userId) return false;
+	const allowedIds = configuredAdminDiscordIds();
+	if (allowedIds.size === 0) return false;
+
+	const [account] = await db
+		.select({ discordId: discordAccounts.discordId })
+		.from(discordAccounts)
+		.where(eq(discordAccounts.userId, userId))
+		.limit(1);
+
+	return Boolean(account && allowedIds.has(account.discordId));
+}
+
+export async function getAdminOverview() {
+	const [productRows, activeProductRows, orderRows, pendingPaymentRows, paidPaymentRows, revenueRows, recentOrders] = await Promise.all([
+		db.select({ total: count() }).from(products),
+		db.select({ total: count() }).from(products).where(eq(products.active, true)),
+		db.select({ total: count() }).from(orders),
+		db.select({ total: count() }).from(payments).where(eq(payments.status, 'pending')),
+		db.select({ total: count() }).from(payments).where(eq(payments.status, 'succeeded')),
+		db
+			.select({ total: sql<number>`coalesce(sum(${orders.amount}), 0)`.mapWith(Number) })
+			.from(orders)
+			.innerJoin(payments, eq(payments.orderId, orders.id))
+			.where(eq(payments.status, 'succeeded')),
+		listAdminOrders(8)
+	]);
+
+	return {
+		products: Number(productRows[0]?.total ?? 0),
+		activeProducts: Number(activeProductRows[0]?.total ?? 0),
+		orders: Number(orderRows[0]?.total ?? 0),
+		pendingPayments: Number(pendingPaymentRows[0]?.total ?? 0),
+		paidOrders: Number(paidPaymentRows[0]?.total ?? 0),
+		paidRevenue: Number(revenueRows[0]?.total ?? 0),
+		recentOrders
+	};
+}
+
+export async function listAdminProducts() {
+	return db
+		.select({ product: products, cosmetic: cosmetics })
+		.from(products)
+		.leftJoin(cosmetics, eq(cosmetics.id, products.id))
+		.orderBy(desc(products.createdAt));
+}
+
+export async function listAdminOrders(limit = 50) {
+	return db
+		.select({
+			orderId: orders.id,
+			orderStatus: orders.status,
+			amount: orders.amount,
+			currency: orders.currency,
+			createdAt: orders.createdAt,
+			targetType: orders.targetType,
+			productName: products.name,
+			productCategory: products.category,
+			paymentStatus: payments.status,
+			paymentMethod: payments.paymentMethod,
+			paidAt: payments.paidAt,
+			customerSlug: profiles.slug
+		})
+		.from(orders)
+		.innerJoin(products, eq(products.id, orders.productId))
+		.leftJoin(payments, eq(payments.orderId, orders.id))
+		.leftJoin(profiles, eq(profiles.userId, orders.userId))
+		.orderBy(desc(orders.createdAt))
+		.limit(limit);
+}
+
+function requireCosmeticFields(input: AdminCreateProduct | AdminUpdateProduct) {
+	if (!input.kind) throw new ValidationError('Choose a cosmetic type');
+	if (!input.assetKey?.startsWith('cosmetics/')) throw new ValidationError('Upload an image for this cosmetic');
+}
+
+export async function createCatalogProduct(input: AdminCreateProduct): Promise<void> {
+	const id = randomUUID();
+	if (input.category === 'cosmetic') {
+		requireCosmeticFields(input);
+		if (input.price === 0 && input.pointsPrice === null) {
+			throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
+		}
+	}
+	if (input.category !== 'cosmetic' && input.price < 1) {
+		throw new ValidationError('Spotlight products must have a positive price');
+	}
+	if (input.category !== 'cosmetic' && !input.durationDays) {
+		throw new ValidationError('Spotlights need a duration from 1 to 365 days');
+	}
+
+	try {
+		await db.transaction(async (tx) => {
+			await tx.insert(products).values({
+				id,
+				name: input.name,
+				description: input.description,
+				price: input.price,
+				currency: 'IDR',
+				active: input.active,
+				category: input.category,
+				durationDays: input.category === 'cosmetic' ? null : input.durationDays
+			});
+
+			if (input.category === 'cosmetic') {
+				await tx.insert(cosmetics).values({
+					id,
+					kind: input.kind!,
+					assetKey: input.assetKey!,
+					accentColor: input.accentColor,
+					pointsPrice: input.pointsPrice,
+					stockLimit: input.stockLimit,
+					dropEndsAt: input.dropEndsAt
+				});
+			}
+		});
+	} catch (err) {
+		if (isUniqueViolation(err)) throw new ConflictError('A product with that name already exists');
+		throw err;
+	}
+}
+
+export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<void> {
+	try {
+		await db.transaction(async (tx) => {
+			const [product] = await tx
+				.select()
+				.from(products)
+				.where(eq(products.id, input.id))
+				.for('update')
+				.limit(1);
+			if (!product) throw new NotFoundError('Product not found');
+			if (product.category === 'plan') {
+				throw new ValidationError('Plan products cannot be managed until plan entitlements are implemented');
+			}
+
+			if (product.category === 'cosmetic') {
+				requireCosmeticFields(input);
+				if (input.price === 0 && input.pointsPrice === null) {
+					throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
+				}
+				const [cosmetic] = await tx
+					.select({ id: cosmetics.id })
+					.from(cosmetics)
+					.where(eq(cosmetics.id, product.id))
+					.for('update')
+					.limit(1);
+				if (!cosmetic) throw new ConflictError('The cosmetic record is missing');
+			} else {
+				if (!input.durationDays) {
+					throw new ValidationError('Spotlights need a duration from 1 to 365 days');
+				}
+				if (input.price < 1) throw new ValidationError('Spotlight products must have a positive price');
+			}
+
+			await tx
+				.update(products)
+				.set({
+					name: input.name,
+					description: input.description,
+					price: input.price,
+					currency: 'IDR',
+					active: input.active,
+					durationDays: product.category === 'cosmetic' ? null : input.durationDays,
+					updatedAt: new Date()
+				})
+				.where(eq(products.id, product.id));
+
+			if (product.category === 'cosmetic') {
+				await tx
+					.update(cosmetics)
+					.set({
+						kind: input.kind!,
+						assetKey: input.assetKey!,
+						accentColor: input.accentColor,
+						pointsPrice: input.pointsPrice,
+						stockLimit: input.stockLimit,
+						dropEndsAt: input.dropEndsAt,
+						updatedAt: new Date()
+					})
+					.where(eq(cosmetics.id, product.id));
+			}
+		});
+	} catch (err) {
+		if (isUniqueViolation(err)) throw new ConflictError('A product with that name already exists');
+		throw err;
+	}
+}

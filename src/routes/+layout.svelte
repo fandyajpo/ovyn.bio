@@ -15,7 +15,7 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-	<Nav user={data.user} />
+	<Nav user={data.user} isAdmin={data.isAdmin} />
 
 	<main class="mx-auto w-full max-w-6xl flex-1 px-4 py-8">
 		{@render children()}

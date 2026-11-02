@@ -1,6 +1,7 @@
 /** Route segments that can never be a profile slug (they are real routes). */
 export const RESERVED_SLUGS = new Set([
 	'api',
+	'admin',
 	'login',
 	'logout',
 	'discover',

@@ -4,7 +4,7 @@
 	import Avatar from './ui/Avatar.svelte';
 	import { toast } from './ui/toasts.svelte.ts';
 
-	let { user }: { user: { name: string; image: string | null } | null } = $props();
+	let { user, isAdmin }: { user: { name: string; image: string | null } | null; isAdmin: boolean } = $props();
 
 	let menuOpen = $state(false);
 
@@ -71,6 +71,7 @@
 						>
 							<a role="menuitem" href="/settings/profile" class="block px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Profile settings</a>
 							<a role="menuitem" href="/billing" class="block px-4 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Billing</a>
+							{#if isAdmin}<a role="menuitem" href="/admin" class="block px-4 py-2 text-sm text-lime-300 transition-colors hover:bg-neutral-800">Monetization admin</a>{/if}
 							<hr class="my-1 border-neutral-800" />
 							<button role="menuitem" onclick={logout} class="block w-full px-4 py-2 text-left text-sm text-red-400 transition-colors hover:bg-neutral-800">
 								Sign out

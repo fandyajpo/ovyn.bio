@@ -4,6 +4,7 @@ import { setProfileBanner } from '#lib/server/services/profiles';
 import { getMembership, updateGuild } from '#lib/server/services/guilds';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
+import { isPlatformAdmin } from '#lib/server/services/admin';
 
 /** Step 1 of the upload flow: validate + hand out a presigned PUT URL. */
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -13,16 +14,19 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		rateLimit(`upload:${locals.user.id}`, 20, 60_000);
 
 		const body = (await request.json()) as { kind?: string; contentType?: string; sizeBytes?: number };
-		if (!body.kind || !body.contentType || typeof body.sizeBytes !== 'number') {
+		if (
+			(body.kind !== 'banner' && body.kind !== 'icon' && body.kind !== 'cosmetic') ||
+			!body.contentType ||
+			typeof body.sizeBytes !== 'number'
+		) {
 			return Response.json({ error: 'Invalid request' }, { status: 422 });
 		}
+		if (body.kind === 'cosmetic' && !(await isPlatformAdmin(locals.user.id))) {
+			return Response.json({ error: 'Admin access required' }, { status: 403 });
+		}
 
-		const { key, uploadUrl } = await presignUpload(
-			locals.user.id,
-			body.kind as UploadKind,
-			body.contentType,
-			body.sizeBytes
-		);
+		const kind: UploadKind = body.kind;
+		const { key, uploadUrl } = await presignUpload(locals.user.id, kind, body.contentType, body.sizeBytes);
 		return Response.json({ key, uploadUrl });
 	} catch (err) {
 		if (err instanceof AppError) return Response.json({ error: err.message }, { status: err.status });

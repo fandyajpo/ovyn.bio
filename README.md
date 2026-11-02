@@ -52,6 +52,10 @@ You must add:
   Portal. In your Discord app → OAuth2 → Redirects, add:
   - `http://localhost:5173/api/auth/callback/discord` (dev)
   - `https://ovyn.bio/api/auth/callback/discord` (production)
+- `OVYN_ADMIN_DISCORD_IDS` — comma-separated Discord user IDs authorized for
+  `/admin`. Find your ID with Discord Developer Mode → right-click your profile
+  → Copy User ID. Set this only in local `.env` and Vercel server environment
+  variables; the server checks it against the authenticated Discord account.
 - `DOKU_PRIVATE_KEY` — the RSA private key DOKU gives you for SNAP B2B token
   requests (`X-SIGNATURE = SHA256withRSA(privateKey, clientID + "|" + timestamp)`)
 - `DOKU_PARTNER_SERVICE_ID` — your 8-digit virtual account company code (BIN)
@@ -89,8 +93,8 @@ You must add:
   automatically via the payment webhook (fulfilment is idempotent). Users
   equip/unequip owned cosmetics in profile settings; public profiles render
   frames around the avatar, wallpapers behind the header, and badges next to
-  the name. Seed the catalog with `npm run db:seed-shop`, then upload the
-  art files to Neon Object Storage at the `cosmetics/<kind>/<name>.png` keys.
+  the name. Seed the starter catalog once with `npm run db:seed-shop`; then use
+  `/admin/catalog` to manage listings and upload their artwork.
 
 - **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
@@ -98,7 +102,18 @@ You must add:
 - **Featured placement** — `profile_spotlight` and `guild_spotlight` products purchase time-limited placement. A user can feature only their own public profile; only active guild owners can feature their guild. The seed script uses sample prices; review them before enabling payments.
 - **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
-Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, `npm run db:seed-shop` inserts the example cosmetics and spotlight products; review sample prices before production.
+Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter products. Re-running it resets their sample prices and settings, so make catalog changes in the admin panel after seeding.
+
+## Monetization administration
+
+Set `OVYN_ADMIN_DISCORD_IDS` to your comma-separated Discord user ID(s) locally
+and in Vercel, then sign in with one of those accounts and open `/admin`. The
+admin area lets you create/edit cosmetics and spotlight products, set prices,
+points costs, drop limits/end dates, upload cosmetic art, and review recent
+orders/revenue. Paid cosmetics and spotlight products can be activated; new
+products remain inactive until published. Products are deactivated rather than deleted so purchase
+history and ownership remain intact. Paid plan entitlements and DOKU refunds
+are not managed here yet.
 
 ## DOKU integration points
 

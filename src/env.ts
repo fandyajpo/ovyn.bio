@@ -18,6 +18,7 @@ export const variables = defineEnvVars({
 	BETTER_AUTH_URL: { schema: z.string().optional() },
 	DISCORD_CLIENT_ID: { schema: z.string().optional() },
 	DISCORD_CLIENT_SECRET: { schema: z.string().optional() },
+	OVYN_ADMIN_DISCORD_IDS: { schema: z.string().optional() },
 
 	// Neon Object Storage (S3-compatible)
 	AWS_ENDPOINT_URL_S3: { schema: z.string().optional() },
