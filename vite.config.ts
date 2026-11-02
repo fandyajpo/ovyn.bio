@@ -13,7 +13,7 @@ export default defineConfig({
 		tailwindcss(),
 		sveltekit({
 			adapter: adapter({
-				runtime: 'nodejs22',
+				runtime: 'nodejs22.x',
 				regions: ['iad1', 'sfo1', 'sin1'],
 				maxDuration: 15
 			})
