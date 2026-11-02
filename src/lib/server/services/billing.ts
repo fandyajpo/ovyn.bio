@@ -5,6 +5,7 @@ import {
 	orders,
 	paymentEvents,
 	payments,
+	planOverrides,
 	products,
 	userCosmetics
 } from '#lib/server/db/schema';
@@ -360,6 +361,23 @@ export async function listUserOrders(userId: string) {
 }
 
 export async function getUserPlan(userId: string) {
+	const [override] = await db
+		.select({ tier: planOverrides.tier })
+		.from(planOverrides)
+		.where(eq(planOverrides.userId, userId))
+		.limit(1);
+
+	// An admin override wins over anything derived from payments.
+	if (override) {
+		const premium = override.tier === 'premium';
+		return {
+			tier: premium ? ('premium' as const) : ('free' as const),
+			isLifetime: premium,
+			premiumUntil: null,
+			daysRemaining: 0
+		};
+	}
+
 	const purchases = await db
 		.select({ paidAt: payments.paidAt, updatedAt: orders.updatedAt, durationDays: products.durationDays })
 		.from(orders)

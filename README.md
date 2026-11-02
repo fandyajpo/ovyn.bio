@@ -162,7 +162,10 @@ limits/end dates, upload cosmetic art, and review recent orders/revenue.
 Cosmetics and lifetime Premium plans can be activated; new products remain
 inactive until published. Premium plans are fixed at Rp 100.000 for lifetime
 access. Products are deactivated rather than deleted so purchase history and
-ownership remain intact. DOKU refunds are not managed here yet.
+ownership remain intact. `/admin/plans` switches an account between Free and
+Premium by writing an override that wins over purchase-derived access; clearing
+it puts the account back on whatever it actually bought. DOKU refunds are not
+managed here yet.
 
 ## DOKU integration points
 

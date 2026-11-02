@@ -34,10 +34,11 @@
 					<span class="sticker sticker--blue">{data.overview.pendingPayments} pending payments</span>
 				</div>
 			</div>
-			<nav aria-label="Admin shortcuts" class="grid w-full gap-2 sm:grid-cols-3 md:w-auto">
-				<Button href="/admin/catalog" class="w-full sm:w-auto">Manage catalog</Button>
-				<Button href="/admin/analytics" variant="secondary" class="w-full sm:w-auto">Sales analytics</Button>
-				<Button href="/admin/orders" variant="ghost" class="w-full sm:w-auto">Review sales</Button>
+			<nav aria-label="Admin shortcuts" class="grid w-full gap-2 sm:grid-cols-4">
+				<Button href="/admin/catalog" class="w-full sm:w-auto">Catalog</Button>
+				<Button href="/admin/plans" variant="secondary" class="w-full sm:w-auto">Plans</Button>
+				<Button href="/admin/analytics" variant="secondary" class="w-full sm:w-auto">Analytics</Button>
+				<Button href="/admin/orders" variant="ghost" class="w-full sm:w-auto">Orders</Button>
 			</nav>
 		</div>
 	</header>

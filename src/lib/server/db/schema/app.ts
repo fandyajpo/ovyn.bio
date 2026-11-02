@@ -49,6 +49,7 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 ]);
 export const cosmeticKindEnum = pgEnum('cosmetic_kind', ['frame', 'wallpaper', 'badge']);
 export const productCategoryEnum = pgEnum('product_category', ['plan', 'cosmetic']);
+export const planOverrideTierEnum = pgEnum('plan_override_tier', ['free', 'premium']);
 
 // ---------------------------------------------------------------------------
 // Identity
@@ -116,6 +117,21 @@ export const profileTemplates = pgTable(
 		index('profile_templates_public_created_idx').on(t.isPublic, t.createdAt)
 	]
 );
+
+/**
+ * Manual plan override set by a platform admin. While a row exists it wins
+ * over access derived from payments; deleting it falls back to purchases.
+ */
+export const planOverrides = pgTable('plan_overrides', {
+	userId: text('user_id')
+		.primaryKey()
+		.references(() => user.id, { onDelete: 'cascade' }),
+	tier: planOverrideTierEnum('tier').notNull(),
+	note: text('note'),
+	grantedByUserId: text('granted_by_user_id').references(() => user.id, { onDelete: 'set null' }),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});
 
 /** Signed-in profile analytics; deduplicated to one visitor per UTC date. */
 export const profileViews = pgTable(
