@@ -6,6 +6,9 @@ import { cosmetics, discordAccounts, orders, payments, products, profiles } from
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import type { AdminCreateProduct, AdminUpdateProduct } from '#lib/schemas/admin';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+
 function configuredAdminDiscordIds(): Set<string> {
 	return new Set(
 		(OVYN_ADMIN_DISCORD_IDS ?? '')
@@ -102,6 +105,18 @@ export async function listAdminProducts() {
 		.orderBy(desc(products.createdAt));
 }
 
+/** A single catalog product with its cosmetic details, or null when absent. */
+export async function getAdminProduct(id: string) {
+	if (!UUID_PATTERN.test(id)) return null;
+	const [row] = await db
+		.select({ product: products, cosmetic: cosmetics })
+		.from(products)
+		.leftJoin(cosmetics, eq(cosmetics.id, products.id))
+		.where(eq(products.id, id))
+		.limit(1);
+	return row ?? null;
+}
+
 export async function listAdminOrders(limit = 50) {
 	return db
 		.select({
@@ -110,7 +125,6 @@ export async function listAdminOrders(limit = 50) {
 			amount: orders.amount,
 			currency: orders.currency,
 			createdAt: orders.createdAt,
-			targetType: orders.targetType,
 			productName: products.name,
 			productCategory: products.category,
 			paymentStatus: payments.status,
@@ -206,11 +220,6 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 				} else if (input.price !== 100_000 || input.durationDays !== null) {
 					throw new ValidationError('Premium lifetime access costs Rp 100.000 with no expiry');
 				}
-			} else {
-				if (!input.durationDays) {
-					throw new ValidationError('Spotlights need a duration from 1 to 365 days');
-				}
-				if (input.price < 1) throw new ValidationError('Spotlight products must have a positive price');
 			}
 
 			await tx

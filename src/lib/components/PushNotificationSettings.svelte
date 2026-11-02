@@ -12,7 +12,7 @@
 		{ key: 'profile', label: 'Profile views and analytics' },
 		{ key: 'shop', label: 'Shop purchases and payment updates' },
 		{ key: 'referral', label: 'Referral and rewards activity' },
-		{ key: 'announcements', label: 'General OVYN announcements' }
+		{ key: 'announcements', label: 'General ovyn announcements' }
 	] as const;
 
 	type Category = (typeof categories)[number]['key'];
@@ -30,7 +30,7 @@
 	let enabled = $state(false);
 	let permission = $state<NotificationPermission | 'unsupported'>('default');
 	let preferences = $state<Preferences>({ ...defaultPreferences });
-	let message = $state('Choose which OVYN updates this device may show.');
+	let message = $state('Choose which ovyn updates this device may show.');
 	let busy = $state(false);
 
 	onMount(() => {
@@ -88,7 +88,7 @@
 
 		if (enabled) {
 			enabled = false;
-			message = 'OVYN notifications are paused on this device.';
+			message = 'ovyn notifications are paused on this device.';
 			await savePreferences();
 			return;
 		}
@@ -117,11 +117,11 @@
 		if (!enabled || permission !== 'granted') return;
 		const registration = await navigator.serviceWorker.getRegistration();
 		if (!registration) {
-			message = 'Install OVYN or open it over HTTPS to enable the service worker.';
+			message = 'Install ovyn or open it over HTTPS to enable the service worker.';
 			return;
 		}
-		await registration.showNotification('OVYN notifications are on', {
-			body: 'Your browser can display OVYN updates on this device.',
+		await registration.showNotification('ovyn notifications are on', {
+			body: 'Your browser can display ovyn updates on this device.',
 			icon: '/icons/ovyn-192.svg',
 			badge: '/icons/ovyn-192.svg',
 			tag: 'ovyn-settings-test'
@@ -138,9 +138,9 @@
 <Card class="p-5 sm:p-6">
 	<div class="flex flex-wrap items-start justify-between gap-4">
 		<div>
-			<span class="sticker sticker--blue">OVYN / DEVICE SETTINGS</span>
+			<span class="sticker sticker--blue">ovyn / device settings</span>
 			<h2 class="mt-3 font-[family-name:var(--font-display)] text-xl font-semibold">Push notifications</h2>
-			<p class="mt-1 max-w-xl text-sm leading-6 text-neutral-400">Choose which OVYN updates this browser may surface. Notification permission is specific to this device.</p>
+			<p class="mt-1 max-w-xl text-sm leading-6 text-neutral-400">Choose which ovyn updates this browser may surface. Notification permission is specific to this device.</p>
 		</div>
 		<Button type="button" variant={enabled ? 'secondary' : 'primary'} loading={busy} onclick={toggleNotifications}>
 			{enabled ? 'Pause notifications' : 'Enable notifications'}

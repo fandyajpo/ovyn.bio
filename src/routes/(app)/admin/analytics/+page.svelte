@@ -26,7 +26,7 @@
 </script>
 
 <svelte:head>
-	<title>Sales analytics - OVYN Admin</title>
+	<title>Sales analytics - ovyn admin</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-6xl flex-col gap-6 sm:gap-8">
@@ -34,7 +34,7 @@
 		<div>
 			<a href="/admin" class="text-sm text-neutral-500 hover:text-lime-300">← Monetization</a>
 			<div class="mt-4 flex flex-wrap items-center gap-2">
-				<span class="sticker sticker--blue">OVYN / SALES SIGNAL</span>
+				<span class="sticker sticker--blue">ovyn / sales signal</span>
 				<Badge tone="lilac" size="xs">LAST 30 DAYS</Badge>
 			</div>
 			<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold tracking-tight sm:text-4xl">Sales analytics</h1>

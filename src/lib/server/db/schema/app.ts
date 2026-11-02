@@ -46,13 +46,7 @@ export const paymentStatusEnum = pgEnum('payment_status', [
 	'refunded'
 ]);
 export const cosmeticKindEnum = pgEnum('cosmetic_kind', ['frame', 'wallpaper', 'badge']);
-export const productCategoryEnum = pgEnum('product_category', [
-	'plan',
-	'cosmetic',
-	'profile_spotlight',
-	'guild_spotlight'
-]);
-export const spotlightTargetEnum = pgEnum('spotlight_target', ['profile', 'guild']);
+export const productCategoryEnum = pgEnum('product_category', ['plan', 'cosmetic']);
 
 // ---------------------------------------------------------------------------
 // Identity
@@ -233,7 +227,7 @@ export const products = pgTable('products', {
 	currency: text('currency').notNull().default('IDR'),
 	active: boolean('active').notNull().default(false),
 	category: productCategoryEnum('category').notNull().default('plan'),
-	/** Spotlight term. Null for products that do not buy a time-limited placement. */
+	/** Term in days for legacy plans; lifetime Premium plans keep this null. */
 	durationDays: integer('duration_days'),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
@@ -296,9 +290,6 @@ export const orders = pgTable(
 		productId: uuid('product_id')
 			.notNull()
 			.references(() => products.id, { onDelete: 'restrict' }),
-		/** Required only for spotlight products; never accepted for cosmetics/plans. */
-		targetType: spotlightTargetEnum('target_type'),
-		targetId: text('target_id'),
 		amount: integer('amount').notNull(),
 		currency: text('currency').notNull().default('IDR'),
 		status: orderStatusEnum('status').notNull().default('pending'),
@@ -306,25 +297,6 @@ export const orders = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [index('orders_user_id_idx').on(t.userId), index('orders_status_idx').on(t.status)]
-);
-
-/** Active paid spotlight; a new paid order extends the target's expiry. */
-export const spotlights = pgTable(
-	'spotlights',
-	{
-		id: uuid('id').primaryKey().defaultRandom(),
-		targetType: spotlightTargetEnum('target_type').notNull(),
-		targetId: text('target_id').notNull(),
-		ownerUserId: text('owner_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-		orderId: uuid('order_id').notNull().unique().references(() => orders.id, { onDelete: 'cascade' }),
-		startsAt: timestamp('starts_at', { withTimezone: true }).notNull().defaultNow(),
-		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
-		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
-	},
-	(t) => [
-		uniqueIndex('spotlights_target_unique').on(t.targetType, t.targetId),
-		index('spotlights_expires_idx').on(t.expiresAt)
-	]
 );
 
 /** One reward account per user; points are earned, non-cash shop credits. */

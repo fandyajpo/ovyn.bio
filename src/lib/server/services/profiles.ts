@@ -47,7 +47,7 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
 /**
  * Sync Discord identity when available and ensure every OAuth user has a
  * profile with a unique slug. Runs inside Better Auth's session-create hook,
- * so failures must not block sign-in. OVYN profile details stay user-owned.
+ * so failures must not block sign-in. ovyn profile details stay user-owned.
  */
 export async function provisionUser(userId: string): Promise<void> {
 	const [acc] = await db
@@ -73,7 +73,7 @@ export async function provisionUser(userId: string): Promise<void> {
 				.values({
 					userId,
 					slug: await availableSlug(tx, authUser.name || 'ovyn'),
-					displayName: authUser.name || 'OVYN member'
+					displayName: authUser.name || 'ovyn member'
 				})
 				.onConflictDoNothing({ target: profiles.userId });
 		});
@@ -138,7 +138,7 @@ export async function provisionUser(userId: string): Promise<void> {
 			return;
 		}
 
-		// Existing profile fields are OVYN-owned and are intentionally not
+		// Existing profile fields are ovyn-owned and are intentionally not
 		// overwritten when Discord identity data changes.
 	});
 }

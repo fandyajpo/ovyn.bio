@@ -354,7 +354,6 @@ body {
 	font-weight: 500;
 	letter-spacing: 0.1em;
 	line-height: 1;
-	text-transform: uppercase;
 }
 
 .sticker--pink {
@@ -628,7 +627,7 @@ html[data-theme='light'] [class*='bg-black/30'] {
 
 
 
-/* Softer OVYN design system */
+/* Softer ovyn design system */
 :root {
 	--color-background: #111117;
 	--color-surface: #1a1a22;
@@ -1037,12 +1036,8 @@ html[data-theme='light'] body {
 
 
 @media (max-width: 63.999rem) {
-	.app-frame[data-workspace-page='true'] .site-header,
-	.app-frame[data-workspace-page='true'] .app-footer {
-		display: none !important;
-	}
-
-	.app-frame[data-workspace-page='true'] .page-content {
-		padding-top: calc(4.5rem + env(safe-area-inset-top));
+	.app-frame[data-workspace-page='true'] .page-content,
+	.app-frame[data-admin-page='true'] .page-content {
+		padding-top: calc(4.25rem + env(safe-area-inset-top));
 	}
 }

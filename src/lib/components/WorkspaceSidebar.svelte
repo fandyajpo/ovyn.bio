@@ -83,7 +83,7 @@
 	onclick={() => (mobileOpen = !mobileOpen)}
 >
 	<span class="workspace-menu-glyph" aria-hidden="true">☰</span>
-	<span>OVYN</span>
+	<span>ovyn</span>
 </button>
 
 {#if mobileOpen}
@@ -103,8 +103,8 @@
 >
 	<div class="workspace-sidebar-heading">
 		<div>
-			<span class="sticker sticker--pink">YOUR SPACE</span>
-			<p class="mt-3 font-[family-name:var(--font-display)] text-lg font-semibold">Account menu</p>
+			<a href="/" class="workspace-brand" onclick={closeMobileMenu}>ovyn<span aria-hidden="true">.</span></a>
+			<p class="mt-1 text-sm font-medium text-neutral-400">Account menu</p>
 		</div>
 		<span class="workspace-plan-pill {planTier === 'premium' ? 'workspace-plan-pill--premium' : ''}">{planTier}</span>
 		<button type="button" class="workspace-sidebar-close" aria-label="Close account menu" onclick={closeMobileMenu}>×</button>
@@ -135,6 +135,7 @@
 	</nav>
 
 	<button type="button" class="workspace-share-button" onclick={shareProfile}>{shareMessage}</button>
+	<a class="workspace-landing-link" href="/" onclick={closeMobileMenu}>← Back to landing page</a>
 
 	<div class="workspace-mobile-tools">
 		<div class="flex items-center justify-between gap-3"><span>Appearance</span><ThemeToggle /></div>
@@ -156,6 +157,19 @@
 		gap: 0.75rem;
 		margin-bottom: 1rem;
 	}
+
+	.workspace-brand {
+		display: inline-flex;
+		align-items: baseline;
+		color: var(--color-foreground);
+		font-family: var(--font-display);
+		font-size: 1.3rem;
+		font-weight: 700;
+		letter-spacing: -0.03em;
+		text-decoration: none;
+	}
+
+	.workspace-brand span { color: var(--color-accent); }
 
 	.workspace-plan-pill {
 		border: 1px solid var(--color-divider);
@@ -197,13 +211,28 @@
 	.workspace-link:active { transform: scale(0.985); }
 	.workspace-share-button { width: 100%; min-height: 2.8rem; margin-top: 1rem; border: 1px solid var(--color-divider); border-radius: 0.9rem; background: transparent; padding: 0.65rem 0.8rem; color: var(--color-muted); font-size: 0.8rem; text-align: left; transition: border-color 160ms ease, color 160ms ease, transform 160ms ease; }
 	.workspace-share-button:hover { border-color: color-mix(in srgb, var(--color-accent) 32%, transparent); color: var(--color-accent); }
+	.workspace-landing-link {
+		display: flex;
+		min-height: 2.6rem;
+		align-items: center;
+		margin-top: 0.5rem;
+		border-radius: 0.75rem;
+		padding: 0.55rem 0.75rem;
+		color: var(--color-muted);
+		font-size: 0.8rem;
+		text-decoration: none;
+		transition: color 160ms ease, background-color 160ms ease;
+	}
+
+	.workspace-landing-link:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); color: var(--color-foreground); }
+
 	.workspace-mobile-tools,
 	.workspace-menu-trigger,
 	.workspace-sidebar-close,
 	.workspace-sidebar-backdrop { display: none; }
 
 	@media (min-width: 64rem) {
-		.workspace-sidebar { position: sticky; top: 5.5rem; max-height: calc(100dvh - 6.5rem); overflow-y: auto; overscroll-behavior: contain; align-self: start; }
+		.workspace-sidebar { position: sticky; top: 1.5rem; max-height: calc(100dvh - 3rem); overflow-y: auto; overscroll-behavior: contain; align-self: start; }
 	}
 
 	@media (max-width: 63.999rem) {
@@ -263,6 +292,7 @@
 	@media (prefers-reduced-motion: reduce) {
 		.workspace-link,
 		.workspace-share-button,
+		.workspace-landing-link,
 		.workspace-sidebar,
 		.workspace-menu-trigger { transition: none; }
 	}

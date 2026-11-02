@@ -33,30 +33,32 @@
 <svelte:window onkeydown={onWindowKeydown} />
 
 {#if open}
-	<div class="modal-layer" transition:fade={{ duration: 160 }}>
-		<button type="button" class="modal-backdrop" onclick={close} aria-label="Close dialog"></button>
+	<div class="ovyn-overlay" transition:fade={{ duration: 170 }}>
+		<button type="button" class="ovyn-overlay-backdrop" onclick={close} aria-label="Close dialog"></button>
 		<dialog
 			open
-			class="modal-panel {className}"
+			class="ovyn-modal {className}"
 			aria-modal="true"
 			aria-labelledby="{id}-title"
 			aria-describedby={description ? `${id}-description` : undefined}
-			transition:fly={{ y: 10, duration: 180 }}
+			transition:fly={{ y: 18, duration: 220 }}
 		>
-			<header class="modal-heading">
+			<span class="ovyn-modal-grip" aria-hidden="true"></span>
+			<header class="ovyn-modal-head">
 				<div>
+					<p class="ovyn-modal-eyebrow">ovyn</p>
 					<h2 id="{id}-title">{title}</h2>
-					{#if description}<p id="{id}-description">{description}</p>{/if}
+					{#if description}<p id="{id}-description" class="ovyn-modal-description">{description}</p>{/if}
 				</div>
-				<button type="button" class="modal-close" onclick={close} aria-label="Close dialog">×</button>
+				<button type="button" class="ovyn-modal-close" onclick={close} aria-label="Close dialog">×</button>
 			</header>
-			<div class="modal-content">{@render children()}</div>
+			<div class="ovyn-modal-body">{@render children()}</div>
 		</dialog>
 	</div>
 {/if}
 
 <style>
-	.modal-layer {
+	.ovyn-overlay {
 		position: fixed;
 		z-index: 100;
 		inset: 0;
@@ -65,40 +67,132 @@
 		padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
 	}
 
-	.modal-backdrop {
+	.ovyn-overlay-backdrop {
 		position: absolute;
 		inset: 0;
 		width: 100%;
 		height: 100%;
 		border: 0;
-		background: rgb(12 11 17 / 55%);
-		backdrop-filter: blur(14px);
+		background:
+			radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 60%),
+			rgb(10 9 14 / 62%);
+		backdrop-filter: blur(16px);
 	}
 
-	.modal-panel {
+	.ovyn-modal {
 		position: relative;
 		z-index: 1;
-		margin: 0;
-		color: var(--color-foreground);
-		width: min(100%, 36rem);
+		width: min(100%, 34rem);
 		max-height: min(90dvh, 52rem);
+		margin: 0;
 		overflow: auto;
 		border: 1px solid var(--color-divider);
 		border-radius: 1.5rem;
-		background: color-mix(in srgb, var(--color-surface) 94%, transparent);
+		background:
+			radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--color-pop-lilac) 9%, transparent), transparent 60%),
+			linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 97%, transparent), color-mix(in srgb, var(--color-background) 92%, transparent));
 		padding: clamp(1.15rem, 4vw, 1.75rem);
-		box-shadow: 0 28px 90px rgb(0 0 0 / 24%);
+		color: var(--color-foreground);
+		box-shadow:
+			inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 8%, transparent),
+			0 34px 100px rgb(0 0 0 / 30%);
 	}
 
-	.modal-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
-	.modal-heading h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.03em; }
-	.modal-heading p { margin-top: 0.35rem; color: var(--color-muted); font-size: 0.85rem; line-height: 1.55; }
-	.modal-close { display: grid; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--color-muted); font-size: 1.5rem; transition: background-color 160ms ease, color 160ms ease, transform 160ms ease; }
-	.modal-close:hover { transform: rotate(90deg); background: var(--color-accent-soft); color: var(--color-foreground); }
-	.modal-content { margin-top: 1.25rem; }
+	.ovyn-modal::before {
+		position: absolute;
+		top: 0;
+		right: 18%;
+		left: 18%;
+		height: 1px;
+		background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+		content: '';
+		opacity: 0.55;
+	}
+
+	.ovyn-modal-grip { display: none; }
+
+	.ovyn-modal-head {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 1rem;
+	}
+
+	.ovyn-modal-eyebrow {
+		margin: 0 0 0.35rem;
+		color: var(--color-accent);
+		font-family: var(--font-mono);
+		font-size: 0.6rem;
+		letter-spacing: 0.2em;
+		text-transform: uppercase;
+	}
+
+	.ovyn-modal-head h2 {
+		font-size: 1.22rem;
+		font-weight: 600;
+		letter-spacing: -0.025em;
+		line-height: 1.25;
+	}
+
+	.ovyn-modal-description {
+		margin-top: 0.4rem;
+		color: var(--color-muted);
+		font-size: 0.8rem;
+		line-height: 1.6;
+	}
+
+	.ovyn-modal-close {
+		display: grid;
+		width: 2.35rem;
+		height: 2.35rem;
+		flex: 0 0 auto;
+		place-items: center;
+		border: 1px solid var(--color-divider);
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--color-surface) 80%, transparent);
+		color: var(--color-muted);
+		font-size: 1.3rem;
+		line-height: 1;
+		transition: background-color 170ms ease, color 170ms ease, transform 240ms ease, border-color 170ms ease;
+	}
+
+	.ovyn-modal-close:hover {
+		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
+		background: var(--color-accent-soft);
+		color: var(--color-foreground);
+		transform: rotate(90deg);
+	}
+
+	.ovyn-modal-body {
+		margin-top: 1.25rem;
+		color: var(--color-foreground);
+		font-size: 0.88rem;
+		line-height: 1.65;
+	}
+
+	@media (max-width: 40rem) {
+		.ovyn-overlay { place-items: end center; padding: 0; }
+
+		.ovyn-modal {
+			width: 100%;
+			max-height: 90dvh;
+			border-radius: 1.5rem 1.5rem 0 0;
+			padding: 0.6rem 1.1rem calc(1.4rem + env(safe-area-inset-bottom));
+			border-bottom: 0;
+		}
+
+		.ovyn-modal-grip {
+			display: block;
+			width: 2.6rem;
+			height: 0.28rem;
+			margin: 0.35rem auto 1rem;
+			border-radius: 999px;
+			background: color-mix(in srgb, var(--color-foreground) 22%, transparent);
+		}
+	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.modal-layer,
-		.modal-panel { transition: none !important; }
+		.ovyn-overlay,
+		.ovyn-modal { transition: none !important; }
 	}
 </style>

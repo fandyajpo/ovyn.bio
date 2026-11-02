@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>Dashboard - OVYN</title>
+	<title>Dashboard - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-8">
@@ -83,7 +83,7 @@
 		<Card class="p-5">
 			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Daily check-in</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.rewards.streakCount} day streak</p>
-			<p class="mt-1 text-sm text-neutral-400">{data.rewards.points} OVYN points · +{data.rewardValues.dailyCheckin} daily, +{data.rewardValues.weeklyStreakBonus} every 7-day streak</p>
+			<p class="mt-1 text-sm text-neutral-400">{data.rewards.points} ovyn points · +{data.rewardValues.dailyCheckin} daily, +{data.rewardValues.weeklyStreakBonus} every 7-day streak</p>
 			{#if form?.checkin}
 				<p class="mt-2 text-sm text-lime-300">
 					{form.checkin.alreadyCheckedIn ? 'Already checked in today.' : `Checked in! +${form.checkin.pointsEarned} points.`}

@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "OVYN: Your identity. Your circle.",
-  "short_name": "OVYN",
+  "name": "ovyn: your identity. your circle.",
+  "short_name": "ovyn",
   "description": "Your identity, out in the world. Your people, one link away.",
   "start_url": "/",
   "scope": "/",

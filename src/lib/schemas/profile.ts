@@ -4,7 +4,7 @@ export const PROFILE_THEME_IDS = ['default', 'midnight', 'bubblegum', 'ocean', '
 export const profileThemeSchema = z.enum(PROFILE_THEME_IDS);
 
 export const PROFILE_THEME_OPTIONS = [
-	{ value: 'default', label: 'OVYN Original' },
+	{ value: 'default', label: 'ovyn original' },
 	{ value: 'midnight', label: 'Midnight Grid' },
 	{ value: 'bubblegum', label: 'Bubblegum After Dark' },
 	{ value: 'ocean', label: 'Deep Ocean' },

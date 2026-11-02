@@ -59,7 +59,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		cosmetics.frameUrl,
 		cosmetics.wallpaperUrl,
 		cosmetics.badgeUrl,
-		// Avatar: uploaded OVYN avatar wins, else the synced Discord avatar.
+		// Avatar: uploaded ovyn avatar wins, else the synced Discord avatar.
 		row.profile.avatarKey
 			? presignDownload(row.profile.avatarKey)
 			: row.discord?.avatarUrl ?? row.authUser.image ?? null,

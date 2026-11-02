@@ -5,7 +5,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import { toast } from './ui/toasts.svelte.ts';
 
-	let { user, isAdmin }: { user: { name: string; image: string | null } | null; isAdmin: boolean } = $props();
+	let { user }: { user: { name: string; image: string | null } | null } = $props();
 
 	let accountMenuOpen = $state(false);
 	let mobileMenuOpen = $state(false);
@@ -19,8 +19,7 @@
 		{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' },
 		{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
 		{ href: '/#plans', label: 'Plans', icon: '＋', tone: 'lilac' },
-		...(user ? [{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' }, { href: '/account', label: 'My space', icon: '⌂', tone: 'lime' }] : []),
-		...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: '⚙', tone: 'pink' }] : []),
+		...(user ? [{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' }] : []),
 		{ href: '/#faq', label: 'FAQ', icon: '?', tone: 'lilac' }
 	]);
 
@@ -74,9 +73,9 @@
 <header class="site-header sticky top-0 z-40">
 	<div class="site-header-inner flex h-16 w-full items-center justify-between px-4">
 		<a href="/" onclick={closeMenus} class="group flex shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
-			<span class="grid size-8 rotate-[-6deg] place-items-center rounded-xl border-2 border-[#111210] bg-lime-300 font-mono text-sm text-neutral-950 shadow-[2px_2px_0_rgba(255,255,255,0.3)] transition-transform group-hover:rotate-6">O</span>
-			<span>OVYN<span class="text-lime-300">.</span></span>
-			<span class="sticker sticker--dark hidden xl:inline-flex">YOUR CORNER</span>
+			<span class="grid size-8 rotate-[-6deg] place-items-center rounded-xl border-2 border-[#111210] bg-lime-300 font-mono text-sm text-neutral-950 shadow-[2px_2px_0_rgba(255,255,255,0.3)] transition-transform group-hover:rotate-6">o</span>
+			<span>ovyn<span class="text-lime-300">.</span></span>
+			<span class="sticker sticker--dark hidden xl:inline-flex">your corner</span>
 		</a>
 
 		<nav class="desktop-navigation" aria-label="Primary">
@@ -102,7 +101,6 @@
 						<a href="/account" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Account overview</a>
 						<a href="/customize" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Customize page</a>
 						<a href="/upgrade" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Plans &amp; upgrade</a>
-						{#if isAdmin}<a href="/admin" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-lime-300 transition-colors hover:bg-neutral-800">Monetization admin</a>{/if}
 						<hr class="my-1 border-neutral-800" />
 						<button type="button" onclick={logout} class="block min-h-11 w-full px-4 py-3 text-left text-sm text-red-400 transition-colors hover:bg-neutral-800">Sign out</button>
 					</div>
@@ -120,7 +118,7 @@
 		<nav id="mobile-primary-menu" class="mobile-menu-panel" bind:this={mobileMenuPanel} aria-label="Primary navigation" transition:fly={{ y: -10, duration: 190 }}>
 			<div class="mobile-menu-heading">
 				<div>
-					<span class="sticker sticker--pink">OVYN / YOUR CORNER</span>
+					<span class="sticker sticker--pink">ovyn / your corner</span>
 					<h2>Where to next?</h2>
 				</div>
 				<button type="button" class="mobile-menu-close" onclick={closeMenus} aria-label="Close navigation menu">×</button>

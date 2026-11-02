@@ -11,7 +11,7 @@
 </script>
 
 <svelte:head>
-	<title>Shop - OVYN</title>
+	<title>Shop - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

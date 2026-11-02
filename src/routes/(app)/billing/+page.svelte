@@ -13,13 +13,13 @@
 	];
 </script>
 
-<svelte:head><title>Plans &amp; billing - OVYN</title></svelte:head>
+<svelte:head><title>Plans &amp; billing - ovyn</title></svelte:head>
 
 <div class="mx-auto flex max-w-5xl flex-col gap-8 py-3">
 	<div class="max-w-2xl"><p class="landing-eyebrow">PLANS THAT STAY SIMPLE</p><h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Your space, your choice.</h1><p class="mt-3 text-sm leading-7 text-neutral-400">Start free. Unlock the full creative toolkit with one lifetime payment. No renewals, no subscriptions to remember.</p></div>
 	{#if form?.error}<p class="text-sm text-red-400" role="alert">{form.error}</p>{/if}
 	<Card class="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
-		<div><p class="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Your current plan</p><p class="mt-1 text-xl font-semibold">{data.plan.tier === 'premium' ? 'OVYN Premium' : 'OVYN Free'}</p></div>
+		<div><p class="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Your current plan</p><p class="mt-1 text-xl font-semibold">{data.plan.tier === 'premium' ? 'ovyn Premium' : 'ovyn Free'}</p></div>
 		{#if data.plan.tier === 'premium'}<p class="text-sm text-neutral-400">{data.plan.isLifetime ? 'Lifetime access · one-time payment' : `Legacy access until ${data.plan.premiumUntil ? formatDate(data.plan.premiumUntil) : 'Date unavailable'}`}</p>{:else}<p class="text-sm text-neutral-400">You can upgrade whenever you’re ready.</p>{/if}
 	</Card>
 	<div class="grid gap-5 md:grid-cols-2">

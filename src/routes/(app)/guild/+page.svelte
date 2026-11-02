@@ -17,7 +17,7 @@
 </script>
 
 <svelte:head>
-	<title>{data.guild ? data.guild.name : 'My guild'} - OVYN</title>
+	<title>{data.guild ? data.guild.name : 'My guild'} - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-6">
@@ -31,7 +31,7 @@
 
 	{#if !data.guild}
 		<Card class="flex flex-col items-center gap-4 p-10 text-center">
-			<p class="text-neutral-400">You're not in a guild yet. OVYN is better with your circle.</p>
+			<p class="text-neutral-400">You're not in a guild yet. ovyn is better with your circle.</p>
 			<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
 				<Button href="/discover" variant="secondary" class="w-full sm:w-auto">Discover guilds</Button>
 				<Button href="/guild/create" class="w-full sm:w-auto">Create a guild</Button>

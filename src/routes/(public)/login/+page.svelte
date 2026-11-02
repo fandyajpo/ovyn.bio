@@ -23,13 +23,13 @@
 </script>
 
 <svelte:head>
-	<title>Sign in - OVYN</title>
+	<title>Sign in - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex min-h-[65svh] max-w-md flex-col items-center justify-center gap-6 py-16 text-center">
 	<p class="landing-eyebrow justify-center">YOUR SPACE IS WAITING</p>
 	<div>
-		<h1 class="text-3xl font-semibold tracking-tight">Welcome to OVYN</h1>
+		<h1 class="text-3xl font-semibold tracking-tight">Welcome to ovyn</h1>
 		<p class="mt-3 text-neutral-400">Sign in and make a corner of the internet your own.</p>
 	</div>
 
@@ -47,6 +47,9 @@
 	{/if}
 
 	<p class="max-w-sm text-xs leading-6 text-neutral-500">
-		Sign-in is only used to protect your account. Your OVYN profile identity stays yours to customize.
+		Sign-in is only used to protect your account. Your ovyn profile identity stays yours to customize.
+	</p>
+	<p class="max-w-sm text-xs leading-6 text-neutral-600">
+		By continuing you agree to the <a href="/terms" class="text-lime-300 hover:underline">Terms of Service</a> and the <a href="/privacy" class="text-lime-300 hover:underline">Privacy Policy</a>.
 	</p>
 </div>

@@ -1,150 +1,115 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import AdminCosmeticAssetUpload from '#lib/components/AdminCosmeticAssetUpload.svelte';
+	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
-	import Checkbox from '#lib/components/ui/Checkbox.svelte';
-	import DropdownSelect from '#lib/components/ui/DropdownSelect.svelte';
-	import Input from '#lib/components/ui/Input.svelte';
-	import Select from '#lib/components/ui/Select.svelte';
+	import { formatDate, formatIdr } from '#lib/utils';
 
-	type CatalogForm = {
-		error?: string;
-		ok?: string;
-		action?: 'create' | 'update';
-		submittedId?: string;
-		submittedValues?: Record<string, string>;
-		fieldErrors?: Record<string, string>;
-	};
+	type CatalogRow = PageData['products'][number];
 
-	let { data, form }: { data: PageData; form?: CatalogForm } = $props();
+	let { data }: { data: PageData } = $props();
 
-	const productTypeOptions = [
-		{ value: 'plan', label: 'Premium lifetime plan' },
-		{ value: 'cosmetic', label: 'Cosmetic' }
-	];
-	const cosmeticKindOptions = [
-		{ value: 'frame', label: 'Avatar frame' },
-		{ value: 'wallpaper', label: 'Wallpaper' },
-		{ value: 'badge', label: 'Badge' }
-	];
-	const createValues: Record<string, string> = $derived(form?.action === 'create' ? form.submittedValues ?? {} : {});
-	const createErrors: Record<string, string> = $derived(form?.action === 'create' ? form.fieldErrors ?? {} : {});
+	const KIND_LABEL = { frame: 'Avatar frame', wallpaper: 'Wallpaper', badge: 'Badge' } as const;
 
-	function updateValues(productId: string) {
-		return form?.action === 'update' && form.submittedId === productId ? form.submittedValues ?? {} : null;
+	function typeLabel(row: CatalogRow) {
+		if (row.product.category === 'plan') {
+			return row.product.durationDays === 30 ? 'Legacy 30-day plan' : 'Lifetime Premium';
+		}
+		return row.cosmetic ? KIND_LABEL[row.cosmetic.kind] : 'Cosmetic';
 	}
 
-	function updateErrors(productId: string) {
-		return form?.action === 'update' && form.submittedId === productId ? form.fieldErrors ?? {} : {};
-	}
-
-	function dateValue(value: Date | null) {
-		return value ? new Date(value).toISOString().slice(0, 10) : '';
+	function availability(row: CatalogRow) {
+		if (row.product.category === 'plan') {
+			return row.product.durationDays === 30 ? '30 days of access' : 'Lifetime access';
+		}
+		if (!row.cosmetic) return 'Details missing';
+		const parts = [row.cosmetic.stockLimit === null ? 'Unlimited stock' : `${row.cosmetic.stockLimit} in stock`];
+		if (row.cosmetic.pointsPrice !== null) parts.push(`${row.cosmetic.pointsPrice} points`);
+		if (row.cosmetic.dropEndsAt) parts.push(`ends ${new Date(row.cosmetic.dropEndsAt).toLocaleDateString()}`);
+		return parts.join(' · ');
 	}
 </script>
 
 <svelte:head>
-	<title>Catalog manager - OVYN Admin</title>
+	<title>Catalog manager - ovyn admin</title>
 </svelte:head>
 
-<div class="mx-auto flex max-w-5xl flex-col gap-7">
-	<div>
-		<a href="/admin" class="text-sm text-neutral-500 hover:text-lime-300">← Monetization</a>
-		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Catalog manager</h1>
-		<p class="mt-1 text-neutral-400">Edit prices and availability. Deactivate items to stop selling them; products are not deleted so existing purchases stay intact.</p>
-	</div>
+<div class="mx-auto flex max-w-6xl flex-col gap-7">
+	<header class="flex flex-wrap items-end justify-between gap-4">
+		<div>
+			<span class="sticker sticker--blue">CATALOG</span>
+			<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Catalog manager</h1>
+			<p class="mt-1 max-w-2xl text-neutral-400">Every product you sell in one table. Price changes affect new orders only, and products are deactivated rather than deleted so purchases stay intact.</p>
+		</div>
+		<Button href="/admin/catalog/new">New product</Button>
+	</header>
 
-	{#if form?.error}<p class="rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-300" role="alert">{form.error}</p>{/if}
-	{#if form?.ok}<p class="rounded-lg border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">{form.ok}</p>{/if}
+	{#if data.created}
+		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Created {data.created}.</p>
+	{/if}
+	{#if data.updated}
+		<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">Saved changes to {data.updated}.</p>
+	{/if}
 
-	<Card class="p-5 sm:p-6">
-		<h2 class="font-[family-name:var(--font-display)] text-xl font-semibold">Add a product</h2>
-		<p class="mt-1 text-sm text-neutral-500">New listings start inactive unless you check Publish. Premium is a one-time Rp 100.000 payment for lifetime access.</p>
-		<form method="POST" action="?/create" class="mt-5 grid gap-4 sm:grid-cols-2">
-			<Select
-				name="category"
-				label="Product type"
-				options={productTypeOptions}
-				value={createValues.category ?? 'cosmetic'}
-				required
-				error={createErrors.category}
-			/>
-			<Input name="name" label="Name" value={createValues.name ?? ''} required minlength={2} maxlength={100} error={createErrors.name} />
-			<Input name="price" label="Price (IDR)" type="number" value={createValues.price ?? ''} min={0} step={1} required error={createErrors.price} />
-			<Input name="durationDays" label="Duration in days" type="number" value={createValues.durationDays ?? ''} min={1} max={365} hint="For a Premium lifetime plan, leave this blank. Enter Rp 100.000 as its price." error={createErrors.durationDays} />
-			<Input name="description" label="Description" value={createValues.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" />
-			<div class="rounded-xl border border-neutral-800 p-4 sm:col-span-2">
-				<p class="mb-3 text-sm font-medium text-neutral-200">Cosmetic details (cosmetic products only)</p>
-				<div class="grid gap-4 sm:grid-cols-2">
-					<DropdownSelect
-						name="kind"
-						label="Cosmetic slot"
-						options={cosmeticKindOptions}
-						value={createValues.kind ?? 'frame'}
-						required
-						error={createErrors.kind}
-					/>
-					<Input name="accentColor" label="Accent color" value={createValues.accentColor ?? ''} placeholder="#D5FF35" pattern="#[0-9a-fA-F]{6}" error={createErrors.accentColor} />
-					<Input name="pointsPrice" label="Points price" type="number" value={createValues.pointsPrice ?? ''} min={0} step={1} hint="Leave empty to disallow points redemption." error={createErrors.pointsPrice} />
-					<Input name="stockLimit" label="Stock limit" type="number" value={createValues.stockLimit ?? ''} min={1} step={1} hint="Leave empty for unlimited stock." error={createErrors.stockLimit} />
-					<Input name="dropEndsAt" label="Drop end date (UTC)" type="date" value={createValues.dropEndsAt ?? ''} error={createErrors.dropEndsAt} />
-					<div><p class="mb-2 text-sm text-neutral-300">Product artwork</p><AdminCosmeticAssetUpload initialKey={createValues.assetKey ?? null} label="Upload cosmetic image" error={createErrors.assetKey} /></div>
-				</div>
+	{#if data.products.length === 0}
+		<Card class="p-10 text-center">
+			<p class="font-medium text-neutral-200">No catalog products yet</p>
+			<p class="mt-1 text-sm text-neutral-500">Create a lifetime Premium plan or a profile cosmetic to get started.</p>
+			<Button href="/admin/catalog/new" variant="secondary" class="mt-4">Create the first product</Button>
+		</Card>
+	{:else}
+		<Card class="overflow-hidden">
+			<div class="grid gap-3 p-3 lg:hidden">
+				{#each data.products as row (row.product.id)}
+					<article class="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
+						<div class="flex items-start justify-between gap-3">
+							<div class="min-w-0">
+								<h2 class="truncate font-medium text-neutral-100">{row.product.name}</h2>
+								<p class="mt-1 font-mono text-[10px] uppercase tracking-wider text-neutral-500">{typeLabel(row)}</p>
+							</div>
+							<Badge tone={row.product.active ? 'lime' : 'neutral'} size="xs">{row.product.active ? 'active' : 'inactive'}</Badge>
+						</div>
+						<p class="mt-3 font-mono text-sm text-neutral-200">{formatIdr(row.product.price)}</p>
+						<p class="mt-2 text-sm text-neutral-400">{availability(row)}</p>
+						<div class="mt-4 flex items-center justify-between gap-3 border-t border-neutral-800 pt-3">
+							<a href="/admin/catalog/{row.product.id}" class="text-sm text-lime-300 hover:underline">Edit</a>
+							<time class="font-mono text-[10px] text-neutral-500">{formatDate(row.product.updatedAt)}</time>
+						</div>
+					</article>
+				{/each}
 			</div>
-			<Checkbox name="active" label="Publish immediately" checked={createValues.active === 'on'} class="sm:col-span-2" />
-			<div class="sm:col-span-2"><Button type="submit">Create product</Button></div>
-		</form>
-	</Card>
 
-	<section class="flex flex-col gap-4">
-		<div><h2 class="font-[family-name:var(--font-display)] text-2xl font-semibold">Existing products</h2><p class="mt-1 text-sm text-neutral-500">Pricing changes affect new orders only. Past orders retain their recorded amounts.</p></div>
-		{#if data.products.length === 0}
-			<Card class="p-8 text-center text-neutral-500">No catalog products yet.</Card>
-		{:else}
-			{#each data.products as row (row.product.id)}
-				{@const values = updateValues(row.product.id)}
-				{@const errors = updateErrors(row.product.id)}
-				<Card class="p-5">
-					<div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-						<div><p class="font-medium text-neutral-100">{row.product.name}</p><p class="font-mono text-xs uppercase text-neutral-500">{row.product.category}</p></div>
-						<span class="rounded-full border px-2 py-1 text-xs {row.product.active ? 'border-lime-300/40 text-lime-300' : 'border-neutral-700 text-neutral-500'}">{row.product.active ? 'Active' : 'Inactive'}</span>
-					</div>
-					{#if row.product.category === 'plan'}
-						<form method="POST" action="?/update" class="grid gap-4 sm:grid-cols-2">
-							<input type="hidden" name="id" value={row.product.id} />
-							<input type="hidden" name="durationDays" value={row.product.durationDays ?? ''} />
-							<Input name="name" label="Plan name" value={values?.name ?? row.product.name} required minlength={2} maxlength={100} error={errors.name} />
-							<Input name="price" label={row.product.durationDays === 30 ? 'Legacy price (IDR)' : 'Lifetime price (IDR)'} type="number" value={values?.price ?? String(row.product.price)} min={1} step={1} required readonly={row.product.durationDays !== 30} error={errors.price} />
-							<Input name="description" label="Description" value={values?.description ?? row.product.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" error={errors.description} />
-							<p class="text-sm text-neutral-500 sm:col-span-2">New Premium purchases are lifetime access for Rp 100.000. Existing 30-day products remain legacy and cannot be sold through the new plans page.</p>
-							<Checkbox name="active" label="Available for purchase" checked={values ? values.active === 'on' : row.product.active} class="sm:col-span-2" />
-							<div class="sm:col-span-2"><Button type="submit">Save plan</Button></div>
-						</form>
-					{:else if row.product.category === 'cosmetic' && !row.cosmetic}
-						<p class="text-sm text-red-400">Cosmetic details are missing for this product; it cannot be edited here.</p>
-					{:else}
-						<form method="POST" action="?/update" class="grid gap-4 sm:grid-cols-2">
-							<input type="hidden" name="id" value={row.product.id} />
-							<Input name="name" label="Name" value={values?.name ?? row.product.name} required minlength={2} maxlength={100} error={errors.name} />
-							<Input name="price" label="Price (IDR)" type="number" value={values?.price ?? String(row.product.price)} min={0} step={1} required error={errors.price} />
-							<Input name="description" label="Description" value={values?.description ?? row.product.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" error={errors.description} />
-							{#if row.product.category === 'cosmetic' && row.cosmetic}
-								<Select name="kind" label="Cosmetic slot" options={cosmeticKindOptions} value={values?.kind ?? row.cosmetic.kind} required error={errors.kind} />
-								<Input name="accentColor" label="Accent color" value={values?.accentColor ?? row.cosmetic.accentColor ?? ''} pattern="#[0-9a-fA-F]{6}" placeholder="#D5FF35" error={errors.accentColor} />
-								<Input name="pointsPrice" label="Points price" type="number" value={values?.pointsPrice ?? String(row.cosmetic.pointsPrice ?? '')} min={0} step={1} error={errors.pointsPrice} />
-								<Input name="stockLimit" label="Stock limit" type="number" value={values?.stockLimit ?? String(row.cosmetic.stockLimit ?? '')} min={1} step={1} error={errors.stockLimit} />
-								<Input name="dropEndsAt" label="Drop end date (UTC)" type="date" value={values?.dropEndsAt ?? dateValue(row.cosmetic.dropEndsAt)} error={errors.dropEndsAt} />
-								<div><p class="mb-2 text-sm text-neutral-300">Product artwork</p><AdminCosmeticAssetUpload initialKey={values?.assetKey ?? row.cosmetic.assetKey} label="Replace image" error={errors.assetKey} /></div>
-							{:else}
-								<Input name="durationDays" label="Spotlight duration in days" type="number" value={values?.durationDays ?? String(row.product.durationDays ?? '')} min={1} max={365} required error={errors.durationDays} />
-							{/if}
-							<Checkbox name="active" label="Available in the shop" checked={values ? values.active === 'on' : row.product.active} class="sm:col-span-2" />
-							<div class="sm:col-span-2"><Button type="submit">Save changes</Button></div>
-						</form>
-					{/if}
-				</Card>
-			{/each}
-		{/if}
-	</section>
+			<div class="hidden overflow-x-auto lg:block">
+				<table class="w-full min-w-[56rem] text-left text-sm">
+					<thead class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+						<tr>
+							<th scope="col" class="px-5 py-3">Product</th>
+							<th scope="col" class="px-5 py-3">Type</th>
+							<th scope="col" class="px-5 py-3">Price</th>
+							<th scope="col" class="px-5 py-3">Availability</th>
+							<th scope="col" class="px-5 py-3">Status</th>
+							<th scope="col" class="px-5 py-3">Updated</th>
+							<th scope="col" class="px-5 py-3"><span class="sr-only">Actions</span></th>
+						</tr>
+					</thead>
+					<tbody class="divide-y divide-neutral-800">
+						{#each data.products as row (row.product.id)}
+							<tr>
+								<td class="px-5 py-3">
+									<span class="block text-neutral-100">{row.product.name}</span>
+									{#if row.product.description}<span class="mt-0.5 block max-w-md truncate text-xs text-neutral-500">{row.product.description}</span>{/if}
+								</td>
+								<td class="px-5 py-3 text-neutral-400">{typeLabel(row)}</td>
+								<td class="whitespace-nowrap px-5 py-3 font-mono text-neutral-200">{formatIdr(row.product.price)}</td>
+								<td class="px-5 py-3 text-neutral-400">{availability(row)}</td>
+								<td class="px-5 py-3"><Badge tone={row.product.active ? 'lime' : 'neutral'} size="xs">{row.product.active ? 'active' : 'inactive'}</Badge></td>
+								<td class="whitespace-nowrap px-5 py-3 text-neutral-500">{formatDate(row.product.updatedAt)}</td>
+								<td class="whitespace-nowrap px-5 py-3 text-right"><a href="/admin/catalog/{row.product.id}" class="text-sm text-lime-300 hover:underline">Edit</a></td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+		</Card>
+	{/if}
 </div>

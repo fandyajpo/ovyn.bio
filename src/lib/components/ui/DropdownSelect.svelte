@@ -121,20 +121,23 @@
 
 <svelte:window onpointerdown={closeOnOutsidePointerDown} />
 
-<div bind:this={root} class={cn('relative flex flex-col gap-1.5', className)}>
-	<label id="{id}-label" for={id} class="text-sm font-medium text-neutral-300">
-		{label}{#if required}<span class="ml-1 text-lime-300" aria-hidden="true">*</span>{/if}
-	</label>
-	<div class="dropdown-control">
+<div bind:this={root} class={cn('ovyn-field', className)}>
+	<div class="ovyn-field-head">
+		<label id="{id}-label" for={id} class="ovyn-field-label">
+			{label}{#if required}<span class="ovyn-required" aria-hidden="true">*</span>{/if}
+		</label>
+	</div>
+
+	<div class="ovyn-dropdown">
 		<input type="hidden" {name} value={value} />
 		<button
 			id={id}
 			bind:this={trigger}
 			type="button"
-			disabled={disabled}
+			{disabled}
 			onclick={toggleMenu}
 			onkeydown={handleKeydown}
-			class="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-neutral-700 bg-neutral-900 px-3.5 py-2.5 text-left text-sm text-neutral-100 outline-none transition-colors focus:border-lime-300 focus:ring-1 focus:ring-lime-300/40 disabled:cursor-not-allowed disabled:opacity-60"
+			class="ovyn-dropdown-trigger"
 			role="combobox"
 			aria-labelledby="{id}-label"
 			aria-haspopup="listbox"
@@ -145,11 +148,15 @@
 			aria-invalid={Boolean(error)}
 			aria-describedby={describedBy}
 		>
-			<span class={selectedOption ? 'truncate' : 'truncate text-neutral-500'}>{selectedOption?.label ?? placeholder}</span>
-			<span class="shrink-0 font-mono text-neutral-500" aria-hidden="true">{open ? '⌃' : '⌄'}</span>
+			<span class="ovyn-dropdown-value {selectedOption ? '' : 'is-placeholder'}">{selectedOption?.label ?? placeholder}</span>
+			<span class="ovyn-dropdown-caret {open ? 'is-open' : ''}" aria-hidden="true">
+				<svg viewBox="0 0 24 24" fill="none">
+					<path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</span>
 		</button>
 
-		<div id="{id}-listbox" class="dropdown-options" role="listbox" aria-labelledby="{id}-label" aria-hidden={!open}>
+		<div id="{id}-listbox" class="ovyn-dropdown-panel" role="listbox" aria-labelledby="{id}-label" aria-hidden={!open}>
 			{#each options as option, index (option.value)}
 				{@const selected = value === option.value}
 				{@const active = activeIndex === index}
@@ -161,81 +168,181 @@
 					aria-selected={selected}
 					aria-disabled={Boolean(option.disabled)}
 					disabled={option.disabled}
-					class={cn('dropdown-option', active && 'dropdown-option--active', selected && 'dropdown-option--selected')}
+					class={cn('ovyn-dropdown-option', active && 'is-active', selected && 'is-selected')}
 					onpointermove={() => { if (!option.disabled) activeIndex = index; }}
 					onclick={() => choose(option)}
 				>
-					<span>{option.label}</span>
-					{#if selected}<span class="font-mono text-lime-300" aria-hidden="true">✓</span>{/if}
+					<span class="ovyn-dropdown-marker" aria-hidden="true"></span>
+					<span class="ovyn-dropdown-option-label">{option.label}</span>
+					{#if selected}<span class="ovyn-dropdown-check" aria-hidden="true">✓</span>{/if}
 				</button>
 			{/each}
 		</div>
 	</div>
 
-	{#if hint}<p id="{id}-hint" class="text-xs text-neutral-500">{hint}</p>{/if}
-	{#if error}<p id="{id}-error" class="text-xs text-red-400" role="alert">{error}</p>{/if}
+	{#if hint}<p id="{id}-hint" class="ovyn-field-hint">{hint}</p>{/if}
+	{#if error}<p id="{id}-error" class="ovyn-field-error" role="alert">{error}</p>{/if}
 </div>
 
 <style>
-	.dropdown-control {
-		position: relative;
+	.ovyn-field { display: grid; gap: 0.45rem; min-width: 0; }
+	.ovyn-field-head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; }
+
+	.ovyn-field-label {
+		color: var(--color-foreground);
+		font-size: 0.78rem;
+		font-weight: 600;
+		letter-spacing: 0.01em;
 	}
 
-	.dropdown-options {
+	.ovyn-required { margin-left: 0.2rem; color: var(--color-pop-pink); }
+	.ovyn-field-hint { color: var(--color-muted); font-size: 0.7rem; line-height: 1.5; }
+	.ovyn-field-error { color: #f87171; font-size: 0.75rem; line-height: 1.5; }
+
+	.ovyn-dropdown { position: relative; }
+
+	.ovyn-dropdown-trigger {
+		display: flex;
+		width: 100%;
+		min-height: 2.85rem;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.9rem;
+		background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 96%, transparent), color-mix(in srgb, var(--color-background) 86%, transparent));
+		padding: 0.7rem 0.75rem 0.7rem 0.95rem;
+		color: var(--color-foreground);
+		font: inherit;
+		font-size: 0.9rem;
+		text-align: left;
+		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 6%, transparent);
+		transition: border-color 180ms ease, box-shadow 180ms ease;
+	}
+
+	.ovyn-dropdown-trigger:hover:not(:disabled) {
+		border-color: color-mix(in srgb, var(--color-foreground) 20%, transparent);
+	}
+
+	.ovyn-dropdown-trigger:focus-visible {
+		border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+		outline: none;
+		box-shadow: 0 0 0 4px var(--color-accent-soft);
+	}
+
+	.ovyn-dropdown-trigger[aria-invalid='true'] {
+		border-color: color-mix(in srgb, #f87171 62%, transparent);
+	}
+
+	.ovyn-dropdown-trigger:disabled { cursor: not-allowed; opacity: 0.6; }
+	.ovyn-dropdown-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.ovyn-dropdown-value.is-placeholder { color: color-mix(in srgb, var(--color-muted) 85%, transparent); }
+
+	.ovyn-dropdown-caret {
+		display: grid;
+		width: 1.55rem;
+		height: 1.55rem;
+		flex: 0 0 auto;
+		place-items: center;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.55rem;
+		background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+		color: var(--color-accent);
+		transition: transform 200ms ease, background-color 200ms ease;
+	}
+
+	.ovyn-dropdown-caret svg { width: 0.85rem; height: 0.85rem; }
+	.ovyn-dropdown-caret.is-open { transform: rotate(180deg); background: var(--color-accent-soft); }
+
+	.ovyn-dropdown-panel {
 		position: absolute;
 		z-index: 30;
-		top: calc(100% + 0.35rem);
+		top: calc(100% + 0.4rem);
 		right: 0;
 		left: 0;
 		max-height: 16rem;
 		overflow-y: auto;
 		border: 1px solid var(--color-divider);
-		border-radius: 0.9rem;
+		border-radius: 1rem;
 		background: var(--color-menu-glass);
-		padding: 0.35rem;
-		box-shadow: 0 18px 40px rgb(0 0 0 / 35%);
+		padding: 0.4rem;
+		box-shadow: 0 22px 48px rgb(0 0 0 / 32%);
 		opacity: 0;
 		visibility: hidden;
 		pointer-events: none;
-		transform: translateY(-0.35rem);
-		transition: opacity 140ms ease, transform 140ms ease, visibility 0s linear 140ms;
+		transform: translateY(-0.35rem) scale(0.985);
+		transform-origin: top center;
+		transition: opacity 150ms ease, transform 170ms ease, visibility 0s linear 170ms;
 	}
 
-	.dropdown-options:not([aria-hidden='true']) {
+	.ovyn-dropdown-panel:not([aria-hidden='true']) {
 		opacity: 1;
 		visibility: visible;
 		pointer-events: auto;
-		transform: translateY(0);
+		transform: translateY(0) scale(1);
 		transition-delay: 0s;
 	}
 
-	.dropdown-option {
+	.ovyn-dropdown-option {
 		display: flex;
 		width: 100%;
-		min-height: 2.75rem;
+		min-height: 2.7rem;
 		align-items: center;
-		justify-content: space-between;
-		gap: 0.75rem;
+		gap: 0.6rem;
 		border: 1px solid transparent;
-		border-radius: 0.65rem;
+		border-radius: 0.7rem;
 		background: transparent;
-		padding: 0.6rem 0.75rem;
+		padding: 0.55rem 0.7rem;
 		color: var(--color-foreground);
+		font: inherit;
+		font-size: 0.85rem;
 		text-align: left;
+		transition: background-color 140ms ease, border-color 140ms ease;
 	}
 
-	.dropdown-option--active,
-	.dropdown-option--selected {
-		border-color: color-mix(in srgb, var(--color-accent) 28%, transparent);
+	.ovyn-dropdown-marker {
+		width: 0.35rem;
+		height: 0.35rem;
+		flex: 0 0 auto;
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--color-muted) 55%, transparent);
+		transition: background-color 140ms ease, transform 140ms ease;
+	}
+
+	.ovyn-dropdown-option-label { min-width: 0; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+	.ovyn-dropdown-check {
+		color: var(--color-accent);
+		font-family: var(--font-mono);
+		font-size: 0.75rem;
+	}
+
+	.ovyn-dropdown-option.is-active {
+		border-color: color-mix(in srgb, var(--color-accent) 22%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+	}
+
+	.ovyn-dropdown-option.is-selected {
+		border-color: color-mix(in srgb, var(--color-accent) 34%, transparent);
 		background: var(--color-accent-soft);
 	}
 
-	.dropdown-option:focus-visible {
+	.ovyn-dropdown-option.is-selected .ovyn-dropdown-marker,
+	.ovyn-dropdown-option.is-active .ovyn-dropdown-marker {
+		background: var(--color-accent);
+		transform: scale(1.15);
+	}
+
+	.ovyn-dropdown-option:disabled { cursor: not-allowed; opacity: 0.45; }
+
+	.ovyn-dropdown-option:focus-visible {
 		outline: 2px solid var(--color-accent);
 		outline-offset: 1px;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.dropdown-options { transition: none; }
+		.ovyn-dropdown-trigger,
+		.ovyn-dropdown-caret,
+		.ovyn-dropdown-panel { transition: none; }
 	}
 </style>

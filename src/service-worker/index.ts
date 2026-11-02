@@ -114,8 +114,8 @@ self.addEventListener('push', (event) => {
 			if (!preferences?.enabled) return;
 			if (message.category && preferences.categories?.[message.category] === false) return;
 
-			await self.registration.showNotification(message.title ?? 'OVYN', {
-				body: message.body ?? 'You have new activity. Open OVYN to see what changed.',
+			await self.registration.showNotification(message.title ?? 'ovyn', {
+				body: message.body ?? 'You have new activity. Open ovyn to see what changed.',
 				icon: resolve('/icons/ovyn-192.svg'),
 				badge: resolve('/icons/ovyn-192.svg'),
 				tag: message.tag ?? `ovyn-${message.category ?? 'activity'}`,

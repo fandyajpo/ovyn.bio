@@ -1,4 +1,4 @@
-# OVYN
+# ovyn
 
 **Your identity. Your circle.** - a digital identity and community platform at `ovyn.bio`.
 
@@ -67,11 +67,19 @@ You must add:
 
 ## PWA, typography and profile media
 
-OVYN can be installed from supported browsers as a standalone app. Its service worker caches versioned build and static assets, shows an offline fallback for navigation, and avoids caching personalized server-rendered pages.
+ovyn can be installed from supported browsers as a standalone app. Its service worker caches versioned build and static assets, shows an offline fallback for navigation, and avoids caching personalized server-rendered pages.
 
 The interface uses Poppins with a soft, low-contrast palette and spacious layouts. Profile wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom profile audio is user-initiated (never autoplayed); custom cursor images are PNG/WebP uploads.
 
 Account settings let each device manage browser notification permission and event-category preferences, with a local test notification. The service worker can receive and filter push payloads, but remote push subscriptions and server delivery are not wired yet; VAPID support remains follow-up work.
+
+## Interface kit
+
+Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), native-backed select, animated dropdown select, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. File uploads use a drag and drop dropzone that also works by click and keyboard.
+
+The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type.
+
+Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages linked from the footer and from the sign-in screen.
 
 ## Key architecture notes
 
@@ -85,7 +93,7 @@ Account settings let each device manage browser notification permission and even
   `mapProfileToUser`. Duplicate accounts for the same Discord ID are prevented
   by the unique `(provider, accountId)` pairing. Discord identity
   seeds new profiles, while profile username, display name, bio and uploaded
-  avatar are OVYN-owned and remain editable. An uploaded avatar overrides the
+  avatar are ovyn-owned and remain editable. An uploaded avatar overrides the
   sign-in provider's picture until the user resets it.
 - **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
   one-time data backfill with `npm run db:backfill` - it copies users and
@@ -111,14 +119,15 @@ Account settings let each device manage browser notification permission and even
   frames around the avatar, wallpapers behind the header, and badges next to
   the name. Seed the starter catalog once with `npm run db:seed-shop`; its SVG
   artwork is bundled in `static/cosmetics/`. The shop previews each item on a
-  sample profile. Use `/admin/catalog` to manage listings and upload replacement
-  artwork to Neon Object Storage.
+  sample profile. `/admin/catalog` lists every product in one table, with
+  separate pages for creating and editing a listing, including artwork uploads
+  to Neon Object Storage.
 
 - **Limited drops** - cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** - one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
 - **Profile analytics** - counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
 - **Plans** - Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
-- **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Admin and guild permissions remain enforced server-side.
+- **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Account and admin areas hide the public navbar and footer on every screen size and link back to the landing page. Platform admins get the `/admin` entry from their account overview, never from the public navigation. Admin and guild permissions remain enforced server-side.
 - **Profile links and templates** - public links are scheme-validated before display. Templates contain preset themes only, are private by default, and enter the community gallery only when their owner shares them.
 - **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
@@ -127,12 +136,15 @@ Whenever the schema changes, run `npm run db:generate`, review the generated mig
 ## Monetization administration
 
 Set `OVYN_ADMIN_DISCORD_IDS` to your comma-separated Discord user ID(s) locally
-and in Vercel, then sign in with one of those accounts and open `/admin`. The
-admin area lets you create/edit cosmetics and Premium plans, set
-prices, points costs, drop limits/end dates, upload cosmetic art, and review
-recent orders/revenue. Cosmetics and lifetime Premium plans can be activated;
-new products remain inactive until published. Premium plans are fixed at Rp 100.000 for lifetime access. Products are deactivated rather than deleted so purchase
-history and ownership remain intact. DOKU refunds are not managed here yet.
+and in Vercel, then sign in with one of those accounts and open `/admin` from
+your account overview. The admin area has its own sidebar and no public navbar
+or footer. It lets you browse the catalog as a table, create and edit cosmetics
+and Premium plans on their own pages, set prices, points costs, drop
+limits/end dates, upload cosmetic art, and review recent orders/revenue.
+Cosmetics and lifetime Premium plans can be activated; new products remain
+inactive until published. Premium plans are fixed at Rp 100.000 for lifetime
+access. Products are deactivated rather than deleted so purchase history and
+ownership remain intact. DOKU refunds are not managed here yet.
 
 ## DOKU integration points
 

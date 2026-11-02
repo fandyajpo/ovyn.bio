@@ -2,12 +2,10 @@ import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import {
 	cosmetics,
-	guilds,
 	orders,
 	paymentEvents,
 	payments,
 	products,
-	spotlights,
 	userCosmetics
 } from '#lib/server/db/schema';
 import { profiles } from '#lib/server/db/schema';
@@ -21,7 +19,6 @@ import {
 import type { TransactionFn } from './types';
 
 type Tx = Parameters<TransactionFn>[0];
-type SpotlightTarget = { type: 'profile' | 'guild'; id: string };
 
 const PAYMENT_CHANNEL: SnapChannel = 'VIRTUAL_ACCOUNT_BCA';
 /** DOKU recommends hitting Check Status ~60s after payment completion. */
@@ -32,15 +29,9 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 // Order + payment creation
 // ---------------------------------------------------------------------------
 
-/**
- * Create an order using a server-controlled product price. Target metadata
- * is accepted only for spotlight products and is validated against ownership.
- */
-export async function createCheckout(userId: string, productId: string, target?: SpotlightTarget) {
+/** Create an order using a server-controlled product price. */
+export async function createCheckout(userId: string, productId: string) {
 	if (!UUID_PATTERN.test(productId)) throw new NotFoundError('Product not found or not available');
-	if (target?.type === 'guild' && !UUID_PATTERN.test(target.id)) {
-		throw new ValidationError('Invalid guild target');
-	}
 
 	const [product] = await db
 		.select()
@@ -53,36 +44,11 @@ export async function createCheckout(userId: string, productId: string, target?:
 		throw new ValidationError('Premium is a one-time Rp 100.000 lifetime plan');
 	}
 
-	const expectedSpotlightType =
-		product.category === 'profile_spotlight'
-			? 'profile'
-			: product.category === 'guild_spotlight'
-				? 'guild'
-				: null;
-
-	if (expectedSpotlightType) {
-		if (!target || target.type !== expectedSpotlightType) {
-			throw new ValidationError('Choose a valid target for this spotlight');
-		}
-		if (!product.durationDays || product.durationDays < 1) {
-			throw new ValidationError('This spotlight product has no valid duration configured');
-		}
-		if (target.type === 'profile' && target.id !== userId) {
-			throw new ForbiddenError('You can only feature your own profile');
-		}
-	} else if (target) {
-		throw new ValidationError('This product does not accept a spotlight target');
-	}
-
 	const [profile] = await db
-		.select({ displayName: profiles.displayName, slug: profiles.slug, visibility: profiles.visibility })
+		.select({ displayName: profiles.displayName, slug: profiles.slug })
 		.from(profiles)
 		.where(eq(profiles.userId, userId))
 		.limit(1);
-
-	if (expectedSpotlightType === 'profile' && profile?.visibility !== 'public') {
-		throw new ConflictError('Make your profile public before featuring it');
-	}
 
 	// User lock prevents parallel pending orders; product lock serializes
 	// limited-drop stock reservations across different users.
@@ -153,20 +119,11 @@ export async function createCheckout(userId: string, productId: string, target?:
 			}
 		}
 
-		if (expectedSpotlightType === 'guild') {
-			const [guild] = await tx.select().from(guilds).where(eq(guilds.id, target!.id)).limit(1);
-			if (!guild || guild.ownerId !== userId || guild.status !== 'active') {
-				throw new ForbiddenError('Only the owner of an active guild can feature it');
-			}
-		}
-
 		const [created] = await tx
 			.insert(orders)
 			.values({
 				userId,
 				productId: product.id,
-				targetType: target?.type ?? null,
-				targetId: target?.id ?? null,
 				amount: product.price,
 				currency: product.currency
 			})
@@ -184,7 +141,7 @@ export async function createCheckout(userId: string, productId: string, target?:
 			trxId: order.id,
 			amountMinor: product.price,
 			currency: product.currency,
-			customerName: profile?.displayName || profile?.slug || 'OVYN Member',
+			customerName: profile?.displayName || profile?.slug || 'ovyn member',
 			channel: PAYMENT_CHANNEL,
 			expiredDate
 		});
@@ -265,10 +222,7 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 			.select({
 				userId: orders.userId,
 				productId: orders.productId,
-				targetType: orders.targetType,
-				targetId: orders.targetId,
-				category: products.category,
-				durationDays: products.durationDays
+				category: products.category
 			})
 			.from(orders)
 			.innerJoin(products, eq(products.id, orders.productId))
@@ -280,30 +234,6 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 				.insert(userCosmetics)
 				.values({ userId: order.userId, cosmeticId: order.productId })
 				.onConflictDoNothing();
-		} else if (
-			(order?.category === 'profile_spotlight' || order?.category === 'guild_spotlight') &&
-			order.targetType &&
-			order.targetId &&
-			order.durationDays && order.durationDays > 0
-		) {
-			const expiresAt = new Date(Date.now() + order.durationDays * 24 * 60 * 60 * 1000);
-			await tx
-				.insert(spotlights)
-				.values({
-					targetType: order.targetType,
-					targetId: order.targetId,
-					ownerUserId: order.userId,
-					orderId: input.orderId,
-					expiresAt
-				})
-				.onConflictDoUpdate({
-					target: [spotlights.targetType, spotlights.targetId],
-					set: {
-						ownerUserId: order.userId,
-						orderId: input.orderId,
-						expiresAt: sql`GREATEST(${spotlights.expiresAt}, now()) + (${order.durationDays} * interval '1 day')`
-					}
-				});
 		}
 	}
 

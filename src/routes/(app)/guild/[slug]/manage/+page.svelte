@@ -36,7 +36,7 @@
 </script>
 
 <svelte:head>
-	<title>Manage {data.guild.name} - OVYN</title>
+	<title>Manage {data.guild.name} - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">

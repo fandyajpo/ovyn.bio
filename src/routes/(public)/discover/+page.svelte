@@ -6,7 +6,7 @@
 </script>
 
 <svelte:head>
-	<title>Discover guilds - OVYN</title>
+	<title>Discover guilds - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

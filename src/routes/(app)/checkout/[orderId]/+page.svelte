@@ -39,7 +39,7 @@
 </script>
 
 <svelte:head>
-	<title>Checkout - OVYN</title>
+	<title>Checkout - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-lg flex-col gap-6">

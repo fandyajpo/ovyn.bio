@@ -25,12 +25,12 @@
 	];
 	const faqs = [
 		{
-			question: 'What is OVYN?',
+			question: 'What is ovyn?',
 			answer: 'A personal page for your online identity, built to show your style and help your people find you.'
 		},
 		{
 			question: 'How do I sign in?',
-			answer: 'Use Discord or Google. Your OVYN username, display name, bio and public page stay yours to customize.'
+			answer: 'Use Discord or Google. Your ovyn username, display name, bio and public page stay yours to customize.'
 		},
 		{
 			question: 'Can I start for free?',
@@ -46,7 +46,7 @@
 <svelte:window bind:scrollY />
 
 <svelte:head>
-	<title>OVYN - Your space on the internet</title>
+	<title>ovyn - your space on the internet</title>
 	<meta name="description" content="A personal corner of the internet to show your style, share your links and find your people." />
 </svelte:head>
 
@@ -92,7 +92,7 @@
 			<div class="landing-profile-orbit" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
 			<div class="landing-profile-preview relative">
 				<div class="flex items-center justify-between gap-4">
-					<p class="landing-eyebrow">OVYN / YOUR SPACE</p>
+					<p class="landing-eyebrow">ovyn / your space</p>
 					<span class="profile-live"><span class="status-dot"></span> YOUR PAGE</span>
 				</div>
 				<div class="mt-10 flex items-center gap-5">
@@ -118,8 +118,8 @@
 	</div>
 </section>
 
-<section class="brand-ribbon" aria-label="OVYN community">
-	<span>OVYN</span><i></i><span>YOUR IDENTITY</span><i></i><span>YOUR CIRCLE</span><i></i><span>YOUR INTERNET</span><i></i><span>OVYN</span>
+<section class="brand-ribbon" aria-label="ovyn community">
+	<span>ovyn</span><i></i><span>your identity</span><i></i><span>your circle</span><i></i><span>your internet</span><i></i><span>ovyn</span>
 </section>
 
 <section id="features" class="landing-section grid gap-8 py-16 sm:py-24 md:grid-cols-[.75fr_1.25fr]">
@@ -145,7 +145,7 @@
 
 {#if data.stats}
 	<Reveal>
-		<section class="community-strip flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-12 text-center" aria-label="OVYN community stats">
+		<section class="community-strip flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-12 text-center" aria-label="ovyn community stats">
 			<div><strong>{data.stats.profiles}</strong><span>identities</span></div>
 			<div><strong>{data.stats.guilds}</strong><span>circles</span></div>
 			<div><strong>{data.stats.members}</strong><span>members</span></div>

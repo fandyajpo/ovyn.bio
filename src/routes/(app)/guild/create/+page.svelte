@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>Create a guild - OVYN</title>
+	<title>Create a guild - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-xl flex-col gap-6">

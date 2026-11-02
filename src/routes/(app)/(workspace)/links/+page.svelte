@@ -15,7 +15,7 @@
 </script>
 
 <svelte:head>
-	<title>Social links - OVYN</title>
+	<title>Social links - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

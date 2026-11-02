@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Customize your page - OVYN</title>
+	<title>Customize your page - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

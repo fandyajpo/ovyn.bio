@@ -1,99 +1,139 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
+
 	let {
 		content,
 		label = 'More information',
-		placement = 'top'
+		placement = 'top',
+		children = null
 	}: {
 		content: string;
 		label?: string;
 		placement?: 'top' | 'bottom' | 'left' | 'right';
+		children?: Snippet | null;
 	} = $props();
 
 	const id = $props.id();
 </script>
 
-<span class="tooltip-root" data-placement={placement}>
-	<button type="button" class="tooltip-trigger" aria-label={label} aria-describedby={id}>
-		<span aria-hidden="true">?</span>
+<span class="ovyn-tooltip" data-placement={placement}>
+	<button type="button" class="ovyn-tooltip-trigger {children ? 'ovyn-tooltip-trigger--custom' : ''}" aria-label={label} aria-describedby={id}>
+		{#if children}
+			{@render children()}
+		{:else}
+			<span aria-hidden="true">?</span>
+		{/if}
 	</button>
-	<span id={id} class="tooltip-bubble" role="tooltip">{content}</span>
+	<span id={id} class="ovyn-tooltip-bubble" role="tooltip">{content}</span>
 </span>
 
 <style>
-	.tooltip-root {
+	.ovyn-tooltip {
 		position: relative;
 		display: inline-flex;
 		vertical-align: middle;
 	}
 
-	.tooltip-trigger {
+	.ovyn-tooltip-trigger {
 		display: grid;
 		width: 1.5rem;
 		height: 1.5rem;
 		place-items: center;
-		border: 1px solid var(--color-divider);
+		border: 1px solid color-mix(in srgb, var(--color-pop-blue) 34%, transparent);
 		border-radius: 999px;
 		background: color-mix(in srgb, var(--color-pop-blue) 12%, var(--color-surface));
 		color: var(--color-pop-blue);
-		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-size: 0.7rem;
+		font-family: var(--font-mono);
+		font-size: 0.68rem;
 		font-weight: 700;
+		cursor: help;
+		transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
 	}
 
-	.tooltip-bubble {
+	.ovyn-tooltip-trigger:hover {
+		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+		background: color-mix(in srgb, var(--color-accent) 12%, var(--color-surface));
+		transform: translateY(-1px);
+	}
+
+	.ovyn-tooltip-trigger--custom {
+		width: auto;
+		height: auto;
+		border: 0;
+		background: transparent;
+		color: inherit;
+	}
+
+	.ovyn-tooltip-bubble {
 		position: absolute;
 		z-index: 60;
 		width: max-content;
 		max-width: min(17rem, 80vw);
 		border: 1px solid var(--color-divider);
-		border-radius: 0.75rem;
-		background: var(--color-menu-glass);
-		padding: 0.65rem 0.8rem;
+		border-radius: 0.9rem;
+		background:
+			linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-menu-glass)), var(--color-menu-glass));
+		padding: 0.6rem 0.8rem;
 		color: var(--color-foreground);
 		font-family: var(--font-sans);
-		font-size: 0.75rem;
+		font-size: 0.74rem;
 		font-weight: 400;
-		line-height: 1.45;
-		box-shadow: 0 10px 28px rgb(0 0 0 / 30%);
+		line-height: 1.5;
+		text-align: left;
+		box-shadow: 0 16px 38px rgb(0 0 0 / 32%);
 		opacity: 0;
 		visibility: hidden;
 		pointer-events: none;
-		transition: opacity 120ms ease, transform 120ms ease, visibility 0s linear 120ms;
+		transition: opacity 140ms ease, transform 160ms ease, visibility 0s linear 160ms;
 	}
 
-	[data-placement='top'] .tooltip-bubble {
-		bottom: calc(100% + 0.5rem);
+	[data-placement='top'] .ovyn-tooltip-bubble {
+		bottom: calc(100% + 0.55rem);
 		left: 50%;
-		transform: translate(-50%, 0.25rem);
+		transform: translate(-50%, 0.3rem);
 	}
 
-	[data-placement='bottom'] .tooltip-bubble {
-		top: calc(100% + 0.5rem);
+	[data-placement='bottom'] .ovyn-tooltip-bubble {
+		top: calc(100% + 0.55rem);
 		left: 50%;
-		transform: translate(-50%, -0.25rem);
+		transform: translate(-50%, -0.3rem);
 	}
 
-	[data-placement='left'] .tooltip-bubble {
+	[data-placement='left'] .ovyn-tooltip-bubble {
 		top: 50%;
-		right: calc(100% + 0.5rem);
-		transform: translate(0.25rem, -50%);
+		right: calc(100% + 0.55rem);
+		transform: translate(0.3rem, -50%);
 	}
 
-	[data-placement='right'] .tooltip-bubble {
+	[data-placement='right'] .ovyn-tooltip-bubble {
 		top: 50%;
-		left: calc(100% + 0.5rem);
-		transform: translate(-0.25rem, -50%);
+		left: calc(100% + 0.55rem);
+		transform: translate(-0.3rem, -50%);
 	}
 
-	.tooltip-root:hover .tooltip-bubble,
-	.tooltip-root:focus-within .tooltip-bubble {
+	.ovyn-tooltip:hover .ovyn-tooltip-bubble,
+	.ovyn-tooltip:focus-within .ovyn-tooltip-bubble {
 		opacity: 1;
 		visibility: visible;
-		transform: translate(0, 0);
 		transition-delay: 0s;
 	}
 
+	[data-placement='top'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
+	[data-placement='top'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble,
+	[data-placement='bottom'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
+	[data-placement='bottom'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble {
+		transform: translate(-50%, 0);
+	}
+
+	[data-placement='left'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
+	[data-placement='left'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble,
+	[data-placement='right'] .ovyn-tooltip:hover .ovyn-tooltip-bubble,
+	[data-placement='right'] .ovyn-tooltip:focus-within .ovyn-tooltip-bubble {
+		transform: translate(0, -50%);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
-		.tooltip-bubble { transition: none; }
+		.ovyn-tooltip-bubble,
+		.ovyn-tooltip-trigger { transition: none; }
 	}
 </style>

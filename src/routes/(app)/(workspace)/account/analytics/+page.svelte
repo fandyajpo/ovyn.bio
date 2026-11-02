@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile analytics - OVYN</title>
+	<title>Profile analytics - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">
@@ -69,6 +69,6 @@
 	</Card>
 
 	<p class="text-xs text-neutral-600">
-		Only signed-in visits are counted, once per visitor per UTC day. Signed-in visitors with public profiles may appear above. OVYN does not store IP addresses or user agents for this feature.
+		Only signed-in visits are counted, once per visitor per UTC day. Signed-in visitors with public profiles may appear above. ovyn does not store IP addresses or user agents for this feature.
 	</p>
 </div>

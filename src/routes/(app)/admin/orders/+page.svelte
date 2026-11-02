@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Sales history - OVYN Admin</title>
+	<title>Sales history - ovyn admin</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">

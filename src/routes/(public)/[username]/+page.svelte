@@ -15,17 +15,17 @@
 </script>
 
 <svelte:head>
-	<title>{displayName} (@{p.slug}) - OVYN</title>
-	<meta name="description" content={p.bio || `${displayName}'s space on OVYN.`} />
-	<meta property="og:title" content={`${displayName} (@${p.slug}) - OVYN`} />
-	<meta property="og:description" content={p.bio || `Find ${displayName} on OVYN.`} />
+	<title>{displayName} (@{p.slug}) - ovyn</title>
+	<meta name="description" content={p.bio || `${displayName}'s space on ovyn.`} />
+	<meta property="og:title" content={`${displayName} (@${p.slug}) - ovyn`} />
+	<meta property="og:description" content={p.bio || `Find ${displayName} on ovyn.`} />
 	<meta property="og:type" content="profile" />
 </svelte:head>
 
 {#if data.private}
 	<main class="profile-private-state">
 		<div class="private-orbit" aria-hidden="true"></div>
-		<p class="profile-overline">OVYN / PRIVATE SPACE</p>
+		<p class="profile-overline">ovyn / private space</p>
 		<h1>This corner is private.</h1>
 		<p>The owner has chosen to keep this page to themselves.</p>
 	</main>
@@ -56,8 +56,8 @@
 						{#if data.cosmetics?.frameUrl}<img src={data.cosmetics.frameUrl} alt="" class="profile-avatar-frame" />{/if}
 					</div>
 					<div class="profile-identity-copy">
-						<p class="profile-overline">OVYN / PERSONAL SPACE</p>
-						<h1>{displayName}{#if data.cosmetics?.badgeUrl}<ProfileBadge label="OVYN profile badge" src={data.cosmetics.badgeUrl} />{/if}{#if data.isPremium}<span class="premium-profile-mark" aria-label="OVYN Premium member">✦</span>{/if}</h1>
+						<p class="profile-overline">ovyn / personal space</p>
+						<h1>{displayName}{#if data.cosmetics?.badgeUrl}<ProfileBadge label="ovyn profile badge" src={data.cosmetics.badgeUrl} />{/if}{#if data.isPremium}<span class="premium-profile-mark" aria-label="ovyn Premium member">✦</span>{/if}</h1>
 						<p class="profile-handle">@{p.slug}</p>
 						{#if data.discord}<p class="profile-discord">Discord · {data.discord.username}</p>{/if}
 					</div>
@@ -91,7 +91,7 @@
 
 			<footer class="profile-signoff">
 				<p>Here since {formatDate(p.createdAt)}</p>
-				<span>OVYN · YOUR IDENTITY, OUT IN THE WORLD</span>
+				<span>ovyn · your identity, out in the world</span>
 			</footer>
 			{#if data.viewerTracked}<p class="profile-view-note">Signed-in visits may appear in this profile's analytics.</p>{/if}
 		</div>
@@ -183,7 +183,6 @@
 		font-size: 0.68rem;
 		font-weight: 600;
 		letter-spacing: 0.18em;
-		text-transform: uppercase;
 	}
 
 	.profile-identity-copy h1 {

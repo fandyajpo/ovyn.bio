@@ -126,9 +126,17 @@ try {
 		});
 	}
 
+	// Rename the older capitalised plan so re-seeding an existing database does
+	// not leave two active Premium rows behind.
+	await sql`
+		UPDATE products SET name = 'ovyn Premium Lifetime'
+		WHERE name = 'OVYN Premium Lifetime'
+			AND NOT EXISTS (SELECT 1 FROM products WHERE name = 'ovyn Premium Lifetime')
+	`;
+
 	await sql`
 		INSERT INTO products (name, description, price, currency, active, category, duration_days)
-		VALUES ('OVYN Premium Lifetime', 'One-time payment for lifetime profile customization.', 100000, 'IDR', true, 'plan', NULL)
+		VALUES ('ovyn Premium Lifetime', 'One-time payment for lifetime profile customization.', 100000, 'IDR', true, 'plan', NULL)
 		ON CONFLICT (name) DO UPDATE
 		SET description = EXCLUDED.description, price = 100000,
 			active = true, category = 'plan', duration_days = NULL

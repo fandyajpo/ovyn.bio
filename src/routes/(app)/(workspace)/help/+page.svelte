@@ -5,7 +5,7 @@
 	const topics = [
 		{
 			title: 'Your account and profile',
-				body: 'Sign in with Discord or Google. Your OVYN display name, unique username, bio and avatar are editable independently of your sign-in identity.',
+				body: 'Sign in with Discord or Google. Your ovyn display name, unique username, bio and avatar are editable independently of your sign-in identity.',
 				link: '/account/settings',
 				label: 'Account settings'
 		},
@@ -31,14 +31,14 @@
 </script>
 
 <svelte:head>
-	<title>Help center - OVYN</title>
+	<title>Help center - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
 	<div>
 		<span class="sticker sticker--blue">GOOD TO KNOW</span>
 		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Help center</h1>
-		<p class="mt-1 text-neutral-400">Quick answers for making your OVYN corner yours.</p>
+		<p class="mt-1 text-neutral-400">Quick answers for making your ovyn corner yours.</p>
 	</div>
 	<div class="grid gap-4 md:grid-cols-2">
 		{#each topics as topic (topic.title)}

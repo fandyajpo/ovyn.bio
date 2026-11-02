@@ -76,14 +76,14 @@
 </script>
 
 <svelte:head>
-	<title>Profile settings - OVYN</title>
+	<title>Profile settings - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-8">
 	<div>
 		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Profile settings</h1>
 		<p class="mt-1 text-neutral-400">
-			Sign in with Discord or Google, then make your OVYN profile your own.
+			Sign in with Discord or Google, then make your ovyn profile your own.
 		</p>
 	</div>
 
@@ -142,7 +142,7 @@
 				value={form?.values?.bio ?? data.profile.bio ?? ''}
 				textarea
 				maxlength={280}
-				hint="Up to 280 characters. Your OVYN bio is separate from your Discord bio."
+				hint="Up to 280 characters. Your ovyn bio is separate from your Discord bio."
 				error={form?.errors?.bio?.[0]}
 			/>
 			{#if form?.error && !form?.errors?.username?.length && !form?.errors?.displayName?.length && !form?.errors?.bio?.length}

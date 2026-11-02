@@ -53,7 +53,7 @@
 						{/if}
 					{/if}
 				</div>
-				<p class="font-mono text-[10px] uppercase tracking-widest text-neutral-500">OVYN PROFILE</p>
+				<p class="font-mono text-[10px] tracking-widest text-neutral-500">ovyn profile</p>
 			</div>
 		</div>
 	{/if}

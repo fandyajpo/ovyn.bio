@@ -14,7 +14,7 @@
 </script>
 
 <svelte:head>
-	<title>Profile templates - OVYN</title>
+	<title>Profile templates - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -53,7 +53,7 @@
 				{#each myTemplates as item (item.template.id)}
 					<Card class="flex flex-col gap-3 p-4">
 						<div class="template-preview rounded-xl p-4" data-profile-theme={item.template.theme}>
-							<span class="sticker sticker--dark">OVYN / PREVIEW</span>
+							<span class="sticker sticker--dark">ovyn / preview</span>
 							<p class="mt-4 font-[family-name:var(--font-display)] text-xl font-bold">Your page, your look.</p>
 							<p class="font-mono text-xs">@your-name</p>
 						</div>
@@ -95,7 +95,7 @@
 						</div>
 						<div>
 						<p class="font-medium text-neutral-100">{item.template.name}</p>
-						<p class="text-xs text-neutral-500">by {item.ownerName || item.ownerSlug || 'OVYN member'} · {item.template.theme}</p>
+						<p class="text-xs text-neutral-500">by {item.ownerName || item.ownerSlug || 'ovyn member'} · {item.template.theme}</p>
 						{#if item.template.description}<p class="mt-1 text-sm text-neutral-400">{item.template.description}</p>{/if}
 						</div>
 						{#if data.plan.tier === 'premium'}

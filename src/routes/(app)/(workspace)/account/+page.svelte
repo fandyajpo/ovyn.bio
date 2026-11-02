@@ -20,7 +20,7 @@
 </script>
 
 <svelte:head>
-	<title>Account overview - OVYN</title>
+	<title>Account overview - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
@@ -34,6 +34,7 @@
 			<Button href="/settings/profile" variant="ghost">Edit profile details</Button>
 			<Button href="/customize" variant="secondary">Customize page</Button>
 			<Button href="/{data.profile.slug}" variant="ghost">View my page</Button>
+			{#if data.isAdmin}<Button href="/admin" variant="ghost">Admin dashboard</Button>{/if}
 		</div>
 	</div>
 
