@@ -25,7 +25,7 @@
 	let paletteType = $state<TemplateBlockType | null>(null);
 
 	let previewSession = $state('');
-	let publisher = $state<PreviewPublisher | null>(null);
+	let publisher = $state.raw<PreviewPublisher | null>(null);
 
 	const serialized = $derived(JSON.stringify(items));
 	const activePreviewKey = $derived(
