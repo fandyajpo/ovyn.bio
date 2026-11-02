@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { fade } from 'svelte/transition';
+	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 
 	let { children }: { children: any } = $props();
 
@@ -80,6 +81,11 @@
 				<a href={link.href} class="admin-link admin-link--utility" onclick={closeMenu}>{link.label}</a>
 			{/each}
 		</nav>
+
+		<div class="admin-appearance">
+			<span>Appearance</span>
+			<ThemeToggle />
+		</div>
 	</aside>
 
 	<div class="admin-content">
@@ -233,6 +239,17 @@
 
 	.admin-link--utility { font-size: 0.8rem; }
 	.admin-content { min-width: 0; }
+
+	.admin-appearance {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		border-top: 1px solid var(--color-divider);
+		padding-top: 0.75rem;
+		color: var(--color-muted);
+		font-size: 0.78rem;
+	}
 
 	@media (min-width: 64rem) {
 		.admin-layout {

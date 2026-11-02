@@ -137,8 +137,8 @@
 	<button type="button" class="workspace-share-button" onclick={shareProfile}>{shareMessage}</button>
 	<a class="workspace-landing-link" href="/" onclick={closeMobileMenu}>← Back to landing page</a>
 
-	<div class="workspace-mobile-tools">
-		<div class="flex items-center justify-between gap-3"><span>Appearance</span><ThemeToggle /></div>
+	<div class="workspace-tools">
+		<div class="workspace-appearance"><span>Appearance</span><ThemeToggle /></div>
 		<button type="button" class="workspace-signout" onclick={logout}>Sign out</button>
 	</div>
 </aside>
@@ -226,7 +226,34 @@
 
 	.workspace-landing-link:hover { background: color-mix(in srgb, var(--color-accent) 8%, transparent); color: var(--color-foreground); }
 
-	.workspace-mobile-tools,
+	.workspace-tools {
+		display: grid;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		border-top: 1px solid var(--color-divider);
+		padding-top: 1rem;
+		color: var(--color-muted);
+		font-size: 0.8rem;
+	}
+
+	.workspace-appearance {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+	}
+
+	.workspace-signout {
+		min-height: 2.75rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.85rem;
+		background: transparent;
+		padding: 0.6rem 0.8rem;
+		color: var(--color-pop-pink);
+		text-align: left;
+		cursor: pointer;
+	}
+
 	.workspace-menu-trigger,
 	.workspace-sidebar-close,
 	.workspace-sidebar-backdrop { display: none; }
@@ -285,7 +312,7 @@
 		.workspace-sidebar--mobile-open { transform: translateX(0); visibility: visible; transition-delay: 0s; }
 		.workspace-sidebar-close { display: grid; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; place-items: center; border: 0; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-foreground); font-size: 1.4rem; }
 		.workspace-sidebar-backdrop { position: fixed; z-index: 72; inset: 0; display: block; width: 100%; height: 100%; border: 0; background: rgb(10 10 14 / 56%); backdrop-filter: blur(8px); }
-		.workspace-mobile-tools { display: grid; gap: 1rem; margin-top: 1.25rem; border-top: 1px solid var(--color-divider); padding-top: 1rem; color: var(--color-muted); font-size: 0.8rem; }
+		.workspace-tools { display: grid; gap: 1rem; margin-top: 1.25rem; border-top: 1px solid var(--color-divider); padding-top: 1rem; color: var(--color-muted); font-size: 0.8rem; }
 		.workspace-signout { min-height: 2.75rem; border: 1px solid var(--color-divider); border-radius: 0.85rem; background: transparent; padding: 0.6rem 0.8rem; color: var(--color-pop-pink); text-align: left; }
 	}
 

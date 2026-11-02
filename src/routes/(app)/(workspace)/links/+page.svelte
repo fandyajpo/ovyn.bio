@@ -4,7 +4,12 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
-	import { PROFILE_LINK_PROVIDER_IDS, PROFILE_LINK_PROVIDER_LABELS } from '#lib/schemas/profile-links';
+	import LinkProviderIcon from '#lib/components/LinkProviderIcon.svelte';
+	import {
+		PROFILE_LINK_PROVIDER_IDS,
+		PROFILE_LINK_PROVIDER_LABELS,
+		type ProfileLinkProvider
+	} from '#lib/schemas/profile-links';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
 	let provider = $state('instagram');
@@ -12,7 +17,15 @@
 		value,
 		label: PROFILE_LINK_PROVIDER_LABELS[value]
 	}));
+
+	function providerLabel(value: string) {
+		return PROFILE_LINK_PROVIDER_LABELS[value as ProfileLinkProvider] ?? value;
+	}
 </script>
+
+{#snippet providerOption(option: { value: string; label: string; disabled?: boolean })}
+	<LinkProviderIcon provider={option.value} size="sm" />
+{/snippet}
 
 <svelte:head>
 	<title>Social links - ovyn</title>
@@ -31,7 +44,7 @@
 	<Card class="p-5">
 		<h2 class="font-medium text-neutral-100">Add a link</h2>
 		<form method="POST" action="?/add" class="mt-4 grid gap-4 sm:grid-cols-2">
-			<Select name="provider" label="Platform" options={providerOptions} bind:value={provider} required />
+			<Select name="provider" label="Platform" options={providerOptions} bind:value={provider} required optionIcon={providerOption} />
 			<Input
 				name="url"
 				label={provider === 'email' ? 'Email address' : provider === 'bitcoin' || provider === 'ethereum' || provider === 'litecoin' || provider === 'solana' || provider === 'xrp' || provider === 'monero' ? 'Wallet address or HTTPS explorer link' : 'Profile URL'}
@@ -58,9 +71,12 @@
 			<div class="grid gap-3 sm:grid-cols-2">
 				{#each data.links as link (link.id)}
 					<Card class="flex min-w-0 items-center justify-between gap-3 p-4">
-						<div class="min-w-0">
-							<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{link.provider.replaceAll('_', ' ')}</p>
-							<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="mt-1 block truncate font-medium text-lime-300 hover:underline">{link.label}</a>
+						<div class="flex min-w-0 items-center gap-3">
+							<LinkProviderIcon provider={link.provider} />
+							<div class="min-w-0">
+								<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{providerLabel(link.provider)}</p>
+								<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="mt-1 block truncate font-medium text-lime-300 hover:underline">{link.label}</a>
+							</div>
 						</div>
 						<form method="POST" action="?/remove">
 							<input type="hidden" name="id" value={link.id} />

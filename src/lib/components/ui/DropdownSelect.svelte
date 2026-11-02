@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import { cn } from '#lib/utils';
 
 	type Option = { value: string; label: string; disabled?: boolean };
@@ -13,7 +14,8 @@
 		disabled = false,
 		hint = null,
 		error = null,
-		class: className
+		class: className,
+		optionIcon = undefined
 	}: {
 		name: string;
 		label: string;
@@ -25,6 +27,7 @@
 		hint?: string | null;
 		error?: string | null;
 		class?: string;
+		optionIcon?: Snippet<[Option]>;
 	} = $props();
 
 	const id = $props.id();
@@ -148,7 +151,12 @@
 			aria-invalid={Boolean(error)}
 			aria-describedby={describedBy}
 		>
-			<span class="ovyn-dropdown-value {selectedOption ? '' : 'is-placeholder'}">{selectedOption?.label ?? placeholder}</span>
+			<span class="ovyn-dropdown-selected">
+				{#if selectedOption && optionIcon}
+					<span class="ovyn-dropdown-icon">{@render optionIcon(selectedOption)}</span>
+				{/if}
+				<span class="ovyn-dropdown-value {selectedOption ? '' : 'is-placeholder'}">{selectedOption?.label ?? placeholder}</span>
+			</span>
 			<span class="ovyn-dropdown-caret {open ? 'is-open' : ''}" aria-hidden="true">
 				<svg viewBox="0 0 24 24" fill="none">
 					<path d="M6 9.5l6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
@@ -172,7 +180,11 @@
 					onpointermove={() => { if (!option.disabled) activeIndex = index; }}
 					onclick={() => choose(option)}
 				>
-					<span class="ovyn-dropdown-marker" aria-hidden="true"></span>
+					{#if optionIcon}
+						<span class="ovyn-dropdown-icon">{@render optionIcon(option)}</span>
+					{:else}
+						<span class="ovyn-dropdown-marker" aria-hidden="true"></span>
+					{/if}
 					<span class="ovyn-dropdown-option-label">{option.label}</span>
 					{#if selected}<span class="ovyn-dropdown-check" aria-hidden="true">✓</span>{/if}
 				</button>
@@ -235,6 +247,8 @@
 	}
 
 	.ovyn-dropdown-trigger:disabled { cursor: not-allowed; color: var(--color-muted); }
+	.ovyn-dropdown-selected { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: 0.55rem; }
+	.ovyn-dropdown-icon { display: grid; flex: 0 0 auto; place-items: center; }
 	.ovyn-dropdown-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.ovyn-dropdown-value.is-placeholder { color: color-mix(in srgb, var(--color-muted) 85%, transparent); }
 

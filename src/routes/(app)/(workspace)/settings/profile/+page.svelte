@@ -24,8 +24,6 @@
 	let usernameRequest = 0;
 
 	let visibility = $derived(data.profile.visibility);
-	const bannerIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
-	const bannerVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 
 	function checkUsername(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -219,28 +217,6 @@
 				</div>
 			{/if}
 		{/each}
-	</section>
-
-	<section class="rounded-xl border border-neutral-800 p-5">
-		<h2 class="mb-4 font-medium text-neutral-200">Page wallpaper</h2>
-		<div class="flex items-center gap-4">
-			<div class="h-14 w-24 overflow-hidden rounded-lg bg-neutral-800">
-				{#if data.bannerUrl}
-					{#if bannerIsVideo}
-						<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="size-full object-cover">
-							<source src={data.bannerUrl} type={bannerVideoType} />
-						</video>
-					{:else}
-						<img src={data.bannerUrl} alt="Wallpaper preview" class="size-full object-cover" />
-					{/if}
-				{/if}
-			</div>
-			<div>
-				<p class="mb-1 text-sm text-neutral-300">Your page background image</p>
-				<p class="mb-1 text-xs text-neutral-500">JPG, PNG, WebP, GIF, MP4 or WebM · max 25 MB</p>
-				<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload wallpaper" />
-			</div>
-		</div>
 	</section>
 
 	<section class="rounded-xl border border-neutral-800 p-5">

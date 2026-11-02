@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import { cn } from '#lib/utils';
+	import { optimizeImage } from '#lib/image-optimize';
+	import { CLIENT_UPLOAD_LIMITS, formatFileSize } from '#lib/upload-limits';
 
 	let {
 		kind,
@@ -45,9 +47,27 @@
 		if (file && !uploading) void uploadFile(file);
 	}
 
-	async function uploadFile(file: File) {
+	async function uploadFile(original: File) {
+		const limits = CLIENT_UPLOAD_LIMITS[kind];
 		uploading = true;
 		try {
+			let file = original;
+			if (original.size > 48 * 1024 * 1024) {
+				throw new Error(`That file is too large. Keep it under ${formatFileSize(limits.maxBytes)}`);
+			}
+
+			if ('maxWidth' in limits && original.type.startsWith('image/')) {
+				file = await optimizeImage(original, {
+					maxWidth: limits.maxWidth,
+					maxHeight: limits.maxHeight,
+					maxBytes: limits.maxBytes
+				});
+			}
+
+			if (file.size > limits.maxBytes) {
+				throw new Error(`That file is ${formatFileSize(file.size)}. Keep it under ${formatFileSize(limits.maxBytes)}`);
+			}
+
 			const res = await fetch('/api/uploads', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },

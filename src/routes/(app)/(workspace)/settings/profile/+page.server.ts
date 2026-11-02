@@ -5,13 +5,12 @@ import {
 	getDiscordAccountByUserId,
 	getProfileByUserId,
 	setProfileAvatar,
-	setProfileBanner,
 	setProfileVisibility,
 	updateProfileIdentity
 } from '#lib/server/services/profiles';
 import { isValidSlug } from '#lib/server/utils/slug';
 import { listOwnedByKind, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
-import { assertOwnObjectKey, presignDownload } from '#lib/server/storage';
+import { presignDownload } from '#lib/server/storage';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
@@ -102,26 +101,6 @@ export const actions: Actions = {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
 			return fail(500, { error: 'Could not update visibility' });
-		}
-	},
-
-	wallpaper: async ({ request, locals }) => {
-		if (!locals.user) redirect(302, '/login');
-		const user = locals.user;
-		const data = await request.formData();
-		const key = data.get('key');
-
-		if (typeof key !== 'string' || !key) return fail(422, { error: 'Missing file key' });
-
-		try {
-			rateLimit(`wallpaper:${user.id}`, 10, 60_000);
-			assertOwnObjectKey(user.id, 'banner', key);
-			await setProfileBanner(user.id, key);
-			return { ok: true };
-		} catch (err) {
-			if (err instanceof AppError) return fail(err.status, { error: err.message });
-			console.error(err);
-			return fail(500, { error: 'Could not save the wallpaper' });
 		}
 	},
 

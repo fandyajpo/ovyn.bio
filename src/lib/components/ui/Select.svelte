@@ -1,4 +1,5 @@
 <script lang="ts">
+	import type { Snippet } from 'svelte';
 	import DropdownSelect from './DropdownSelect.svelte';
 
 	type Option = { value: string; label: string; disabled?: boolean };
@@ -13,7 +14,8 @@
 		disabled = false,
 		hint = null,
 		error = null,
-		class: className
+		class: className,
+		optionIcon = undefined
 	}: {
 		name: string;
 		label: string;
@@ -25,6 +27,7 @@
 		hint?: string | null;
 		error?: string | null;
 		class?: string;
+		optionIcon?: Snippet<[Option]>;
 	} = $props();
 </script>
 
@@ -39,4 +42,5 @@
 	{hint}
 	{error}
 	class={className}
+	{optionIcon}
 />

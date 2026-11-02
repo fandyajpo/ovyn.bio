@@ -1,4 +1,7 @@
 <script lang="ts">
+	import { optimizeImage } from '#lib/image-optimize';
+	import { CLIENT_UPLOAD_LIMITS, formatFileSize } from '#lib/upload-limits';
+
 	let { initialKey = null, label = 'Upload image', error = null }: { initialKey?: string | null; label?: string; error?: string | null } = $props();
 
 	let currentKey = $derived(initialKey ?? '');
@@ -6,10 +9,20 @@
 	let dragging = $state(false);
 	let errorMessage = $state<string | null>(null);
 
-	async function upload(file: File) {
+	async function upload(original: File) {
 		errorMessage = null;
 		uploading = true;
+		const limits = CLIENT_UPLOAD_LIMITS.cosmetic;
 		try {
+			const file = await optimizeImage(original, {
+				maxWidth: limits.maxWidth,
+				maxHeight: limits.maxHeight,
+				maxBytes: limits.maxBytes
+			});
+			if (file.size > limits.maxBytes) {
+				throw new Error(`That image is ${formatFileSize(file.size)}. Keep it under ${formatFileSize(limits.maxBytes)}`);
+			}
+
 			const response = await fetch('/api/uploads', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },

@@ -4,7 +4,7 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
-	import Input from '#lib/components/ui/Input.svelte';
+	import ColorPicker from '#lib/components/ui/ColorPicker.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
 	import { PROFILE_BACKGROUND_TEXTURE_OPTIONS } from '#lib/schemas/profile';
@@ -15,9 +15,8 @@
 	const coverVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.backgroundKey ?? ''));
 	const backgroundVideoType = $derived(data.profile.backgroundKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
-	const colorPreview = $derived(
-		/^#[0-9a-f]{6}$/i.test(data.profile.usernameColor ?? '') ? (data.profile.usernameColor as string) : 'var(--color-accent)'
-	);
+	let usernameColor = $state(data.profile.usernameColor ?? '');
+	const colorPreview = $derived(/^#[0-9a-f]{6}$/i.test(usernameColor) ? usernameColor : 'var(--color-accent)');
 </script>
 
 <svelte:head>
@@ -61,14 +60,12 @@
 			<p class="mt-1 text-sm text-neutral-400">Colours your @handle on the public page. Leave it empty to use the theme accent.</p>
 		</div>
 		<form method="POST" action="?/color" class="flex flex-wrap items-end gap-3">
-			<Input
+			<ColorPicker
 				name="usernameColor"
-				label="Hex colour"
-				value={data.profile.usernameColor ?? ''}
-				placeholder="#CDBCF3"
-				pattern="#[0-9a-fA-F]{6}"
-				class="w-full sm:max-w-48"
-				hint="Six digits, like #CDBCF3."
+				label="Username colour"
+				bind:value={usernameColor}
+				hint="Pick a swatch, or leave it empty for the theme accent."
+				class="w-full sm:max-w-56"
 			/>
 			<span class="color-swatch" style={`background: ${colorPreview}`} aria-hidden="true"></span>
 			<Button type="submit">Save colour</Button>
