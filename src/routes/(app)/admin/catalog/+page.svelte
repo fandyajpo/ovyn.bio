@@ -20,6 +20,7 @@
 	let { data, form }: { data: PageData; form?: CatalogForm } = $props();
 
 	const productTypeOptions = [
+		{ value: 'plan', label: 'Premium plan' },
 		{ value: 'cosmetic', label: 'Cosmetic' },
 		{ value: 'profile_spotlight', label: 'Profile spotlight' },
 		{ value: 'guild_spotlight', label: 'Guild spotlight' }
@@ -61,7 +62,7 @@
 
 	<Card class="p-5 sm:p-6">
 		<h2 class="font-[family-name:var(--font-display)] text-xl font-semibold">Add a product</h2>
-		<p class="mt-1 text-sm text-neutral-500">New listings start inactive unless you check Publish. Spotlight prices are charged through the existing DOKU flow.</p>
+		<p class="mt-1 text-sm text-neutral-500">New listings start inactive unless you check Publish. Premium plan purchases grant 30 days and renew manually through DOKU.</p>
 		<form method="POST" action="?/create" class="mt-5 grid gap-4 sm:grid-cols-2">
 			<Select
 				name="category"
@@ -73,10 +74,10 @@
 			/>
 			<Input name="name" label="Name" value={createValues.name ?? ''} required minlength={2} maxlength={100} error={createErrors.name} />
 			<Input name="price" label="Price (IDR)" type="number" value={createValues.price ?? ''} min={0} step={1} required error={createErrors.price} />
-			<Input name="durationDays" label="Spotlight duration in days" type="number" value={createValues.durationDays ?? ''} min={1} max={365} hint="Only needed for spotlight products." error={createErrors.durationDays} />
+			<Input name="durationDays" label="Duration in days" type="number" value={createValues.durationDays ?? ''} min={1} max={365} hint="Premium plans must be 30 days; spotlight terms can be 1–365 days." error={createErrors.durationDays} />
 			<Input name="description" label="Description" value={createValues.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" />
 			<div class="rounded-xl border border-neutral-800 p-4 sm:col-span-2">
-				<p class="mb-3 text-sm font-medium text-neutral-200">Cosmetic details</p>
+				<p class="mb-3 text-sm font-medium text-neutral-200">Cosmetic details (cosmetic products only)</p>
 				<div class="grid gap-4 sm:grid-cols-2">
 					<DropdownSelect
 						name="kind"
@@ -112,7 +113,16 @@
 						<span class="rounded-full border px-2 py-1 text-xs {row.product.active ? 'border-lime-300/40 text-lime-300' : 'border-neutral-700 text-neutral-500'}">{row.product.active ? 'Active' : 'Inactive'}</span>
 					</div>
 					{#if row.product.category === 'plan'}
-						<p class="text-sm text-amber-300">Plan listings are read-only because paid plan entitlements are not implemented yet. They cannot be activated from this panel.</p>
+						<form method="POST" action="?/update" class="grid gap-4 sm:grid-cols-2">
+							<input type="hidden" name="id" value={row.product.id} />
+							<input type="hidden" name="durationDays" value="30" />
+							<Input name="name" label="Plan name" value={values?.name ?? row.product.name} required minlength={2} maxlength={100} error={errors.name} />
+							<Input name="price" label="Price (IDR per 30 days)" type="number" value={values?.price ?? String(row.product.price)} min={1} step={1} required error={errors.price} />
+							<Input name="description" label="Description" value={values?.description ?? row.product.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" error={errors.description} />
+							<p class="text-sm text-neutral-500 sm:col-span-2">Premium lasts 30 days from payment. Members renew manually; current features remain available on Free.</p>
+							<Checkbox name="active" label="Available for purchase" checked={values ? values.active === 'on' : row.product.active} class="sm:col-span-2" />
+							<div class="sm:col-span-2"><Button type="submit">Save plan</Button></div>
+						</form>
 					{:else if row.product.category === 'cosmetic' && !row.cosmetic}
 						<p class="text-sm text-red-400">Cosmetic details are missing for this product; it cannot be edited here.</p>
 					{:else}

@@ -2,7 +2,7 @@ import { and, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { account, user } from '#lib/server/db/schema/auth';
 import { discordAccounts, profiles } from '#lib/server/db/schema';
-import { ConflictError, isUniqueViolation, NotFoundError } from '../utils/errors';
+import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '../utils/errors';
 import { isValidSlug, normalizeSlug } from '../utils/slug';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -52,10 +52,8 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
  *
  * Sync policy:
  *  - `discord_accounts` always mirrors the current Discord identity.
- *  - Profile display name auto-follows Discord UNLESS the user customized
- *    it (custom = differs from the previously mirrored Discord name).
- *  - Slug auto-follows the Discord username with the same policy; custom
- *    slugs are preserved.
+ *  - New profiles are seeded from Discord once; existing OVYN profile details
+ *    remain user-owned and are never overwritten by sign-in.
  *  - Avatar: users with no uploaded avatar always show the live Discord
  *    avatar (resolved via fallback at read time).
  */
@@ -85,15 +83,6 @@ export async function provisionUser(userId: string): Promise<void> {
 		// Lock the account row so two concurrent sign-ins don't race.
 		await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
 
-		// Read the previously mirrored Discord name BEFORE updating it —
-		// it tells us whether the user customized their OVYN display name.
-		const [previous] = await tx
-			.select()
-			.from(discordAccounts)
-			.where(eq(discordAccounts.userId, userId))
-			.limit(1);
-		const previousMirroredName = previous?.globalName ?? previous?.username ?? null;
-
 		await tx
 			.insert(discordAccounts)
 			.values({
@@ -114,8 +103,8 @@ export async function provisionUser(userId: string): Promise<void> {
 				}
 			});
 
-		// Strong sync: follow Discord's display name unless the user set
-		// their own custom one in OVYN settings.
+		// Seed a profile from Discord on first sign-in; later profile edits are
+		// owned by the user and stay independent of Discord changes.
 		const [profile] = await tx
 			.select()
 			.from(profiles)
@@ -128,66 +117,69 @@ export async function provisionUser(userId: string): Promise<void> {
 				.values({
 					userId,
 					slug: await availableSlug(tx, discordUser.username),
-					displayName: newDiscordName
+					displayName: newDiscordName,
+					bio: discordUser.bio
 				})
 				.onConflictDoNothing({ target: profiles.userId });
 			return;
 		}
 
-		if (
-			profile.displayName === null ||
-			profile.displayName === previousMirroredName ||
-			profile.displayName === ''
-		) {
-			// Never customized (or still mirrors Discord) → follow Discord.
-			if (profile.displayName !== newDiscordName) {
-				await tx
-					.update(profiles)
-					.set({ displayName: newDiscordName, updatedAt: new Date() })
-					.where(eq(profiles.userId, userId));
-			}
-		}
-
-		// Bio is fully Discord-owned: always mirror it.
-		if (discordUser.bio !== profile.bio) {
-			await tx
-				.update(profiles)
-				.set({ bio: discordUser.bio, updatedAt: new Date() })
-				.where(eq(profiles.userId, userId));
-		}
-
-		// Slug follows the Discord username with the same policy: only
-		// override when the user never customized it. Auto-generated suffix
-		// variants (e.g. "name-2" when "name" was taken) still count as
-		// "not customized".
-		const prevUsername = previous?.username;
-		const slugIsCustomized = prevUsername
-			? profile.slug !== prevUsername && !profile.slug.startsWith(`${prevUsername}-`)
-			: false;
-
-		const normalizedNewSlug = normalizeSlug(discordUser.username);
-		if (
-			!slugIsCustomized &&
-			normalizedNewSlug &&
-			normalizedNewSlug !== profile.slug &&
-			normalizedNewSlug !== prevUsername
-		) {
-			const newSlug = await availableSlug(tx, normalizedNewSlug);
-			if (newSlug !== profile.slug) {
-				await tx
-					.update(profiles)
-					.set({ slug: newSlug, updatedAt: new Date() })
-					.where(eq(profiles.userId, userId));
-			}
-		}
+		// Existing profile fields are OVYN-owned and are intentionally not
+		// overwritten when Discord identity data changes.
 	});
 }
 
-/**
- * Identity fields (name, slug, bio, avatar) are Discord-owned and sync
- * automatically — the only user-editable profile settings are the page's
- * visibility and its wallpaper (banner).
- */
+/** Save user-owned profile details; the unique database constraint is the race-safe final username check. */
+export async function updateProfileIdentity(
+	userId: string,
+	input: { username: string; displayName: string; bio: string | null }
+) {
+	if (!isValidSlug(input.username)) throw new ValidationError('Choose a valid username');
+
+	try {
+		const [updated] = await db
+			.update(profiles)
+			.set({
+				slug: input.username,
+				displayName: input.displayName,
+				bio: input.bio,
+				updatedAt: new Date()
+			})
+			.where(eq(profiles.userId, userId))
+			.returning();
+		if (!updated) throw new NotFoundError('Profile not found');
+		return updated;
+	} catch (err) {
+		if (isUniqueViolation(err, 'profiles_slug_unique')) {
+			throw new ConflictError('That username is already taken', 'username_taken');
+		}
+		throw err;
+	}
+}
+
+export async function checkUsernameAvailability(userId: string, rawUsername: string) {
+	const username = rawUsername.trim().toLowerCase();
+	if (!isValidSlug(username)) return { username, valid: false, available: false };
+
+	const [existing] = await db
+		.select({ userId: profiles.userId })
+		.from(profiles)
+		.where(eq(profiles.slug, username))
+		.limit(1);
+	return { username, valid: true, available: !existing || existing.userId === userId };
+}
+
+/** A null avatar key restores the current Discord avatar as the profile picture. */
+export async function setProfileAvatar(userId: string, avatarKey: string | null) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ avatarKey, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
 export async function setProfileVisibility(
 	userId: string,
 	visibility: 'public' | 'private'
@@ -225,6 +217,11 @@ export async function getProfileByUserId(userId: string) {
 	const [row] = await db.select().from(profiles).where(eq(profiles.userId, userId)).limit(1);
 	if (!row) throw new NotFoundError('Profile not found');
 	return row;
+}
+
+export async function getDiscordAccountByUserId(userId: string) {
+	const [row] = await db.select().from(discordAccounts).where(eq(discordAccounts.userId, userId)).limit(1);
+	return row ?? null;
 }
 
 export { isUniqueViolation, user };

@@ -91,7 +91,13 @@
 				This page updates automatically once your payment is confirmed by DOKU. You can leave and come back anytime at /checkout/{data.order.id}.
 			</p>
 		{:else if status === 'paid'}
-			<p class="text-lime-300">Payment received — thank you! Your plan is now active.</p>
+			{#if data.product.category === 'plan'}
+				<p class="text-lime-300">Payment received — your 30-day Premium access is active. Renew manually from Plans &amp; billing; it will not auto-renew.</p>
+			{:else if data.product.category === 'cosmetic'}
+				<p class="text-lime-300">Payment received — your cosmetic has been added to your account.</p>
+			{:else}
+				<p class="text-lime-300">Payment received — your spotlight is active.</p>
+			{/if}
 		{:else if status === 'expired'}
 			<p class="text-neutral-400">This payment code expired. Start again from Plans &amp; billing.</p>
 		{:else}

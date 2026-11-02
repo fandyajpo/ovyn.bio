@@ -60,7 +60,7 @@ const productFields = {
 export const adminCreateProductSchema = z
 	.object({
 		...productFields,
-		category: z.enum(['cosmetic', 'profile_spotlight', 'guild_spotlight'])
+		category: z.enum(['plan', 'cosmetic', 'profile_spotlight', 'guild_spotlight'])
 	})
 	.superRefine((product, context) => {
 		if (product.category === 'cosmetic') {
@@ -72,6 +72,13 @@ export const adminCreateProductSchema = z
 			}
 			if (product.price === 0 && product.pointsPrice === null) {
 				context.addIssue({ code: 'custom', path: ['pointsPrice'], message: 'A free cosmetic needs a points price (use 0 for free)' });
+			}
+		} else if (product.category === 'plan') {
+			if (product.durationDays !== 30) {
+				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Premium access lasts exactly 30 days' });
+			}
+			if (product.price < 1) {
+				context.addIssue({ code: 'custom', path: ['price'], message: 'Premium plans must have a positive price' });
 			}
 		} else {
 			if (!product.durationDays) {

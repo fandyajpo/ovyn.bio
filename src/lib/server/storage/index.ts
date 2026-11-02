@@ -45,12 +45,13 @@ function s3WithBucket(): { client: S3Client; bucket: string } {
 export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
 export const BANNER_MIME_TYPES = [...IMAGE_MIME_TYPES, 'image/gif', 'video/mp4', 'video/webm'] as const;
 export type UploadMime = (typeof BANNER_MIME_TYPES)[number];
-export type UploadKind = 'banner' | 'icon' | 'cosmetic';
+export type UploadKind = 'banner' | 'avatar' | 'icon' | 'cosmetic';
 
 type UploadLimit = { maxSize: number; mimeTypes: readonly UploadMime[] };
 
 export const UPLOAD_LIMITS: Record<UploadKind, UploadLimit> = {
 	banner: { maxSize: 25 * 1024 * 1024, mimeTypes: BANNER_MIME_TYPES },
+	avatar: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
 };

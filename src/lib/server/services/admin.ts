@@ -140,12 +140,12 @@ export async function createCatalogProduct(input: AdminCreateProduct): Promise<v
 		if (input.price === 0 && input.pointsPrice === null) {
 			throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
 		}
-	}
-	if (input.category !== 'cosmetic' && input.price < 1) {
-		throw new ValidationError('Spotlight products must have a positive price');
-	}
-	if (input.category !== 'cosmetic' && !input.durationDays) {
-		throw new ValidationError('Spotlights need a duration from 1 to 365 days');
+	} else if (input.category === 'plan') {
+		if (input.price < 1) throw new ValidationError('Premium plans must have a positive price');
+		if (input.durationDays !== 30) throw new ValidationError('Premium access lasts exactly 30 days');
+	} else {
+		if (input.price < 1) throw new ValidationError('Spotlight products must have a positive price');
+		if (!input.durationDays) throw new ValidationError('Spotlights need a duration from 1 to 365 days');
 	}
 
 	try {
@@ -189,10 +189,6 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 				.for('update')
 				.limit(1);
 			if (!product) throw new NotFoundError('Product not found');
-			if (product.category === 'plan') {
-				throw new ValidationError('Plan products cannot be managed until plan entitlements are implemented');
-			}
-
 			if (product.category === 'cosmetic') {
 				requireCosmeticFields(input);
 				if (input.price === 0 && input.pointsPrice === null) {
@@ -205,6 +201,9 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 					.for('update')
 					.limit(1);
 				if (!cosmetic) throw new ConflictError('The cosmetic record is missing');
+			} else if (product.category === 'plan') {
+				if (input.price < 1) throw new ValidationError('Premium plans must have a positive price');
+				if (input.durationDays !== 30) throw new ValidationError('Premium access lasts exactly 30 days');
 			} else {
 				if (!input.durationDays) {
 					throw new ValidationError('Spotlights need a duration from 1 to 365 days');

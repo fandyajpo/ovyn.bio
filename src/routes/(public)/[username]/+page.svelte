@@ -7,7 +7,7 @@
 	let { data } = $props();
 
 	const p = $derived.by(() => data.profile);
-	// OVYN display name wins; fall back to the auto-synced Discord identity.
+	// The OVYN display name wins; Discord identity is only a fallback.
 	const displayName = $derived.by(() => {
 		const profile = data.profile;
 		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;

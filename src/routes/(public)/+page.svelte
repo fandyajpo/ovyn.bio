@@ -17,8 +17,8 @@
 			answer: 'Nope. Your profile is yours either way. You can join one guild when you find a circle that feels right.'
 		},
 		{
-			question: 'What syncs from Discord?',
-			answer: 'Your name, username, avatar, and available profile details refresh when you sign in. Your OVYN wallpaper and cosmetics stay yours.'
+			question: 'How does Discord sign-in work?',
+			answer: 'Discord is your sign-in. Your OVYN display name, unique username, bio, and profile picture are yours to customize. You can use your Discord picture or upload your own.'
 		},
 		{
 			question: 'Can I style my profile for free?',
@@ -122,7 +122,7 @@
 		<a href={data.user ? '/settings/profile' : '/login'} class="collage-card collage-card--pink group block h-full rounded-[1.6rem] bg-[#20191c] p-6 sm:p-7">
 			<div class="flex items-center justify-between"><span class="font-mono text-xs text-neutral-500">01 / IDENTITY</span><span class="sticker sticker--pink">MAKE IT YOU</span></div>
 			<h2 class="mt-8 font-[family-name:var(--font-display)] text-2xl font-bold">A page with<br />your fingerprints.</h2>
-			<p class="mt-3 text-sm leading-6 text-neutral-400">Discord-synced identity, a wallpaper, and cosmetics that feel like your own corner.</p>
+			<p class="mt-3 text-sm leading-6 text-neutral-400">Discord sign-in, a profile you can customize, a wallpaper, and cosmetics that feel like your own corner.</p>
 		</a>
 	</Reveal>
 	<Reveal delay={90} class="h-full">

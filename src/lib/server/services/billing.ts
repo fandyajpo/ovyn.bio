@@ -1,4 +1,4 @@
-import { and, desc, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import {
 	cosmetics,
@@ -49,6 +49,9 @@ export async function createCheckout(userId: string, productId: string, target?:
 		.limit(1);
 
 	if (!product) throw new NotFoundError('Product not found or not available');
+	if (product.category === 'plan' && (product.price < 1 || product.durationDays !== 30)) {
+		throw new ValidationError('Premium plans must be priced and provide exactly 30 days of access');
+	}
 
 	const expectedSpotlightType =
 		product.category === 'profile_spotlight'
@@ -426,7 +429,44 @@ export async function listUserOrders(userId: string) {
 		.limit(50);
 }
 
+export async function getUserPlan(userId: string) {
+	const purchases = await db
+		.select({ paidAt: payments.paidAt, updatedAt: orders.updatedAt, durationDays: products.durationDays })
+		.from(orders)
+		.innerJoin(products, eq(products.id, orders.productId))
+		.innerJoin(payments, eq(payments.orderId, orders.id))
+		.where(
+			and(
+				eq(orders.userId, userId),
+				eq(orders.status, 'paid'),
+				eq(payments.status, 'succeeded'),
+				eq(products.category, 'plan')
+			)
+		);
+
+	purchases.sort((a, b) => (a.paidAt ?? a.updatedAt).getTime() - (b.paidAt ?? b.updatedAt).getTime());
+
+	let accessUntil = 0;
+	for (const purchase of purchases) {
+		if (purchase.durationDays !== 30) continue;
+		const paidAt = (purchase.paidAt ?? purchase.updatedAt).getTime();
+		accessUntil = Math.max(paidAt, accessUntil) + 30 * 24 * 60 * 60 * 1000;
+	}
+
+	const premiumUntil = accessUntil ? new Date(accessUntil) : null;
+	const isPremium = accessUntil > Date.now();
+	return {
+		tier: isPremium ? 'premium' as const : 'free' as const,
+		premiumUntil,
+		daysRemaining: isPremium ? Math.ceil((accessUntil - Date.now()) / (24 * 60 * 60 * 1000)) : 0
+	};
+}
+
 export async function listActiveProducts() {
-	return db.select().from(products).where(and(eq(products.active, true), eq(products.category, 'plan')));
+	return db
+		.select()
+		.from(products)
+		.where(and(eq(products.active, true), eq(products.category, 'plan'), eq(products.durationDays, 30), gt(products.price, 0)))
+		.orderBy(desc(products.price));
 }
 

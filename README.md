@@ -78,7 +78,10 @@ Account settings let each device manage browser notification permission and even
   `/api/auth/[...all]` route, and populates `locals.user` in the server hook.
   Discord accounts without an email get a stable `<discord-id>@discord.ovyn.bio`
   placeholder via `mapProfileToUser`. Duplicate accounts for the same Discord
-  ID are prevented by the unique `(provider, accountId)` pairing.
+  ID are prevented by the unique `(provider, accountId)` pairing. Discord identity
+  seeds new profiles, while profile username, display name, bio and uploaded
+  avatar are OVYN-owned and remain editable. An uploaded avatar overrides the
+  Discord picture until the user resets it.
 - **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
   one-time data backfill with `npm run db:backfill` — it copies users and
   Discord accounts from the managed `neon_auth` schema into the standalone
@@ -110,6 +113,7 @@ Account settings let each device manage browser notification permission and even
 - **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
 - **Profile analytics** — counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
 - **Featured placement** — `profile_spotlight` and `guild_spotlight` products purchase time-limited placement. A user can feature only their own public profile; only active guild owners can feature their guild. The seed script uses sample prices; review them before enabling payments.
+- **Plans** — Free is the default and includes all current features. A successful Premium plan payment grants 30 days; repeat purchases extend active access and must be made manually. Access is derived server-side from successful payment records. Premium-only benefits are intentionally not enabled yet.
 - **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
 Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter products. Re-running it resets their sample prices, settings, and bundled art keys, so make catalog changes in the admin panel after seeding.
@@ -118,12 +122,12 @@ Whenever the schema changes, run `npm run db:generate`, review the generated mig
 
 Set `OVYN_ADMIN_DISCORD_IDS` to your comma-separated Discord user ID(s) locally
 and in Vercel, then sign in with one of those accounts and open `/admin`. The
-admin area lets you create/edit cosmetics and spotlight products, set prices,
-points costs, drop limits/end dates, upload cosmetic art, and review recent
-orders/revenue. Paid cosmetics and spotlight products can be activated; new
-products remain inactive until published. Products are deactivated rather than deleted so purchase
-history and ownership remain intact. Paid plan entitlements and DOKU refunds
-are not managed here yet.
+admin area lets you create/edit cosmetics, spotlights and Premium plans, set
+prices, points costs, drop limits/end dates, upload cosmetic art, and review
+recent orders/revenue. Cosmetics, spotlights and 30-day Premium plans can be activated;
+new products remain inactive until published. Plan products must have a positive
+price and a 30-day term. Products are deactivated rather than deleted so purchase
+history and ownership remain intact. DOKU refunds are not managed here yet.
 
 ## DOKU integration points
 

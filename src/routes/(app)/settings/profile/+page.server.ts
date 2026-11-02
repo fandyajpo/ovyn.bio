@@ -1,7 +1,15 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { profileVisibilitySchema } from '#lib/schemas/profile';
-import { getProfileByUserId, setProfileBanner, setProfileVisibility } from '#lib/server/services/profiles';
+import { profileIdentitySchema, profileVisibilitySchema } from '#lib/schemas/profile';
+import {
+	getDiscordAccountByUserId,
+	getProfileByUserId,
+	setProfileAvatar,
+	setProfileBanner,
+	setProfileVisibility,
+	updateProfileIdentity
+} from '#lib/server/services/profiles';
+import { isValidSlug } from '#lib/server/utils/slug';
 import { listOwnedByKind, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
 import { presignDownload } from '#lib/server/storage';
 import { AppError } from '#lib/server/utils/errors';
@@ -10,16 +18,72 @@ import { rateLimit } from '#lib/server/utils/rate-limit';
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const profile = await getProfileByUserId(locals.user.id);
-	const [owned, bannerUrl, avatarUrl] = await Promise.all([
+	const [owned, discord, bannerUrl, uploadedAvatarUrl] = await Promise.all([
 		listOwnedByKind(locals.user.id),
+		getDiscordAccountByUserId(locals.user.id),
 		profile.bannerKey ? presignDownload(profile.bannerKey) : null,
 		profile.avatarKey ? presignDownload(profile.avatarKey) : null
 	]);
 
-	return { profile, owned, bannerUrl, avatarUrl };
+	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl ?? discord?.avatarUrl ?? null };
 };
 
 export const actions: Actions = {
+	identity: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const user = locals.user;
+		const data = await request.formData();
+		const values = {
+			username: typeof data.get('username') === 'string' ? String(data.get('username')) : '',
+			displayName: typeof data.get('displayName') === 'string' ? String(data.get('displayName')) : '',
+			bio: typeof data.get('bio') === 'string' ? String(data.get('bio')) : ''
+		};
+		const parsed = profileIdentitySchema.safeParse(values);
+		if (!parsed.success) {
+			return fail(422, {
+				error: 'Please check the highlighted profile details',
+				errors: parsed.error.flatten().fieldErrors,
+				values
+			});
+		}
+		if (!isValidSlug(parsed.data.username)) {
+			return fail(422, {
+				error: 'That username is reserved',
+				errors: { username: ['Choose a different username'] },
+				values
+			});
+		}
+
+		try {
+			rateLimit(`profile-identity:${user.id}`, 10, 60_000);
+			await updateProfileIdentity(user.id, parsed.data);
+			return { ok: true };
+		} catch (err) {
+			if (err instanceof AppError) {
+				return fail(err.status, {
+					error: err.message,
+					...(err.code === 'username_taken' ? { errors: { username: [err.message] } } : {}),
+					values
+				});
+			}
+			console.error(err);
+			return fail(500, { error: 'Could not save your profile', values });
+		}
+	},
+
+	avatarReset: async ({ locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		try {
+			rateLimit(`profile-avatar:${locals.user.id}`, 10, 60_000);
+			await setProfileAvatar(locals.user.id, null);
+			return { ok: true };
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not restore your Discord avatar' });
+		}
+	},
+
 	visibility: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		const user = locals.user;
