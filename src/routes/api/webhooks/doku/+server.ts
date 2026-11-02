@@ -3,6 +3,9 @@ import { verifyNotificationSignature } from '#lib/server/payments/doku/webhook';
 import { processWebhookNotification } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
 
+// Fulfilment runs inside the notification, so give it room to finish.
+export const config = { maxDuration: 30 };
+
 /**
  * DOKU HTTP Notification endpoint.
  *

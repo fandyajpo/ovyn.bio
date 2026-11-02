@@ -1,11 +1,39 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { toast } from './ui/toasts.svelte.ts';
 
-	let { user }: { user: { name: string; image: string | null } | null } = $props();
+	type Viewer = { name: string; image: string | null };
+
+	// The header belongs to a prerendered shell, so the signed-in state is read
+	// in the browser. The actions keep their width until it arrives, so nothing
+	// jumps when it does.
+	let viewer = $state<Viewer | null>(null);
+	let sessionChecked = $state(false);
+
+	onMount(() => {
+		let cancelled = false;
+		void (async () => {
+			try {
+				const res = await fetch('/api/auth/get-session', { headers: { accept: 'application/json' } });
+				if (res.ok) {
+					const body = (await res.json()) as { user?: { name?: string; image?: string | null } } | null;
+					const name = body?.user?.name;
+					if (!cancelled && name) viewer = { name, image: body?.user?.image ?? null };
+				}
+			} catch {
+				// A failed check simply leaves the signed-out actions in place.
+			} finally {
+				if (!cancelled) sessionChecked = true;
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	});
 
 	let accountMenuOpen = $state(false);
 	let mobileMenuOpen = $state(false);
@@ -62,6 +90,7 @@
 	async function logout() {
 		closeMenus();
 		await signOut();
+		viewer = null;
 		toast('info', 'Signed out');
 		location.href = '/';
 	}
@@ -85,11 +114,11 @@
 		</nav>
 
 		<div class="nav-actions">
-			{#if user}
+			{#if viewer}
 				<div class="relative">
 					<button type="button" bind:this={accountButton} onclick={toggleAccountMenu} class="account-trigger" aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'} aria-expanded={accountMenuOpen} aria-controls="account-menu">
 						<span class="account-avatar">
-							<Avatar name={user.name} src={user.image} size="sm" />
+							<Avatar name={viewer.name} src={viewer.image} size="sm" />
 						</span>
 					</button>
 
@@ -97,10 +126,10 @@
 						<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border py-1 shadow-xl" transition:fly={{ y: -6, duration: 150 }}>
 							<div class="account-menu-head">
 								<span class="account-avatar account-avatar--menu">
-									<Avatar name={user.name} src={user.image} size="sm" />
+									<Avatar name={viewer.name} src={viewer.image} size="sm" />
 								</span>
 								<div class="min-w-0">
-									<p class="truncate text-sm font-medium text-neutral-100">{user.name}</p>
+									<p class="truncate text-sm font-medium text-neutral-100">{viewer.name}</p>
 									<p class="account-menu-caption">Signed in</p>
 								</div>
 							</div>
@@ -113,8 +142,10 @@
 						</div>
 					{/if}
 				</div>
-			{:else}
+			{:else if sessionChecked}
 				<a href="/login" class="inline-flex min-h-10 shrink-0 items-center rounded-full bg-lime-300 px-3.5 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-lime-200">Sign in</a>
+			{:else}
+				<span class="account-placeholder" aria-hidden="true"></span>
 			{/if}
 
 			<button type="button" bind:this={mobileMenuButton} onclick={toggleMobileMenu} class="mobile-menu-toggle" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} aria-controls="mobile-primary-menu">
@@ -147,7 +178,7 @@
 				{/each}
 			</div>
 
-			{#if user}
+			{#if viewer}
 				<section class="mobile-menu-account" aria-label="Account shortcuts">
 					<p class="mobile-menu-caption">Your account</p>
 					<div class="mobile-account-links">
@@ -182,6 +213,16 @@
 		flex: 0 0 auto;
 		align-items: center;
 		gap: 0.4rem;
+	}
+
+	.account-placeholder {
+		display: inline-block;
+		width: 5.75rem;
+		height: 2.5rem;
+		flex: 0 0 auto;
+		border: 1px solid var(--color-divider);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-surface) 60%, transparent);
 	}
 
 	.account-trigger {

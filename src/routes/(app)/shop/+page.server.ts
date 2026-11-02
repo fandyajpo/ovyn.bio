@@ -5,6 +5,9 @@ import { createCheckout } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
+// Buying through the shop creates a DOKU virtual account server-side.
+export const config = { maxDuration: 30 };
+
 export const load: PageServerLoad = async ({ locals }) => {
 	return { items: await listShop(locals.user?.id ?? null) };
 };

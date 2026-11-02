@@ -1,11 +1,33 @@
 <script lang="ts">
-	import type { PageData } from './$types';
+	import { onMount } from 'svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import LandingDemo from '#lib/components/LandingDemo.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import { slide } from 'svelte/transition';
 
-	let { data }: { data: PageData } = $props();
+	type Stats = { profiles: number; guilds: number; members: number };
+
+	// The page is prerendered, so the community numbers arrive from /api/stats
+	// once it is running in the browser.
+	let stats = $state<Stats | null>(null);
+
+	onMount(() => {
+		let cancelled = false;
+		void (async () => {
+			try {
+				const res = await fetch('/api/stats');
+				if (!res.ok) return;
+				const next = (await res.json()) as Stats;
+				if (!cancelled) stats = next;
+			} catch {
+				// The strip simply stays hidden when the counters are unavailable.
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	});
+
 	let scrollY = $state(0);
 	const parallaxY = $derived(Math.min(scrollY * 0.12, 110));
 
@@ -104,11 +126,7 @@
 			</Reveal>
 			<Reveal delay={210}>
 				<div class="flex flex-wrap items-center gap-3">
-					{#if data.user}
-						<Button href="/account">Open your space</Button>
-					{:else}
-						<Button href="/login">Get started with Discord or Google</Button>
-					{/if}
+					<Button href="/login">Get started with Discord or Google</Button>
 					<Button href="/discover" variant="ghost">Find your circle <span aria-hidden="true">↗</span></Button>
 				</div>
 			</Reveal>
@@ -178,12 +196,12 @@
 	</div>
 </section>
 
-{#if data.stats}
+{#if stats}
 	<Reveal stagger>
 		<section class="community-strip flex flex-wrap items-center justify-center gap-x-10 gap-y-5 py-12 text-center" aria-label="ovyn community stats">
-			<div data-reveal-item style="--reveal-order: 0"><strong>{data.stats.profiles}</strong><span>identities</span></div>
-			<div data-reveal-item style="--reveal-order: 1"><strong>{data.stats.guilds}</strong><span>circles</span></div>
-			<div data-reveal-item style="--reveal-order: 2"><strong>{data.stats.members}</strong><span>members</span></div>
+			<div data-reveal-item style="--reveal-order: 0"><strong>{stats.profiles}</strong><span>identities</span></div>
+			<div data-reveal-item style="--reveal-order: 1"><strong>{stats.guilds}</strong><span>circles</span></div>
+			<div data-reveal-item style="--reveal-order: 2"><strong>{stats.members}</strong><span>members</span></div>
 		</section>
 	</Reveal>
 {/if}
@@ -202,7 +220,7 @@
 				<div class="flex items-center justify-between gap-3"><h3>Free</h3><span class="plan-mark">ALWAYS FREE</span></div>
 				<p class="plan-price">Rp 0 <span>forever</span></p>
 				<ul>{#each freeFeatures as feature (feature)}<li><span aria-hidden="true">✓</span>{feature}</li>{/each}</ul>
-				<Button href={data.user ? '/account' : '/login'} variant="secondary" class="mt-7 w-full">{data.user ? 'Your account' : 'Create your page'}</Button>
+				<Button href="/login" variant="secondary" class="mt-7 w-full">Create your page</Button>
 			</article>
 		</Reveal>
 		<Reveal delay={100} class="h-full">
@@ -212,7 +230,7 @@
 				<p class="mb-5 text-sm text-neutral-400">Everything in Free, plus room to make your profile unmistakably yours.</p>
 				<ul>{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✦</span>{feature}</li>{/each}</ul>
 				<p class="plan-rollout-note">Layouts, the Premium badge and cursor effects are live now. Fonts, widgets, SEO, typewriter text, aliases and extra preferences are in development.</p>
-				<Button href={data.user ? '/upgrade' : '/login'} class="mt-7 w-full">{data.user ? 'Explore Premium' : 'Sign in to explore Premium'}</Button>
+				<Button href="/upgrade" class="mt-7 w-full">Explore Premium</Button>
 			</article>
 		</Reveal>
 	</div>
@@ -259,7 +277,7 @@
 			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
 			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
 			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 3">
-				{#if data.user}<Button href="/account">Open your space</Button>{:else}<Button href="/login">Continue with Discord or Google</Button>{/if}
+				<Button href="/login">Continue with Discord or Google</Button>
 				<Button href="/discover" variant="ghost">Meet the community</Button>
 			</div>
 		</div>

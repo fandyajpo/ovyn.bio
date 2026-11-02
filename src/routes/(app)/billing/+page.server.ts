@@ -4,6 +4,9 @@ import { createCheckout, getUserPlan, listActiveProducts } from '#lib/server/ser
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
+// Creating a DOKU virtual account can outlast the default function timeout.
+export const config = { maxDuration: 30 };
+
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const [products, plan] = await Promise.all([

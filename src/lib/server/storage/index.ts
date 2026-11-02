@@ -109,16 +109,39 @@ export async function presignUpload(
 	const { client, bucket } = s3WithBucket();
 
 	const key = `${kind}s/${userId}/${randomUUID()}.${ext}`;
-	const command = new PutObjectCommand({ Bucket: bucket, Key: key, ContentType: mimeType });
+	// Objects are immutable: a replaced file gets a new key, so the browser and
+	// any CDN may keep it for a year.
+	const command = new PutObjectCommand({
+		Bucket: bucket,
+		Key: key,
+		ContentType: mimeType,
+		CacheControl: 'public, max-age=31536000, immutable'
+	});
 	const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
 
 	return { key, uploadUrl };
 }
 
-/** Short-lived read URL for private objects. */
+const presignedCache = new Map<string, { url: string; expiresAt: number }>();
+
+const PRESIGNED_CACHE_MAX = 2_000;
+
+/**
+ * Short-lived read URL for private objects. The URL is reused for most of its
+ * lifetime, otherwise it would change on every render and neither the browser
+ * nor a CDN could cache the file behind it.
+ */
 export async function presignDownload(key: string, expiresIn = 60 * 60 * 24 * 7): Promise<string> {
+	const cacheKey = `${expiresIn}:${key}`;
+	const cached = presignedCache.get(cacheKey);
+	if (cached && cached.expiresAt > Date.now()) return cached.url;
+
 	const { client, bucket } = s3WithBucket();
-	return getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+	const url = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+
+	if (presignedCache.size > PRESIGNED_CACHE_MAX) presignedCache.clear();
+	presignedCache.set(cacheKey, { url, expiresAt: Date.now() + (expiresIn - 60 * 60) * 1000 });
+	return url;
 }
 
 export async function deleteObject(key: string): Promise<void> {

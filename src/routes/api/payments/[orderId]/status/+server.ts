@@ -3,6 +3,9 @@ import { syncPaymentStatus } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
+// The status is reconciled with DOKU's Check Status API.
+export const config = { maxDuration: 30 };
+
 /**
  * Server-side payment status sync. The client polls this, but the status is
  * always reconciled with DOKU's Check Status API here - the frontend can

@@ -2,13 +2,15 @@ import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getProfileBySlug } from '#lib/server/services/profiles';
 import { listProfileLinks } from '#lib/server/services/profile-content';
-import { getGuildById, getMembership } from '#lib/server/services/guilds';
+import { getMembership } from '#lib/server/services/guilds';
 import { getEquippedForProfile } from '#lib/server/services/cosmetics';
 import { recordProfileView } from '#lib/server/services/engagement';
 import { presignDownload } from '#lib/server/storage';
 import { getUserPlan } from '#lib/server/services/billing';
+import { runInBackground } from '#lib/server/utils/background';
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load: PageServerLoad = async (event) => {
+	const { params, locals } = event;
 	const row = await getProfileBySlug(params.username);
 	if (!row) error(404, 'Profile not found');
 
@@ -53,8 +55,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		};
 	}
 
-	// Count unique signed-in visitors only; never store IPs or user agents.
-	if (locals.user) await recordProfileView(row.profile.userId, locals.user.id);
+	// Count unique signed-in visitors only; never store IPs or user agents. The
+	// counter runs after the response so it never slows down the page.
+	if (locals.user) void runInBackground(event, recordProfileView(row.profile.userId, locals.user.id));
 
 	// Equipped cosmetics + identity files resolve in parallel.
 	const [cosmetics, membership, links, plan] = await Promise.all([
@@ -78,7 +81,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		row.profile.backgroundKey ? presignDownload(row.profile.backgroundKey) : null
 	]);
 
-	const guild = membership ? await getGuildById(membership.guild.id) : null;
+	// The membership row already carries the circle, so no extra query is needed.
+	const guild = membership?.guild ?? null;
 
 	return {
 		private: false,

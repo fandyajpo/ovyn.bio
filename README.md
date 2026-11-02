@@ -35,6 +35,9 @@ npm run db:migrate     # apply them (uses DATABASE_URL directly)
 npm run dev
 ```
 
+`npm run build` prerenders the landing and legal pages, so the environment
+variables below must be present at build time too, not only at runtime.
+
 ## Starting from a clean database
 
 To wipe every table and rebuild from the migration files:
@@ -132,6 +135,16 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   changes, template saves) answer `429` when a user exceeds their window; if the
   database is unreachable a per-instance memory window keeps the endpoint
   working.
+- **Performance** - the landing, terms and privacy pages are prerendered, so
+  they are served as static files with no function call; the landing's community
+  counters load from a small cached endpoint after hydration, and the header
+  reads the signed-in state in the browser so the shell stays identical for
+  everyone. Static assets and fonts are served from the CDN and cached by the
+  service worker, images are downscaled in the browser before upload, and
+  uploaded objects carry immutable cache headers while their presigned URLs are
+  reused for days. The profile view counter runs after the response, the circle
+  is read from the membership row instead of a second query, and DOKU routes get
+  a longer function timeout.
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
   a key is attached to a profile. Replacing an avatar, cover, background,

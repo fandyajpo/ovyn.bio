@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
-	import type { LayoutData } from './$types';
 	import '../app.css';
 	import Nav from '#lib/components/Nav.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 
-	let { data, children }: { data: LayoutData; children: any } = $props();
+	let { children }: { children: any } = $props();
 	const isLanding = $derived(page.url.pathname === '/');
 	const isProfilePage = $derived(page.route.id?.endsWith('/[username]') ?? false);
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
@@ -31,7 +30,7 @@
 <QueryClientProvider client={queryClient}>
 	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
-		{#if showsSiteChrome}<Nav user={data.user} />{/if}
+		{#if showsSiteChrome}<Nav />{/if}
 
 		<div class="app-workspace">
 			<main id="main-content" class={['page-content', isProfilePage && 'profile-page-content']} tabindex="-1">
@@ -54,7 +53,7 @@
 								<a href="/#plans" class="hover:text-lime-300">Plans</a>
 								<a href="/terms" class="hover:text-lime-300">Terms</a>
 								<a href="/privacy" class="hover:text-lime-300">Privacy</a>
-								<a href={data.user ? '/account' : '/login'} class="hover:text-lime-300">{data.user ? 'Your account' : 'Claim your corner'}</a>
+								<a href="/login" class="hover:text-lime-300">Your account</a>
 							</nav>
 							<p class="font-mono text-[10px] tracking-widest text-neutral-700">ovyn. your identity. your circle.</p>
 						</div>
