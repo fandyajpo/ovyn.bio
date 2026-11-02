@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { count, desc, eq, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { OVYN_ADMIN_DISCORD_IDS } from '$app/env/private';
 import { db } from '#lib/server/db';
 import { cosmetics, discordAccounts, orders, payments, products, profiles } from '#lib/server/db/schema';
@@ -53,6 +53,44 @@ export async function getAdminOverview() {
 		paidOrders: Number(paidPaymentRows[0]?.total ?? 0),
 		paidRevenue: Number(revenueRows[0]?.total ?? 0),
 		recentOrders
+	};
+}
+
+export async function getSalesAnalytics(days = 30) {
+	const dayCount = Math.max(1, Math.min(Math.floor(days), 365));
+	const firstDay = new Date();
+	firstDay.setUTCHours(0, 0, 0, 0);
+	firstDay.setUTCDate(firstDay.getUTCDate() - (dayCount - 1));
+
+	const dateExpression = sql`to_char(${payments.paidAt} at time zone 'UTC', 'YYYY-MM-DD')`;
+	const rows = await db
+		.select({
+			date: sql<string>`to_char(${payments.paidAt} at time zone 'UTC', 'YYYY-MM-DD')`,
+			orders: count(),
+			revenue: sql<number>`coalesce(sum(${orders.amount}), 0)`.mapWith(Number)
+		})
+		.from(payments)
+		.innerJoin(orders, eq(orders.id, payments.orderId))
+		.where(and(eq(payments.status, 'succeeded'), isNotNull(payments.paidAt), gte(payments.paidAt, firstDay)))
+		.groupBy(dateExpression)
+		.orderBy(dateExpression);
+
+	const rowsByDate = new Map(rows.map((row) => [row.date, row]));
+	const daily = Array.from({ length: dayCount }, (_, index) => {
+		const date = new Date(firstDay);
+		date.setUTCDate(firstDay.getUTCDate() + index);
+		const key = date.toISOString().slice(0, 10);
+		const row = rowsByDate.get(key);
+		return { date: key, orders: Number(row?.orders ?? 0), revenue: Number(row?.revenue ?? 0) };
+	});
+	const totalOrders = daily.reduce((total, day) => total + day.orders, 0);
+	const totalRevenue = daily.reduce((total, day) => total + day.revenue, 0);
+
+	return {
+		daily,
+		totalOrders,
+		totalRevenue,
+		averageOrderValue: totalOrders ? Math.round(totalRevenue / totalOrders) : 0
 	};
 }
 

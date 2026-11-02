@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { initialKey = null, label = 'Upload image' }: { initialKey?: string | null; label?: string } = $props();
+	let { initialKey = null, label = 'Upload image', error = null }: { initialKey?: string | null; label?: string; error?: string | null } = $props();
 	let currentKey = $derived(initialKey ?? '');
 	let uploading = $state(false);
 	let errorMessage = $state<string | null>(null);
@@ -56,5 +56,7 @@
 	{/if}
 	{#if errorMessage}
 		<p class="text-xs text-red-400" role="alert">{errorMessage}</p>
+	{:else if error}
+		<p class="text-xs text-red-400" role="alert">{error}</p>
 	{/if}
 </div>

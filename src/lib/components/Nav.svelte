@@ -2,6 +2,7 @@
 	import { page } from '$app/state';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
+	import ThemeToggle from './ThemeToggle.svelte';
 	import { toast } from './ui/toasts.svelte.ts';
 
 	let { user, isAdmin, isLanding }: { user: { name: string; image: string | null } | null; isAdmin: boolean; isLanding: boolean } = $props();
@@ -93,6 +94,8 @@
 		<button type="button" bind:this={mobileMenuButton} onclick={toggleMobileMenu} class="mobile-menu-toggle" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} aria-controls="mobile-primary-menu">
 			<span class="menu-glyph" aria-hidden="true"><span></span></span>
 		</button>
+
+		<ThemeToggle />
 
 		{#if user}
 			<div class="relative">

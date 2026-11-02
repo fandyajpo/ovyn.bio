@@ -100,9 +100,16 @@
 		padding-top: env(safe-area-inset-top);
 	}
 
-	:global(.site-header-inner) {
+	:global(.app-frame .site-header-inner) {
+		width: 100%;
+		max-width: 90rem;
+		margin-inline: auto;
 		padding-left: max(1rem, env(safe-area-inset-left));
 		padding-right: max(1rem, env(safe-area-inset-right));
+	}
+
+	:global(.app-frame[data-landing='true'] .site-header-inner) {
+		max-width: 76rem;
 	}
 
 	.skip-link {

@@ -1,15 +1,17 @@
 <script lang="ts">
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
+	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
 	import { formatDate } from '#lib/utils';
 
 	let { data } = $props();
 
-	const p = $derived(data.profile);
+	const p = $derived.by(() => data.profile);
 	// OVYN display name wins; fall back to the auto-synced Discord identity.
-	const displayName = $derived(
-		p.displayName || data.discord?.globalName || data.discord?.username || p.slug
-	);
+	const displayName = $derived.by(() => {
+		const profile = data.profile;
+		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;
+	});
 </script>
 
 <svelte:head>
@@ -58,7 +60,7 @@
 				<h1 class="flex items-center gap-2 truncate font-[family-name:var(--font-display)] text-2xl font-bold">
 					{displayName}
 					{#if data.cosmetics?.badgeUrl}
-						<img src={data.cosmetics.badgeUrl} alt="Badge" class="inline size-6 object-contain" />
+						<ProfileBadge label="OVYN profile badge" src={data.cosmetics.badgeUrl} />
 					{/if}
 				</h1>
 				<p class="mt-1 font-mono text-sm text-lime-300">@{p.slug}</p>
@@ -69,7 +71,7 @@
 		</div>
 
 		{#if p.bio}
-			<p class="collage-card collage-card--blue rounded-2xl bg-[#151a1c]/90 p-4 text-base leading-7 text-neutral-200">{p.bio}</p>
+			<p class="profile-bio collage-card collage-card--blue rounded-2xl bg-[#151a1c]/90 p-4 text-base leading-7 text-neutral-200">{p.bio}</p>
 		{/if}
 
 		{#if data.guild}

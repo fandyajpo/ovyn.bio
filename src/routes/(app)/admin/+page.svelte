@@ -1,10 +1,19 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
+	import Tooltip from '#lib/components/ui/Tooltip.svelte';
 	import { formatDate, formatIdr } from '#lib/utils';
 
 	let { data }: { data: PageData } = $props();
+
+	function statusTone(status: string): 'lime' | 'warning' | 'danger' | 'neutral' {
+		if (['succeeded', 'paid', 'completed'].includes(status)) return 'lime';
+		if (status === 'pending') return 'warning';
+		if (['failed', 'cancelled', 'expired'].includes(status)) return 'danger';
+		return 'neutral';
+	}
 </script>
 
 <svelte:head>
@@ -25,9 +34,10 @@
 					<span class="sticker sticker--blue">{data.overview.pendingPayments} pending payments</span>
 				</div>
 			</div>
-			<nav aria-label="Admin shortcuts" class="grid w-full gap-2 sm:grid-cols-2 md:w-auto">
+			<nav aria-label="Admin shortcuts" class="grid w-full gap-2 sm:grid-cols-3 md:w-auto">
 				<Button href="/admin/catalog" class="w-full sm:w-auto">Manage catalog</Button>
-				<Button href="/admin/orders" variant="secondary" class="w-full sm:w-auto">Review sales</Button>
+				<Button href="/admin/analytics" variant="secondary" class="w-full sm:w-auto">Sales analytics</Button>
+				<Button href="/admin/orders" variant="ghost" class="w-full sm:w-auto">Review sales</Button>
 			</nav>
 		</div>
 	</header>
@@ -59,7 +69,10 @@
 
 				<Card class="border-pop-lilac/25 bg-pop-lilac/[0.04] p-4 sm:p-5">
 					<div class="flex items-start justify-between gap-3">
-						<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Paid orders</p>
+						<div class="flex items-center gap-2">
+							<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Paid orders</p>
+							<Tooltip label="Paid order details" content="Orders whose DOKU payment status is marked successful." />
+						</div>
 						<span class="grid size-9 place-items-center rounded-xl bg-pop-lilac/15 text-lg text-pop-lilac" aria-hidden="true">↗</span>
 					</div>
 					<p class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">{data.overview.paidOrders}</p>
@@ -107,7 +120,7 @@
 								<p class="shrink-0 font-mono text-sm text-neutral-200">{formatIdr(order.amount)}</p>
 							</div>
 							<div class="mt-4 flex items-center justify-between gap-3 border-t border-neutral-800 pt-3">
-								<span class="truncate rounded-full border border-neutral-700 px-2.5 py-1 text-xs text-neutral-300">{order.paymentStatus ?? order.orderStatus}</span>
+								<Badge tone={statusTone(order.paymentStatus ?? order.orderStatus)} size="xs">{order.paymentStatus ?? order.orderStatus}</Badge>
 								<time class="shrink-0 font-mono text-[10px] text-neutral-500">{formatDate(order.createdAt)}</time>
 							</div>
 						</article>
@@ -124,7 +137,7 @@
 									<td class="px-5 py-3 text-neutral-200">{order.productName}</td>
 									<td class="px-5 py-3 text-neutral-400">{order.customerSlug ? `@${order.customerSlug}` : 'Profile unavailable'}</td>
 									<td class="px-5 py-3 font-mono text-neutral-200">{formatIdr(order.amount)}</td>
-									<td class="px-5 py-3 text-neutral-300">{order.paymentStatus ?? order.orderStatus}</td>
+									<td class="px-5 py-3"><Badge tone={statusTone(order.paymentStatus ?? order.orderStatus)} size="xs">{order.paymentStatus ?? order.orderStatus}</Badge></td>
 									<td class="whitespace-nowrap px-5 py-3 text-neutral-500">{formatDate(order.createdAt)}</td>
 								</tr>
 							{/each}
@@ -150,6 +163,9 @@
 					</a>
 					<a href="/admin/orders" class="flex min-h-11 items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950/40 px-4 text-sm text-neutral-200 transition-colors hover:border-pop-pink/40 hover:text-pop-pink">
 						View all sales <span aria-hidden="true">↗</span>
+					</a>
+					<a href="/admin/analytics" class="flex min-h-11 items-center justify-between rounded-xl border border-neutral-800 bg-neutral-950/40 px-4 text-sm text-neutral-200 transition-colors hover:border-pop-lilac/40 hover:text-pop-lilac">
+						Sales analytics <span aria-hidden="true">↗</span>
 					</a>
 				</div>
 			</Card>
