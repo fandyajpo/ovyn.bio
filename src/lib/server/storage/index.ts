@@ -43,9 +43,11 @@ function s3WithBucket(): { client: S3Client; bucket: string } {
 }
 
 export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
+export const CURSOR_MIME_TYPES = ['image/png', 'image/webp'] as const;
+export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm'] as const;
 export const BANNER_MIME_TYPES = [...IMAGE_MIME_TYPES, 'image/gif', 'video/mp4', 'video/webm'] as const;
-export type UploadMime = (typeof BANNER_MIME_TYPES)[number];
-export type UploadKind = 'banner' | 'avatar' | 'icon' | 'cosmetic';
+export type UploadMime = (typeof BANNER_MIME_TYPES)[number] | (typeof AUDIO_MIME_TYPES)[number];
+export type UploadKind = 'banner' | 'avatar' | 'icon' | 'cosmetic' | 'audio' | 'cursor';
 
 type UploadLimit = { maxSize: number; mimeTypes: readonly UploadMime[] };
 
@@ -53,7 +55,9 @@ export const UPLOAD_LIMITS: Record<UploadKind, UploadLimit> = {
 	banner: { maxSize: 25 * 1024 * 1024, mimeTypes: BANNER_MIME_TYPES },
 	avatar: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
 	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
-	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES }
+	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
+	audio: { maxSize: 10 * 1024 * 1024, mimeTypes: AUDIO_MIME_TYPES },
+	cursor: { maxSize: 256 * 1024, mimeTypes: CURSOR_MIME_TYPES }
 };
 
 const EXT_BY_MIME: Record<UploadMime, string> = {
@@ -62,7 +66,12 @@ const EXT_BY_MIME: Record<UploadMime, string> = {
 	'image/webp': 'webp',
 	'image/gif': 'gif',
 	'video/mp4': 'mp4',
-	'video/webm': 'webm'
+	'video/webm': 'webm',
+	'audio/mpeg': 'mp3',
+	'audio/mp4': 'm4a',
+	'audio/ogg': 'ogg',
+	'audio/wav': 'wav',
+	'audio/webm': 'webm'
 };
 
 export function validateUpload(

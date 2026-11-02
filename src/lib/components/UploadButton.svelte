@@ -6,7 +6,7 @@
 		kind,
 		existingKey = null,
 		label
-	}: { kind: 'banner' | 'avatar' | 'icon'; existingKey?: string | null; label: string } = $props();
+	}: { kind: 'banner' | 'avatar' | 'icon' | 'audio' | 'cursor'; existingKey?: string | null; label: string } = $props();
 
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
@@ -63,7 +63,13 @@
 <input
 	bind:this={input}
 	type="file"
-	accept={kind === 'banner' ? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'}
+	accept={kind === 'banner'
+		? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm'
+		: kind === 'audio'
+			? 'audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm'
+			: kind === 'cursor'
+				? 'image/png,image/webp'
+				: 'image/jpeg,image/png,image/webp'}
 	class="hidden"
 	onchange={onPicked}
 />

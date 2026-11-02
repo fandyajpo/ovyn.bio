@@ -12,8 +12,8 @@
 		const profile = data.profile;
 		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;
 	});
-	const bannerIsVideo = $derived(/\.(mp4|webm)$/i.test(p.bannerKey ?? ''));
-	const bannerVideoType = $derived(p.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
+	const bannerIsVideo = $derived(data.bannerIsVideo);
+	const bannerVideoType = $derived(data.bannerVideoType);
 </script>
 
 <svelte:head>
@@ -26,7 +26,11 @@
 		<p>This profile is private.</p>
 	</div>
 {:else}
-	<article class="profile-sheet relative isolate mx-auto flex max-w-2xl flex-col gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950/75 p-4 sm:p-7">
+	<article
+		class="profile-sheet relative isolate mx-auto flex max-w-2xl flex-col gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950/75 p-4 sm:p-7"
+		data-profile-theme={p.theme}
+		style={data.cursorUrl ? `cursor: url('${data.cursorUrl}') 0 0, auto` : undefined}
+	>
 		<div class="pointer-events-none absolute right-5 top-5 z-10 rotate-3" aria-hidden="true"><span class="sticker sticker--lilac">YOUR SPACE</span></div>
 		{#if data.cosmetics?.wallpaperUrl}
 			<img
@@ -80,6 +84,18 @@
 
 		{#if p.bio}
 			<p class="profile-bio collage-card collage-card--blue rounded-2xl bg-[#151a1c]/90 p-4 text-base leading-7 text-neutral-200">{p.bio}</p>
+		{/if}
+
+		{#if data.audioUrl}
+			<audio controls preload="none" src={data.audioUrl} class="w-full" aria-label="{displayName}'s profile audio"></audio>
+		{/if}
+
+		{#if data.links.length > 0}
+			<nav aria-label="{displayName}'s links" class="flex flex-wrap gap-2">
+				{#each data.links as link (link.id)}
+					<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="rounded-full border border-white/10 bg-neutral-900/80 px-3 py-2 text-sm text-neutral-200 transition hover:border-lime-300/50 hover:text-lime-300">{link.label}</a>
+				{/each}
+			</nav>
 		{/if}
 
 		{#if data.guild}

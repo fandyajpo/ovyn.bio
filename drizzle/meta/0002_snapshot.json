@@ -132,12 +132,8 @@
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -209,12 +205,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -224,9 +216,7 @@
         "session_token_unique": {
           "name": "session_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -297,9 +287,7 @@
         "user_email_unique": {
           "name": "user_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -423,12 +411,8 @@
           "name": "cosmetics_id_products_id_fk",
           "tableFrom": "cosmetics",
           "tableTo": "products",
-          "columnsFrom": [
-            "id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -517,12 +501,8 @@
           "name": "discord_accounts_user_id_user_id_fk",
           "tableFrom": "discord_accounts",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -532,9 +512,7 @@
         "discord_accounts_discord_id_unique": {
           "name": "discord_accounts_discord_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "discord_id"
-          ]
+          "columns": ["discord_id"]
         }
       },
       "policies": {},
@@ -642,12 +620,8 @@
           "name": "guild_invitations_guild_id_guilds_id_fk",
           "tableFrom": "guild_invitations",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guild_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guild_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -655,12 +629,8 @@
           "name": "guild_invitations_inviter_id_user_id_fk",
           "tableFrom": "guild_invitations",
           "tableTo": "user",
-          "columnsFrom": [
-            "inviter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["inviter_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -668,12 +638,8 @@
           "name": "guild_invitations_invitee_id_user_id_fk",
           "tableFrom": "guild_invitations",
           "tableTo": "user",
-          "columnsFrom": [
-            "invitee_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["invitee_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -738,12 +704,8 @@
           "name": "guild_members_user_id_user_id_fk",
           "tableFrom": "guild_members",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -751,12 +713,8 @@
           "name": "guild_members_guild_id_guilds_id_fk",
           "tableFrom": "guild_members",
           "tableTo": "guilds",
-          "columnsFrom": [
-            "guild_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["guild_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -882,12 +840,8 @@
           "name": "guilds_owner_id_user_id_fk",
           "tableFrom": "guilds",
           "tableTo": "user",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -897,9 +851,7 @@
         "guilds_slug_unique": {
           "name": "guilds_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1002,12 +954,8 @@
           "name": "orders_user_id_user_id_fk",
           "tableFrom": "orders",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1015,12 +963,8 @@
           "name": "orders_product_id_products_id_fk",
           "tableFrom": "orders",
           "tableTo": "products",
-          "columnsFrom": [
-            "product_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["product_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1102,12 +1046,8 @@
           "name": "payment_events_payment_id_payments_id_fk",
           "tableFrom": "payment_events",
           "tableTo": "payments",
-          "columnsFrom": [
-            "payment_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["payment_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1117,9 +1057,7 @@
         "payment_events_provider_event_id_unique": {
           "name": "payment_events_provider_event_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "provider_event_id"
-          ]
+          "columns": ["provider_event_id"]
         }
       },
       "policies": {},
@@ -1225,12 +1163,8 @@
           "name": "payments_order_id_orders_id_fk",
           "tableFrom": "payments",
           "tableTo": "orders",
-          "columnsFrom": [
-            "order_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["order_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1240,9 +1174,7 @@
         "payments_order_id_unique": {
           "name": "payments_order_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "order_id"
-          ]
+          "columns": ["order_id"]
         }
       },
       "policies": {},
@@ -1314,9 +1246,7 @@
         "products_name_unique": {
           "name": "products_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -1440,12 +1370,8 @@
           "name": "profiles_user_id_user_id_fk",
           "tableFrom": "profiles",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1453,12 +1379,8 @@
           "name": "profiles_equipped_frame_id_cosmetics_id_fk",
           "tableFrom": "profiles",
           "tableTo": "cosmetics",
-          "columnsFrom": [
-            "equipped_frame_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipped_frame_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1466,12 +1388,8 @@
           "name": "profiles_equipped_wallpaper_id_cosmetics_id_fk",
           "tableFrom": "profiles",
           "tableTo": "cosmetics",
-          "columnsFrom": [
-            "equipped_wallpaper_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipped_wallpaper_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -1479,12 +1397,8 @@
           "name": "profiles_equipped_badge_id_cosmetics_id_fk",
           "tableFrom": "profiles",
           "tableTo": "cosmetics",
-          "columnsFrom": [
-            "equipped_badge_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["equipped_badge_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1494,16 +1408,12 @@
         "profiles_user_id_unique": {
           "name": "profiles_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "user_id"
-          ]
+          "columns": ["user_id"]
         },
         "profiles_slug_unique": {
           "name": "profiles_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -1556,12 +1466,8 @@
           "name": "user_cosmetics_user_id_user_id_fk",
           "tableFrom": "user_cosmetics",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1569,12 +1475,8 @@
           "name": "user_cosmetics_cosmetic_id_cosmetics_id_fk",
           "tableFrom": "user_cosmetics",
           "tableTo": "cosmetics",
-          "columnsFrom": [
-            "cosmetic_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["cosmetic_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1582,10 +1484,7 @@
       "compositePrimaryKeys": {
         "user_cosmetics_user_id_cosmetic_id_pk": {
           "name": "user_cosmetics_user_id_cosmetic_id_pk",
-          "columns": [
-            "user_id",
-            "cosmetic_id"
-          ]
+          "columns": ["user_id", "cosmetic_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1598,58 +1497,32 @@
     "public.cosmetic_kind": {
       "name": "cosmetic_kind",
       "schema": "public",
-      "values": [
-        "frame",
-        "wallpaper",
-        "badge"
-      ]
+      "values": ["frame", "wallpaper", "badge"]
     },
     "public.guild_role": {
       "name": "guild_role",
       "schema": "public",
-      "values": [
-        "owner",
-        "officer",
-        "member"
-      ]
+      "values": ["owner", "officer", "member"]
     },
     "public.guild_status": {
       "name": "guild_status",
       "schema": "public",
-      "values": [
-        "active",
-        "disbanded"
-      ]
+      "values": ["active", "disbanded"]
     },
     "public.guild_visibility": {
       "name": "guild_visibility",
       "schema": "public",
-      "values": [
-        "public",
-        "private"
-      ]
+      "values": ["public", "private"]
     },
     "public.invitation_status": {
       "name": "invitation_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "accepted",
-        "rejected",
-        "cancelled",
-        "expired"
-      ]
+      "values": ["pending", "accepted", "rejected", "cancelled", "expired"]
     },
     "public.order_status": {
       "name": "order_status",
       "schema": "public",
-      "values": [
-        "pending",
-        "paid",
-        "failed",
-        "expired",
-        "cancelled"
-      ]
+      "values": ["pending", "paid", "failed", "expired", "cancelled"]
     },
     "public.payment_status": {
       "name": "payment_status",
@@ -1666,10 +1539,7 @@
     "public.profile_visibility": {
       "name": "profile_visibility",
       "schema": "public",
-      "values": [
-        "public",
-        "private"
-      ]
+      "values": ["public", "private"]
     }
   },
   "schemas": {},

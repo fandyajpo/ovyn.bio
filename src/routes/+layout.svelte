@@ -38,7 +38,7 @@
 					<nav aria-label="Footer" class="flex flex-wrap gap-4 font-mono text-xs text-neutral-500">
 						<a href="/discover" class="hover:text-lime-300">Discover</a>
 						{#if data.user}<a href="/shop" class="hover:text-lime-300">Shop</a>{/if}
-						<a href={data.user ? '/dashboard' : '/login'} class="hover:text-lime-300">{data.user ? 'Your dashboard' : 'Claim your corner'}</a>
+						<a href={data.user ? '/account' : '/login'} class="hover:text-lime-300">{data.user ? 'Your account' : 'Claim your corner'}</a>
 					</nav>
 					<p class="font-mono text-[10px] uppercase tracking-widest text-neutral-700">OVYN — your identity. your circle.</p>
 				</div>

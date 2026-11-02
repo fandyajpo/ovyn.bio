@@ -99,14 +99,14 @@
 				<p class="text-lime-300">Payment received — your spotlight is active.</p>
 			{/if}
 		{:else if status === 'expired'}
-			<p class="text-neutral-400">This payment code expired. Start again from Plans &amp; billing.</p>
+			<p class="text-neutral-400">This payment code expired. Start again from Plans &amp; upgrade.</p>
 		{:else}
-			<p class="text-red-400">This payment did not go through. Start again from Plans &amp; billing.</p>
+			<p class="text-red-400">This payment did not go through. Start again from Plans &amp; upgrade.</p>
 		{/if}
 	</Card>
 
 	<div class="flex flex-col gap-2 sm:flex-row">
-		<Button href="/billing" variant="secondary" class="w-full sm:w-auto">Plans &amp; billing</Button>
+		<Button href="/upgrade" variant="secondary" class="w-full sm:w-auto">Plans &amp; billing</Button>
 		<Button href="/billing/history" variant="ghost" class="w-full sm:w-auto">Payment history</Button>
 	</div>
 </div>

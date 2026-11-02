@@ -1,5 +1,16 @@
 import { z } from 'zod';
 
+export const PROFILE_THEME_IDS = ['default', 'midnight', 'bubblegum', 'ocean', 'forest'] as const;
+export const profileThemeSchema = z.enum(PROFILE_THEME_IDS);
+
+export const PROFILE_THEME_OPTIONS = [
+	{ value: 'default', label: 'OVYN Original' },
+	{ value: 'midnight', label: 'Midnight Grid' },
+	{ value: 'bubblegum', label: 'Bubblegum After Dark' },
+	{ value: 'ocean', label: 'Deep Ocean' },
+	{ value: 'forest', label: 'Forest Club' }
+] as const;
+
 export const profileIdentitySchema = z.object({
 	username: z
 		.string()
