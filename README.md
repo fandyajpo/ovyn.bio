@@ -9,6 +9,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Layer | Choice |
 |---|---|
 | Framework | SvelteKit 3 + Svelte 5 (runes) + TypeScript (strict) |
+| Tooling | Vite+ (`vite-plus`) - dev, build and preview from one toolchain |
 | Styling | Tailwind CSS v4 |
 | Hosting | Vercel (`@sveltejs/adapter-vercel`, Node runtime) |
 | Database | Neon PostgreSQL (pooled connection for app, direct for migrations) |
@@ -25,17 +26,26 @@ Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
 old `$env/*` modules. Server-only modules read `process.env` directly, which
 works unchanged on Vercel Functions.
 
+Tooling runs on [Vite+](https://viteplus.dev) (`vite-plus`), whose core is Vite
+8.3.5. SvelteKit and the Vite plugins import `vite`, so `pnpm-workspace.yaml`
+overrides `vite` with `@voidzero-dev/vite-plus-core`; keep that override on the
+same version as `vite-plus` in `package.json`. The scripts run through the Vite+
+CLI (`vp`), which ships in the `vite-plus` package itself, so no global install
+is needed: `vp dev`, `vp build`, `vp preview`, `vp lint` and `vp test`.
+`svelte-check` stays in `check` because only it understands Svelte templates,
+and there is no separate Vitest setup - `vp test` uses the copy Vite+ bundles.
+
 ## Getting started
 
 ```bash
-npm install
+pnpm install
 cp .env.example .env   # fill in the values below
-npm run db:generate    # generate SQL migrations from the schema
-npm run db:migrate     # apply them (uses DATABASE_URL directly)
-npm run dev
+pnpm run db:generate    # generate SQL migrations from the schema
+pnpm run db:migrate     # apply them (uses DATABASE_URL directly)
+pnpm run dev
 ```
 
-`npm run build` prerenders the landing and legal pages, so the environment
+`pnpm run build` prerenders the landing and legal pages, so the environment
 variables below must be present at build time too, not only at runtime.
 
 ## Starting from a clean database
@@ -43,9 +53,9 @@ variables below must be present at build time too, not only at runtime.
 To wipe every table and rebuild from the migration files:
 
 ```bash
-npm run db:reset -- --yes
-npm run db:migrate
-npm run db:seed-shop
+pnpm run db:reset -- --yes
+pnpm run db:migrate
+pnpm run db:seed-shop
 ```
 
 `db:reset` is destructive and only runs with the flag. It drops the `public`
@@ -116,7 +126,7 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   seeds new profiles, while profile username, display name, bio and uploaded
   avatar are ovyn-owned and remain editable. An uploaded avatar overrides the
   sign-in provider's picture until the user resets it.
-- **Legacy Neon Managed Auth** - `npm run db:backfill` copies users and
+- **Legacy Neon Managed Auth** - `pnpm run db:backfill` copies users and
   Discord accounts out of the old managed `neon_auth` schema into the
   standalone tables with the SAME user ids, so existing profiles, guild
   memberships, and orders keep working. It is only needed for a database that
@@ -155,7 +165,7 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   automatically via the payment webhook (fulfilment is idempotent). Users
   equip/unequip owned cosmetics in profile settings; public profiles render
   frames around the avatar, wallpapers behind the header, and badges next to
-  the name. Seed the starter catalog once with `npm run db:seed-shop`; its SVG
+  the name. Seed the starter catalog once with `pnpm run db:seed-shop`; its SVG
   artwork is bundled in `static/cosmetics/`. The shop previews each item on a
   sample profile. `/admin/catalog` lists every product in one table, with
   separate pages for creating and editing a listing, including artwork uploads
@@ -169,7 +179,7 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 - **Profile links and templates** - public links are scheme-validated before display. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
 - **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
-Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter cosmetics and the Rp 30.000 monthly Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
+Whenever the schema changes, run `pnpm run db:generate`, review the generated migration, then run `pnpm run db:migrate`. After migrations, run `pnpm run db:seed-shop` once to add starter cosmetics and the Rp 30.000 monthly Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
 
 ## Monetization administration
 
@@ -198,5 +208,5 @@ managed here yet.
 ## Roadmap / not yet done
 
 - Payment cancellation calls (DOKU delete VA) and refund flows
-- `npm run check` / `npm run build` must be run locally - no CI configured yet
+- `pnpm run check` / `pnpm run build` must be run locally - no CI configured yet
 - Review starter cosmetic prices and reward values before production
