@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import LinkProviderIcon from '#lib/components/LinkProviderIcon.svelte';
 	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
 	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
 	import { formatDate } from '#lib/utils';
@@ -87,8 +88,18 @@
 
 			{#if data.links.length > 0}
 				<nav aria-label="{displayName}'s links" class="profile-links">
-					{#each data.links as link (link.id)}
-						<a href={link.url} target="_blank" rel="noopener noreferrer nofollow">{link.label}<span aria-hidden="true">↗</span></a>
+					{#each data.links as link, index (link.id)}
+						<a
+							href={link.url}
+							target="_blank"
+							rel="noopener noreferrer nofollow"
+							class="profile-link"
+							style={`--i: ${index}`}
+						>
+							<span class="profile-link-float"><LinkProviderIcon provider={link.provider} size="sm" /></span>
+							<span class="profile-link-label">{link.label}</span>
+							<span class="profile-link-arrow" aria-hidden="true">↗</span>
+						</a>
 					{/each}
 				</nav>
 			{/if}
@@ -287,6 +298,76 @@
 
 	.profile-links a span,
 	.profile-circle a span { color: var(--color-accent); }
+
+	.profile-circle a span { color: var(--color-accent); }
+
+	.profile-links .profile-link {
+		gap: 0.6rem;
+		padding: 0.35rem 0.8rem 0.35rem 0.4rem;
+		border: 1px solid transparent;
+		border-radius: 999px;
+		transition:
+			color 200ms ease,
+			border-color 220ms ease,
+			background-color 220ms ease,
+			transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+	}
+
+	.profile-link-float {
+		display: inline-flex;
+		flex: 0 0 auto;
+		animation: profile-link-float 5.6s ease-in-out infinite;
+		animation-delay: calc(var(--i, 0) * 0.32s);
+	}
+
+	.profile-link :global(.provider-icon) {
+		transition: transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	.profile-link-label {
+		color: var(--color-foreground);
+		transition: color 160ms ease;
+	}
+
+	.profile-link-arrow {
+		color: var(--color-accent);
+		font-size: 0.8em;
+		transition: transform 240ms ease;
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.profile-links .profile-link:hover {
+			border-color: color-mix(in srgb, var(--color-accent) 32%, transparent);
+			background: var(--color-accent-soft);
+			transform: translateY(-2px);
+		}
+
+		.profile-link:hover :global(.provider-icon) {
+			transform: translateY(-1px) rotate(-6deg) scale(1.08);
+		}
+
+		.profile-link:hover .profile-link-arrow { transform: translate(2px, -2px); }
+	}
+
+	.profile-link:focus-visible {
+		outline: 2px solid color-mix(in srgb, var(--color-accent) 60%, transparent);
+		outline-offset: 2px;
+	}
+
+	.profile-link:active :global(.provider-icon) {
+		transform: scale(0.92) rotate(3deg);
+		transition-duration: 90ms;
+	}
+
+	@keyframes profile-link-float {
+		0%, 100% { transform: translate3d(0, 0, 0); }
+		50% { transform: translateY(-2px); }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.profile-link-float { animation: none; }
+		.profile-link :global(.provider-icon) { transition: none; }
+	}
 	.profile-links a:hover,
 	.profile-circle a:hover { color: var(--color-accent); transform: translateY(-2px); }
 	.profile-circle { margin-top: 3rem; }
