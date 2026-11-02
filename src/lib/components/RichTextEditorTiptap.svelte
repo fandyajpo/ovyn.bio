@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import type { Editor, Extensions } from '@tiptap/core';
 
 	let {
@@ -16,7 +16,7 @@
 
 	let element: HTMLDivElement | undefined = $state();
 	let editor = $state.raw<Editor | null>(null);
-	let lastEmitted = value;
+	let lastEmitted = untrack(() => value);
 
 	const marks = $state({
 		bold: false,

@@ -45,7 +45,7 @@ export const TEMPLATE_EMBED_PROVIDER_OPTIONS = [
 	{ value: 'codepen', label: 'CodePen' }
 ] as const;
 
-export type TemplateListItem = { id: string; text: string; checked?: boolean };
+export type TemplateListItem = { id: string; text?: string; checked?: boolean };
 
 export type TemplateGridCell = { id: string; heading?: string; markdown?: string };
 
@@ -204,7 +204,7 @@ export function cleanTemplateBlocks(blocks: TemplateBlock[]): TemplateBlock[] {
 			if (block.items) {
 				next.items = block.items
 					.filter((item) => item.text?.trim())
-					.map((item) => ({ id: item.id, text: item.text.trim(), checked: item.checked }));
+					.map((item) => ({ id: item.id, text: (item.text ?? '').trim(), checked: item.checked }));
 			}
 
 			if (block.cells) {
