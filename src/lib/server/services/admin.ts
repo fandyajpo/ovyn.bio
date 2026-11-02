@@ -5,6 +5,7 @@ import { db } from '#lib/server/db';
 import { cosmetics, discordAccounts, orders, payments, products, profiles, user } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import type { AdminCreateProduct, AdminUpdateProduct } from '#lib/schemas/admin';
+import { deleteReplacedObject } from '#lib/server/storage';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -207,6 +208,8 @@ export async function createCatalogProduct(input: AdminCreateProduct): Promise<v
 }
 
 export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<void> {
+	let replacedAssetKey: string | null = null;
+
 	try {
 		await db.transaction(async (tx) => {
 			const [product] = await tx
@@ -222,12 +225,13 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 					throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
 				}
 				const [cosmetic] = await tx
-					.select({ id: cosmetics.id })
+					.select({ id: cosmetics.id, assetKey: cosmetics.assetKey })
 					.from(cosmetics)
 					.where(eq(cosmetics.id, product.id))
 					.for('update')
 					.limit(1);
 				if (!cosmetic) throw new ConflictError('The cosmetic record is missing');
+				replacedAssetKey = cosmetic.assetKey;
 			} else if (product.category === 'plan') {
 				if (input.price !== 30_000 || input.durationDays !== 30) {
 					throw new ValidationError('Premium costs Rp 30.000 for 30 days');
@@ -265,5 +269,9 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 	} catch (err) {
 		if (isUniqueViolation(err)) throw new ConflictError('A product with that name already exists');
 		throw err;
+	}
+
+	if (replacedAssetKey && replacedAssetKey !== input.assetKey) {
+		await deleteReplacedObject(replacedAssetKey);
 	}
 }

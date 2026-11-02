@@ -128,7 +128,9 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   `provider_event_id`. Terminal payment states never regress.
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
-  a key is attached to a profile.
+  a key is attached to a profile. Replacing an avatar, cover, background,
+  audio, cursor or cosmetic artwork deletes the file it replaced, while the
+  seed artwork under `static/` is shared and never deleted.
 - **Shop & cosmetics** - cosmetic items (avatar frames, wallpapers, badges)
   are products: buying one through the normal DOKU checkout grants it
   automatically via the payment webhook (fulfilment is idempotent). Users

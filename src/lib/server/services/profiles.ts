@@ -4,6 +4,7 @@ import { account, user } from '#lib/server/db/schema/auth';
 import { discordAccounts, profiles } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '../utils/errors';
 import { isValidSlug, normalizeSlug } from '../utils/slug';
+import { deleteReplacedObject } from '#lib/server/storage';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -183,14 +184,38 @@ export async function checkUsernameAvailability(userId: string, rawUsername: str
 	return { username, valid: true, available: !existing || existing.userId === userId };
 }
 
+/** The file currently attached to a profile column, for cleanup after a replace. */
+async function currentProfileFile(userId: string): Promise<Record<'avatarKey' | 'bannerKey' | 'audioKey' | 'cursorKey' | 'backgroundKey', string | null>> {
+	const [row] = await db
+		.select({
+			avatarKey: profiles.avatarKey,
+			bannerKey: profiles.bannerKey,
+			audioKey: profiles.audioKey,
+			cursorKey: profiles.cursorKey,
+			backgroundKey: profiles.backgroundKey
+		})
+		.from(profiles)
+		.where(eq(profiles.userId, userId))
+		.limit(1);
+	return {
+		avatarKey: row?.avatarKey ?? null,
+		bannerKey: row?.bannerKey ?? null,
+		audioKey: row?.audioKey ?? null,
+		cursorKey: row?.cursorKey ?? null,
+		backgroundKey: row?.backgroundKey ?? null
+	};
+}
+
 /** A null avatar key restores the current Discord avatar as the profile picture. */
 export async function setProfileAvatar(userId: string, avatarKey: string | null) {
+	const previous = (await currentProfileFile(userId)).avatarKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ avatarKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');
+	if (previous && previous !== avatarKey) await deleteReplacedObject(previous);
 	return updated;
 }
 
@@ -208,32 +233,38 @@ export async function setProfileVisibility(
 }
 
 export async function setProfileBanner(userId: string, bannerKey: string) {
+	const previous = (await currentProfileFile(userId)).bannerKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ bannerKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');
+	if (previous && previous !== bannerKey) await deleteReplacedObject(previous);
 	return updated;
 }
 
 export async function setProfileAudioKey(userId: string, audioKey: string | null) {
+	const previous = (await currentProfileFile(userId)).audioKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ audioKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');
+	if (previous && previous !== audioKey) await deleteReplacedObject(previous);
 	return updated;
 }
 
 export async function setProfileCursorKey(userId: string, cursorKey: string | null) {
+	const previous = (await currentProfileFile(userId)).cursorKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ cursorKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');
+	if (previous && previous !== cursorKey) await deleteReplacedObject(previous);
 	return updated;
 }
 
@@ -272,12 +303,14 @@ export async function setProfileBackground(
 }
 
 export async function setProfileBackgroundKey(userId: string, backgroundKey: string | null) {
+	const previous = (await currentProfileFile(userId)).backgroundKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ backgroundKey, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning();
 	if (!updated) throw new NotFoundError('Profile not found');
+	if (previous && previous !== backgroundKey) await deleteReplacedObject(previous);
 	return updated;
 }
 

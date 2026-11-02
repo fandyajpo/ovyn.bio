@@ -10,6 +10,7 @@ import {
 	ValidationError
 } from '#lib/server/utils/errors';
 import { normalizeSlug, RESERVED_SLUGS } from '#lib/server/utils/slug';
+import { deleteReplacedObject } from '#lib/server/storage';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -347,21 +348,40 @@ export async function updateGuild(
 	guildId: string,
 	update: Partial<Pick<GuildInput, 'name' | 'description' | 'visibility' | 'iconKey' | 'bannerKey'>>
 ) {
-	return db.transaction(async (tx) => {
+	const replaced: (string | null)[] = [];
+
+	const updated = await db.transaction(async (tx) => {
 		const actor = await currentMembership(tx, actorId);
 		if (!actor || actor.role !== 'owner') {
 			throw new ForbiddenError('Only the owner can edit circle settings');
 		}
 
-		const [updated] = await tx
+		const [existing] = await tx
+			.select({ iconKey: guilds.iconKey, bannerKey: guilds.bannerKey })
+			.from(guilds)
+			.where(eq(guilds.id, guildId))
+			.limit(1);
+
+		const [row] = await tx
 			.update(guilds)
 			.set({ ...update, updatedAt: new Date() })
 			.where(eq(guilds.id, guildId))
 			.returning();
 
-		if (!updated) throw new NotFoundError('Circle not found');
-		return updated;
+		if (!row) throw new NotFoundError('Circle not found');
+
+		if (existing) {
+			const nextIcon = update.iconKey === undefined ? existing.iconKey : update.iconKey;
+			const nextBanner = update.bannerKey === undefined ? existing.bannerKey : update.bannerKey;
+			if (nextIcon !== existing.iconKey) replaced.push(existing.iconKey);
+			if (nextBanner !== existing.bannerKey) replaced.push(existing.bannerKey);
+		}
+
+		return row;
 	});
+
+	for (const key of replaced) await deleteReplacedObject(key);
+	return updated;
 }
 
 export async function searchGuildMemberCandidates(guildId: string, query: string) {

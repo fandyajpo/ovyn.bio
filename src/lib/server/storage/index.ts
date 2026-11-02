@@ -133,6 +133,21 @@ export async function deleteObject(key: string): Promise<void> {
 	}
 }
 
+/**
+ * Remove a file that a record no longer points at. Seed artwork under `static/`
+ * ships with the app and is shared, so it is never deleted here. Failures are
+ * logged rather than thrown, because a saved record should not fail just
+ * because storage was briefly unavailable.
+ */
+export async function deleteReplacedObject(key: string | null | undefined): Promise<void> {
+	if (!key || key.startsWith('static/')) return;
+	try {
+		await deleteObject(key);
+	} catch (err) {
+		console.error('Could not delete replaced file', key, err);
+	}
+}
+
 /** Verify the object belongs to the user (keys are `{kind}s/{userId}/…`) before storing the key. */
 export function assertOwnObjectKey(userId: string, kind: UploadKind, key: string): void {
 	if (!key.startsWith(`${kind}s/${userId}/`)) {
