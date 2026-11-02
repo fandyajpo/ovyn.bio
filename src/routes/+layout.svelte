@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import '../app.css';
 	import Nav from '#lib/components/Nav.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
@@ -21,14 +20,7 @@
 	});
 </script>
 
-<svelte:head>
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
-	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-</svelte:head>
-
-<QueryClientProvider client={queryClient}>
-	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'}>
+<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		{#if showsSiteChrome}<Nav />{/if}
 
@@ -67,7 +59,6 @@
 	</div>
 
 	<Toasts />
-</QueryClientProvider>
 
 <style>
 	.app-frame {

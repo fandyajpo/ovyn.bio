@@ -1,10 +1,42 @@
 @import 'tailwindcss';
 
 @font-face {
-	font-family: 'Geist Sans';
-	src: url('/fonts/geist/GeistSans-Variable.woff2') format('woff2');
+	font-family: 'Poppins';
+	src: url('/fonts/poppins/poppins-latin-400-normal.woff2') format('woff2');
 	font-style: normal;
-	font-weight: 100 900;
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Poppins';
+	src: url('/fonts/poppins/poppins-latin-500-normal.woff2') format('woff2');
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Poppins';
+	src: url('/fonts/poppins/poppins-latin-600-normal.woff2') format('woff2');
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Poppins';
+	src: url('/fonts/poppins/poppins-latin-700-normal.woff2') format('woff2');
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Poppins';
+	src: url('/fonts/poppins/poppins-latin-800-normal.woff2') format('woff2');
+	font-style: normal;
+	font-weight: 800;
 	font-display: swap;
 }
 
@@ -13,14 +45,6 @@
 	src: url('/fonts/geist/GeistMono-Variable.woff2') format('woff2');
 	font-style: normal;
 	font-weight: 100 900;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: 'Geist Serif';
-	src: url('/fonts/geist/GeistSerif-Variable.woff2') format('woff2');
-	font-style: normal;
-	font-weight: 400;
 	font-display: swap;
 }
 
@@ -49,10 +73,10 @@
 	--color-nav-glass: rgb(17 18 16 / 94%);
 	--color-menu-glass: rgb(20 21 18 / 97%);
 
-	--font-display: 'Geist Serif', Georgia, serif;
-	--font-sans: 'Geist Sans', system-ui, sans-serif;
+	--font-display: 'Poppins', system-ui, sans-serif;
+	--font-sans: 'Poppins', system-ui, sans-serif;
 	--font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-	--font-serif: 'Geist Serif', Georgia, serif;
+	--font-serif: 'Poppins', system-ui, sans-serif;
 	--font-pixel: 'Geist Pixel', ui-monospace, monospace;
 }
 

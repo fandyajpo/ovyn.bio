@@ -11,11 +11,9 @@ const CACHE_NAME = `ovyn-shell-${version}`;
 const PUSH_PREFERENCES_CACHE = 'ovyn-push-preferences-v1';
 const PUSH_PREFERENCES_URL = new URL('/__ovyn_push_preferences__', self.location.origin).href;
 const OFFLINE_URL = resolve('/offline.html');
-const ASSET_URLS = [
-	...immutable.map((asset) => resolve(asset.path)),
-	...assets.map((asset) => resolve(asset.path))
-];
-const ASSET_PATHS = new Set(ASSET_URLS.map((asset) => new URL(asset, self.location.origin).pathname));
+const ASSET_PATHS = new Set(
+	[...immutable, ...assets].map((asset) => new URL(resolve(asset.path), self.location.origin).pathname)
+);
 
 type PushMessage = {
 	title?: string;
@@ -34,7 +32,9 @@ self.addEventListener('install', (event) => {
 	event.waitUntil(
 		(async () => {
 			const cache = await caches.open(CACHE_NAME);
-			await cache.addAll(ASSET_URLS);
+			// Only the offline page is precached. Chunks, styles and fonts are cached
+			// as they are requested, so a first visit does not pull the whole build.
+			await cache.add(OFFLINE_URL);
 			await self.skipWaiting();
 		})()
 	);

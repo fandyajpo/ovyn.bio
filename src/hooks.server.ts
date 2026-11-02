@@ -6,6 +6,12 @@ import { recordReferral } from '#lib/server/services/engagement';
 // This hook populates session data for load functions, form actions, and
 // API endpoints.
 export const handle: Handle = async ({ event, resolve }) => {
+	// Payment notifications carry no session, so skip the lookup for them.
+	if (event.url.pathname.startsWith('/api/webhooks/')) {
+		event.locals.user = null;
+		return resolve(event);
+	}
+
 	const session = await auth.api.getSession({ headers: event.request.headers });
 
 	if (session) {

@@ -365,7 +365,33 @@ export async function listUserOrders(userId: string) {
 		.limit(50);
 }
 
-export async function getUserPlan(userId: string) {
+type UserPlan = {
+	tier: 'free' | 'premium';
+	isLifetime: boolean;
+	premiumUntil: Date | null;
+	daysRemaining: number;
+};
+
+const PLAN_CACHE_TTL_MS = 10_000;
+
+const planCache = new Map<string, { plan: UserPlan; expiresAt: number }>();
+
+/**
+ * The plan is read on nearly every page render, and it only changes when a
+ * payment or an admin override lands, so each instance keeps it for a few
+ * seconds instead of re-deriving it from orders and payments every time.
+ */
+export async function getUserPlan(userId: string): Promise<UserPlan> {
+	const cached = planCache.get(userId);
+	if (cached && cached.expiresAt > Date.now()) return cached.plan;
+
+	const plan = await computeUserPlan(userId);
+	if (planCache.size > 5_000) planCache.clear();
+	planCache.set(userId, { plan, expiresAt: Date.now() + PLAN_CACHE_TTL_MS });
+	return plan;
+}
+
+async function computeUserPlan(userId: string): Promise<UserPlan> {
 	const [override] = await db
 		.select({ tier: planOverrides.tier })
 		.from(planOverrides)

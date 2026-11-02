@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { createQuery } from '@tanstack/svelte-query';
 	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -9,26 +8,27 @@
 
 	let copied = $state(false);
 
-	type StatusResponse = { status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' };
+	type Status = { status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' };
+
+	let status = $state<Status['status']>(data.order.status);
 
 	// Poll payment status; the endpoint re-syncs from DOKU server-side.
-	const statusQuery = createQuery(() => ({
-		queryKey: ['payment', data.order.id],
-		queryFn: async (): Promise<StatusResponse> => {
-			const res = await fetch(`/api/payments/${data.order.id}/status`);
-			if (!res.ok) throw new Error('Could not fetch payment status');
-			return res.json();
-		},
-		refetchInterval: (query) => {
-			const status = query.state.data?.status;
-			return status === 'pending' ? 10_000 : false;
-		},
-		refetchIntervalInBackground: false,
-		initialData: { status: data.order.status },
-		staleTime: 5_000
-	}));
+	$effect(() => {
+		if (status !== 'pending') return;
 
-	const status = $derived(statusQuery.data?.status ?? data.order.status);
+		const timer = setInterval(async () => {
+			try {
+				const res = await fetch(`/api/payments/${data.order.id}/status`);
+				if (!res.ok) return;
+				const next = (await res.json()) as Status;
+				if (next?.status) status = next.status;
+			} catch {
+				// A failed poll is retried on the next tick.
+			}
+		}, 10_000);
+
+		return () => clearInterval(timer);
+	});
 
 	async function copyVa() {
 		if (await copyText(data.payment.paymentCode ?? '')) {

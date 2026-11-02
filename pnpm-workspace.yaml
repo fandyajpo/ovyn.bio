@@ -10,8 +10,6 @@ minimumReleaseAgeExclude:
   - '@better-auth/mongo-adapter@1.7.15'
   - '@better-auth/prisma-adapter@1.7.15'
   - '@better-auth/telemetry@1.7.15'
-  - '@tanstack/query-core@5.105.1'
-  - '@tanstack/svelte-query@6.3.7'
   - '@voidzero-dev/vite-plus-core@1.4.0'
   - better-auth@1.7.15
   - vite-plus@1.4.0

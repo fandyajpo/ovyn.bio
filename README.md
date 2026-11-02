@@ -17,7 +17,6 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Auth | Standalone Better Auth - Discord and optional Google OAuth |
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
-| Client data | TanStack Query (checkout status polling) |
 | Validation | Zod 4 |
 
 Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
@@ -149,12 +148,13 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   they are served as static files with no function call; the landing's community
   counters load from a small cached endpoint after hydration, and the header
   reads the signed-in state in the browser so the shell stays identical for
-  everyone. Static assets and fonts are served from the CDN and cached by the
-  service worker, images are downscaled in the browser before upload, and
-  uploaded objects carry immutable cache headers while their presigned URLs are
-  reused for days. The profile view counter runs after the response, the circle
-  is read from the membership row instead of a second query, and DOKU routes get
-  a longer function timeout.
+  everyone. Poppins and the Geist faces are self-hosted instead of loaded from a
+  font CDN, and the service worker caches chunks, styles and fonts as they are
+  requested rather than precaching the whole build on install. Uploaded objects
+  carry immutable cache headers while their presigned URLs are reused for days.
+  The profile view counter runs after the response, the plan lookup is memoized
+  for a few seconds per instance, the circle is read from the membership row
+  instead of a second query, and DOKU routes get a longer function timeout.
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
   a key is attached to a profile. Replacing an avatar, cover, background,
