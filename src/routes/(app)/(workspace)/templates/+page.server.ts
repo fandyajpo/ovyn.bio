@@ -24,6 +24,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/login');
+		let createdId: string | null = null;
 		const data = await request.formData();
 		const parsed = createProfileTemplateSchema.safeParse({
 			name: data.get('name'),
@@ -38,13 +39,16 @@ export const actions: Actions = {
 				return fail(403, { error: 'Saving profile layouts is a Premium feature' });
 			}
 			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
-			await createProfileTemplate(locals.user.id, parsed.data);
-			return { ok: 'Template saved.' };
+			const created = await createProfileTemplate(locals.user.id, parsed.data);
+			createdId = created.id;
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
 			return fail(500, { error: 'Could not save your template' });
 		}
+
+		if (!createdId) return fail(500, { error: 'Could not create your template' });
+		redirect(303, `/templates/${createdId}`);
 	},
 
 	apply: async ({ request, locals }) => {

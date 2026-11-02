@@ -19,6 +19,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		bio: row.profile.bio,
 		theme: row.profile.theme,
 		visibility: row.profile.visibility,
+		blocks: row.profile.blocks ?? [],
 		createdAt: row.profile.createdAt
 	};
 	const bannerIsVideo = /\.(mp4|webm)$/i.test(row.profile.bannerKey ?? '');
@@ -28,7 +29,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (row.profile.visibility === 'private' && !isOwner) {
 		return {
 			private: true,
-			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default' },
+			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', blocks: [] },
 			discord: null,
 			avatarUrl: null,
 			bannerUrl: null,

@@ -36,6 +36,13 @@
       "when": 1793580000000,
       "tag": "0004_profile_customization_links_templates",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793590000000,
+      "tag": "0005_profile_template_blocks",
+      "breakpoints": true
     }
   ]
 }

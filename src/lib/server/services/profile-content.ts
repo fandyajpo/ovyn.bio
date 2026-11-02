@@ -3,7 +3,8 @@ import { db } from '#lib/server/db';
 import { profileLinks, profileTemplates, profiles } from '#lib/server/db/schema';
 import type { ProfileLinkInput, ProfileLinkProvider } from '#lib/schemas/profile-links';
 import { PROFILE_LINK_PROVIDER_LABELS } from '#lib/schemas/profile-links';
-import type { ProfileTemplateInput } from '#lib/schemas/templates';
+import type { ProfileTemplateInput, ProfileTemplateUpdateInput } from '#lib/schemas/templates';
+import { cleanTemplateBlocks } from '#lib/schemas/templates';
 import { ConflictError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 
 const CRYPTO_SCHEMES: Partial<Record<ProfileLinkProvider, string>> = {
@@ -112,6 +113,7 @@ export async function listProfileTemplates(userId: string) {
 				name: profileTemplates.name,
 				description: profileTemplates.description,
 				theme: profileTemplates.theme,
+				blocks: profileTemplates.blocks,
 				isPublic: profileTemplates.isPublic,
 				createdAt: profileTemplates.createdAt
 			},
@@ -145,10 +147,36 @@ export async function createProfileTemplate(userId: string, input: NewProfileTem
 			name: input.name,
 			description: input.description,
 			theme: input.theme,
+			blocks: cleanTemplateBlocks(input.blocks ?? []),
 			isPublic: input.isPublic
 		})
 		.returning();
 	return created;
+}
+
+export async function getOwnedProfileTemplate(userId: string, templateId: string) {
+	const [row] = await db
+		.select()
+		.from(profileTemplates)
+		.where(and(eq(profileTemplates.id, templateId), eq(profileTemplates.ownerUserId, userId)))
+		.limit(1);
+	return row ?? null;
+}
+
+export async function updateProfileTemplate(userId: string, input: ProfileTemplateUpdateInput) {
+	const [updated] = await db
+		.update(profileTemplates)
+		.set({
+			name: input.name,
+			description: input.description,
+			theme: input.theme,
+			blocks: cleanTemplateBlocks(input.blocks),
+			isPublic: input.isPublic,
+			updatedAt: new Date()
+		})
+		.where(and(eq(profileTemplates.id, input.id), eq(profileTemplates.ownerUserId, userId)))
+		.returning({ id: profileTemplates.id });
+	if (!updated) throw new NotFoundError('Template not found');
 }
 
 export async function setProfileTemplateVisibility(userId: string, templateId: string, isPublic: boolean) {
@@ -170,7 +198,7 @@ export async function deleteProfileTemplate(userId: string, templateId: string) 
 
 export async function applyProfileTemplate(userId: string, templateId: string) {
 	const [template] = await db
-		.select({ theme: profileTemplates.theme })
+		.select({ theme: profileTemplates.theme, blocks: profileTemplates.blocks })
 		.from(profileTemplates)
 		.where(
 			and(
@@ -183,7 +211,7 @@ export async function applyProfileTemplate(userId: string, templateId: string) {
 
 	const [profile] = await db
 		.update(profiles)
-		.set({ theme: template.theme, updatedAt: new Date() })
+		.set({ theme: template.theme, blocks: template.blocks, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning({ theme: profiles.theme });
 	if (!profile) throw new NotFoundError('Profile not found');

@@ -4,6 +4,7 @@ import {
 	date,
 	integer,
 	index,
+	jsonb,
 	pgEnum,
 	pgTable,
 	primaryKey,
@@ -13,6 +14,7 @@ import {
 	uniqueIndex,
 	uuid
 } from 'drizzle-orm/pg-core';
+import type { TemplateBlock } from '#lib/schemas/templates';
 import { user } from './auth';
 
 // ---------------------------------------------------------------------------
@@ -68,6 +70,8 @@ export const profiles = pgTable(
 		audioKey: text('audio_key'),
 		cursorKey: text('cursor_key'),
 		theme: text('theme').notNull().default('default'),
+		/** Ordered page blocks applied from a template; rendered on the public page. */
+		blocks: jsonb('blocks').$type<TemplateBlock[]>().notNull().default(sql`'[]'::jsonb`),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
 		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, { onDelete: 'set null' }),
 		equippedWallpaperId: uuid('equipped_wallpaper_id').references(() => cosmetics.id, { onDelete: 'set null' }),
@@ -101,6 +105,8 @@ export const profileTemplates = pgTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		theme: text('theme').notNull().default('default'),
+		/** Ordered, editable page blocks composed in the template editor. */
+		blocks: jsonb('blocks').$type<TemplateBlock[]>().notNull().default(sql`'[]'::jsonb`),
 		isPublic: boolean('is_public').notNull().default(false),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

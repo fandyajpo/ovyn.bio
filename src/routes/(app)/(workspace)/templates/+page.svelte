@@ -37,7 +37,7 @@
 				<Switch name="isPublic" label="Share in the community gallery" description="Public templates contain only preset styling and text." class="sm:col-span-2" />
 				<div class="sm:col-span-2"><Button type="submit">Save template</Button></div>
 			</form>
-			<p class="mt-3 text-xs text-neutral-500">Templates never expose your uploads, private account data or links.</p>
+			<p class="mt-3 text-xs text-neutral-500">After saving you land in the block builder, where you can drag content, write in markdown and add blog posts. Templates never expose your uploads, private account data or links.</p>
 		</Card>
 	{:else}
 		<Card class="flex flex-wrap items-center justify-between gap-4 p-5">
@@ -58,11 +58,12 @@
 							<p class="font-mono text-xs">@your-name</p>
 						</div>
 						<div>
-						<p class="font-medium text-neutral-100">{item.template.name}</p>
-						<p class="text-xs text-neutral-500">{item.template.theme} · {item.template.isPublic ? 'Public' : 'Private'}</p>
-						{#if item.template.description}<p class="mt-1 text-sm text-neutral-400">{item.template.description}</p>{/if}
-					</div>
+							<p class="font-medium text-neutral-100">{item.template.name}</p>
+							<p class="text-xs text-neutral-500">{item.template.theme} · {item.template.blocks.length} block{item.template.blocks.length === 1 ? '' : 's'} · {item.template.isPublic ? 'Public' : 'Private'}</p>
+							{#if item.template.description}<p class="mt-1 text-sm text-neutral-400">{item.template.description}</p>{/if}
+						</div>
 						<div class="mt-auto flex flex-wrap gap-2">
+							<Button href="/templates/{item.template.id}" variant="primary">Edit layout</Button>
 							<form method="POST" action="?/apply"><input type="hidden" name="id" value={item.template.id} /><Button type="submit" variant="secondary">Use template</Button></form>
 							<form method="POST" action="?/visibility">
 								<input type="hidden" name="id" value={item.template.id} />
@@ -95,7 +96,7 @@
 						</div>
 						<div>
 						<p class="font-medium text-neutral-100">{item.template.name}</p>
-						<p class="text-xs text-neutral-500">by {item.ownerName || item.ownerSlug || 'ovyn member'} · {item.template.theme}</p>
+						<p class="text-xs text-neutral-500">by {item.ownerName || item.ownerSlug || 'ovyn member'} · {item.template.theme} · {item.template.blocks.length} block{item.template.blocks.length === 1 ? '' : 's'}</p>
 						{#if item.template.description}<p class="mt-1 text-sm text-neutral-400">{item.template.description}</p>{/if}
 						</div>
 						{#if data.plan.tier === 'premium'}

@@ -75,7 +75,7 @@ Account settings let each device manage browser notification permission and even
 
 ## Interface kit
 
-Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), native-backed select, animated dropdown select, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. File uploads use a drag and drop dropzone that also works by click and keyboard.
+Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), custom select dropdowns, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. File uploads use a drag and drop dropzone that also works by click and keyboard.
 
 The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type.
 
@@ -128,7 +128,7 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 - **Profile analytics** - counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
 - **Plans** - Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
 - **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Account and admin areas hide the public navbar and footer on every screen size and link back to the landing page. Platform admins get the `/admin` entry from their account overview, never from the public navigation. Admin and guild permissions remain enforced server-side.
-- **Profile links and templates** - public links are scheme-validated before display. Templates contain preset themes only, are private by default, and enter the community gallery only when their owner shares them.
+- **Profile links and templates** - public links are scheme-validated before display. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
 - **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
 Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter cosmetics and the Rp 100.000 lifetime Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.

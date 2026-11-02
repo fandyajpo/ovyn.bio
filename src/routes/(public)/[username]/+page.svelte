@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
+	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
 	import { formatDate } from '#lib/utils';
 
 	let { data } = $props();
@@ -80,6 +81,12 @@
 						<a href={link.url} target="_blank" rel="noopener noreferrer nofollow">{link.label}<span aria-hidden="true">↗</span></a>
 					{/each}
 				</nav>
+			{/if}
+
+			{#if p.blocks.length > 0}
+				<section aria-label="{displayName}'s page content">
+					<TemplateBlocks blocks={p.blocks} />
+				</section>
 			{/if}
 
 			{#if data.guild}
