@@ -3,7 +3,17 @@
 	"include": ["src", "drizzle.config.ts", "vite.config.ts"],
 	"exclude": ["src/service-worker"],
 	"compilerOptions": {
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"noEmit": true,
+		"allowImportingTsExtensions": true,
 		"strict": true,
-		"noUncheckedIndexedAccess": true
+		"noUncheckedIndexedAccess": true,
+		"paths": {
+			"#lib": ["./src/lib/index.ts"],
+			"#lib/*": ["./src/lib/*"],
+			"$lib": ["./src/lib"],
+			"$lib/*": ["./src/lib/*"]
+		}
 	}
 }

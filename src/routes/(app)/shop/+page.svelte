@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -26,11 +27,13 @@
 
 	const wishlist = $derived(data.items.filter((item) => !item.owned));
 
-	let selected = $state<Record<Kind, string>>({
-		frame: data.items.find((item) => item.kind === 'frame' && item.equipped)?.id ?? '',
-		wallpaper: data.items.find((item) => item.kind === 'wallpaper' && item.equipped)?.id ?? '',
-		badge: data.items.find((item) => item.kind === 'badge' && item.equipped)?.id ?? ''
-	});
+	let selected = $state<Record<Kind, string>>(
+		untrack(() => ({
+			frame: data.items.find((item) => item.kind === 'frame' && item.equipped)?.id ?? '',
+			wallpaper: data.items.find((item) => item.kind === 'wallpaper' && item.equipped)?.id ?? '',
+			badge: data.items.find((item) => item.kind === 'badge' && item.equipped)?.id ?? ''
+		}))
+	);
 </script>
 
 <svelte:head>
