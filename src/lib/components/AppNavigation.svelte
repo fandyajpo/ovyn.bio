@@ -3,16 +3,16 @@
 
 	let { isAuthenticated, isAdmin }: { isAuthenticated: boolean; isAdmin: boolean } = $props();
 
-	const publicLinks = [{ href: '/discover', label: 'Discover', icon: '✳' }];
+	const publicLinks = [{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' }];
 
 	const memberLinks = [
-		{ href: '/shop', label: 'Shop', icon: '◇' },
-		{ href: '/spotlight', label: 'Spotlight', icon: '↗' },
-		{ href: '/guild', label: 'My guild', icon: '◉' },
-		{ href: '/dashboard', label: 'Dashboard', icon: '⌂' }
+		{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
+		{ href: '/spotlight', label: 'Spotlight', icon: '↗', tone: 'lilac' },
+		{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' },
+		{ href: '/dashboard', label: 'Dashboard', icon: '⌂', tone: 'lime' }
 	];
 
-	const adminLink = { href: '/admin', label: 'Admin', icon: '⚙' };
+	const adminLink = { href: '/admin', label: 'Admin', icon: '⚙', tone: 'pink' };
 
 	const links = $derived([
 		...publicLinks,
@@ -29,6 +29,7 @@
 				<a
 					href={link.href}
 					class="app-nav-link"
+					data-tone={link.tone}
 					aria-label={link.label}
 					aria-current={active ? 'page' : undefined}
 					title={link.label}
@@ -48,19 +49,19 @@
 		inset: auto 0 0;
 		display: flex;
 		justify-content: center;
-		border-top: 1px solid rgb(255 255 255 / 12%);
-		background: rgb(17 18 16 / 94%);
-		padding: 0.35rem max(0.35rem, env(safe-area-inset-right)) calc(0.35rem + env(safe-area-inset-bottom)) max(0.35rem, env(safe-area-inset-left));
-		backdrop-filter: blur(16px);
+		border-top: 1px solid var(--color-divider);
+		background: var(--color-nav-glass);
+		padding: 0.55rem max(0.55rem, env(safe-area-inset-right)) calc(0.55rem + env(safe-area-inset-bottom)) max(0.55rem, env(safe-area-inset-left));
+		backdrop-filter: blur(18px);
 	}
 
 	ul {
 		display: flex;
 		width: 100%;
-		max-width: 38rem;
+		max-width: 42rem;
 		align-items: stretch;
 		justify-content: space-around;
-		gap: 0.15rem;
+		gap: 0.35rem;
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -72,40 +73,66 @@
 	}
 
 	.app-nav-link {
+		--nav-accent: var(--color-accent);
 		display: flex;
-		min-height: 3.5rem;
+		min-height: 3.6rem;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		gap: 0.1rem;
-		border-radius: 0.9rem;
-		padding: 0.35rem 0.1rem;
-		color: #92958a;
+		gap: 0.2rem;
+		border: 1px solid transparent;
+		border-radius: 1rem;
+		padding: 0.35rem 0.15rem;
+		color: var(--color-muted);
 		text-decoration: none;
-		transition: background-color 150ms ease, color 150ms ease;
+		transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
 	}
 
-	.app-nav-link:hover,
-	.app-nav-link[aria-current='page'] {
-		background: rgb(255 255 255 / 7%);
-		color: #d5ff35;
+	.app-nav-link[data-tone='blue'] {
+		--nav-accent: var(--color-pop-blue);
 	}
 
-	.app-nav-link:focus-visible {
-		outline: 2px solid #d5ff35;
-		outline-offset: 2px;
+	.app-nav-link[data-tone='pink'] {
+		--nav-accent: var(--color-pop-pink);
+	}
+
+	.app-nav-link[data-tone='lilac'] {
+		--nav-accent: var(--color-pop-lilac);
 	}
 
 	.app-nav-icon {
-		font-size: 1.05rem;
-		line-height: 1.1;
+		display: grid;
+		width: 1.65rem;
+		height: 1.65rem;
+		place-items: center;
+		border-radius: 0.65rem;
+		background: color-mix(in srgb, var(--nav-accent) 16%, transparent);
+		color: var(--nav-accent);
+		font-size: 1rem;
+		line-height: 1;
+	}
+
+	.app-nav-link[aria-current='page'] {
+		border-color: color-mix(in srgb, var(--nav-accent) 38%, transparent);
+		background: color-mix(in srgb, var(--nav-accent) 13%, transparent);
+		color: var(--color-foreground);
+	}
+
+	.app-nav-link[aria-current='page'] .app-nav-icon {
+		background: var(--nav-accent);
+		color: var(--color-background);
+	}
+
+	.app-nav-link:focus-visible {
+		outline: 2px solid var(--nav-accent);
+		outline-offset: 2px;
 	}
 
 	.app-nav-label {
 		max-width: 100%;
 		overflow: hidden;
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-		font-size: 0.57rem;
+		font-size: 0.59rem;
 		line-height: 1.2;
 		text-overflow: ellipsis;
 		white-space: nowrap;
@@ -123,15 +150,15 @@
 			min-height: 0;
 			justify-content: flex-start;
 			border-top: 0;
-			border-right: 1px solid rgb(255 255 255 / 10%);
-			padding: 1rem 0.4rem;
+			border-right: 1px solid var(--color-divider);
+			padding: 1.2rem 0.4rem;
 			backdrop-filter: none;
 		}
 
 		ul {
 			flex-direction: column;
 			justify-content: flex-start;
-			gap: 0.5rem;
+			gap: 0.7rem;
 		}
 
 		li {
@@ -159,16 +186,25 @@
 	@media (min-width: 64rem) {
 		.app-navigation {
 			width: 15rem;
-			padding: 1.25rem 0.75rem;
+			padding: 1.35rem 0.9rem;
+		}
+
+		ul {
+			gap: 0.55rem;
 		}
 
 		.app-nav-link {
 			width: 100%;
-			min-height: 3.25rem;
+			min-height: 3.4rem;
 			flex-direction: row;
 			justify-content: flex-start;
-			gap: 0.8rem;
-			padding: 0.7rem 0.9rem;
+			gap: 0.85rem;
+			padding: 0.65rem 0.85rem;
+		}
+
+		.app-nav-icon {
+			width: 1.85rem;
+			height: 1.85rem;
 		}
 
 		.app-nav-label {
@@ -178,15 +214,23 @@
 			clip: auto;
 			clip-path: none;
 			font-family: var(--font-sans);
-			font-size: 0.875rem;
+			font-size: 0.9rem;
 			white-space: normal;
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.app-nav-link:hover:not([aria-current='page']) {
+			border-color: color-mix(in srgb, var(--nav-accent) 24%, transparent);
+			background: color-mix(in srgb, var(--nav-accent) 9%, transparent);
+			color: var(--color-foreground);
 		}
 	}
 
 	@media (hover: none) {
 		.app-nav-link:hover:not([aria-current='page']) {
 			background: transparent;
-			color: #92958a;
+			color: var(--color-muted);
 		}
 	}
 

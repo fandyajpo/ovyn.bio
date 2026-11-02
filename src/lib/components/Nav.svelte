@@ -21,10 +21,10 @@
 	let landingMenuButton = $state<HTMLButtonElement | undefined>(undefined);
 
 	const landingLinks = $derived([
-		{ href: '#features', label: 'Features' },
-		{ href: '/discover', label: 'Discover' },
-		...(user ? [{ href: '/shop', label: 'Shop' }] : []),
-		{ href: '#faq', label: 'FAQ' }
+		{ href: '#features', label: 'Features', tone: 'blue' },
+		{ href: '/discover', label: 'Discover', tone: 'lime' },
+		...(user ? [{ href: '/shop', label: 'Shop', tone: 'pink' }] : []),
+		{ href: '#faq', label: 'FAQ', tone: 'lilac' }
 	]);
 
 	function closeMenus() {
@@ -71,7 +71,7 @@
 
 <svelte:window onkeydown={closeOnEscape} onpointerdown={closeOnOutsidePointerDown} />
 
-<header class="site-header sticky top-0 z-40 border-b border-neutral-800/80 bg-[#111210]/90 backdrop-blur">
+<header class="site-header sticky top-0 z-40">
 	<div class="site-header-inner flex h-16 w-full items-center justify-between px-4">
 		<a href="/" onclick={closeMenus} class="group flex items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
 			<span class="grid size-8 rotate-[-6deg] place-items-center rounded-xl border-2 border-[#111210] bg-lime-300 font-mono text-sm text-neutral-950 shadow-[2px_2px_0_rgba(255,255,255,0.3)] transition-transform group-hover:rotate-6">O</span>
@@ -94,7 +94,7 @@
 				</button>
 				<div id="landing-links" class={landingMenuOpen ? 'landing-links open' : 'landing-links'}>
 					{#each landingLinks as link (link.href)}
-						<a href={link.href} onclick={closeMenus}>{link.label}</a>
+						<a href={link.href} data-tone={link.tone} onclick={closeMenus}>{link.label}</a>
 					{/each}
 				</div>
 			</nav>
@@ -106,7 +106,7 @@
 					type="button"
 					bind:this={accountButton}
 					onclick={toggleAccountMenu}
-					class="flex min-h-11 items-center gap-2 rounded-full p-1 transition-colors hover:bg-neutral-800"
+					class="account-trigger flex min-h-11 items-center gap-2 rounded-full p-1 transition-colors"
 					aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'}
 					aria-expanded={accountMenuOpen}
 					aria-controls="account-menu"
@@ -121,7 +121,7 @@
 						bind:this={accountMenu}
 						role="group"
 						aria-label="Account links"
-						class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900 py-1 shadow-xl"
+						class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border py-1 shadow-xl"
 					>
 						<a href="/settings/profile" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Profile settings</a>
 						<a href="/billing" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Billing</a>
@@ -158,17 +158,17 @@
 		width: 2.75rem;
 		height: 2.75rem;
 		place-items: center;
-		border: 1px solid rgb(255 255 255 / 12%);
+		border: 1px solid var(--color-divider);
 		border-radius: 0.9rem;
-		background: #1b1d19;
-		color: #f1f0e9;
+		background: var(--color-surface);
+		color: var(--color-foreground);
 		transition: background-color 160ms ease, border-color 160ms ease;
 	}
 
 	.landing-menu-toggle:hover,
 	.landing-menu-toggle[aria-expanded='true'] {
-		border-color: rgb(213 255 53 / 40%);
-		background: #242720;
+		border-color: color-mix(in srgb, var(--color-pop-blue) 42%, transparent);
+		background: var(--color-surface-raised);
 	}
 
 	.menu-glyph,
@@ -219,9 +219,9 @@
 		min-width: 13rem;
 		flex-direction: column;
 		gap: 0.2rem;
-		border: 1px solid rgb(255 255 255 / 12%);
+		border: 1px solid var(--color-divider);
 		border-radius: 1rem;
-		background: rgb(20 21 18 / 97%);
+		background: var(--color-menu-glass);
 		padding: 0.45rem;
 		box-shadow: 0 16px 40px rgb(0 0 0 / 35%);
 		opacity: 0;
@@ -240,18 +240,42 @@
 	}
 
 	.landing-links a {
+		--nav-accent: var(--color-accent);
 		display: flex;
 		min-height: 2.75rem;
 		align-items: center;
-		border-radius: 0.7rem;
-		padding: 0.6rem 0.75rem;
-		color: #c4c7bd;
-		font-size: 0.875rem;
+		border: 1px solid color-mix(in srgb, var(--nav-accent) 24%, transparent);
+		border-radius: 0.8rem;
+		background: color-mix(in srgb, var(--nav-accent) 7%, transparent);
+		padding: 0.65rem 0.9rem;
+		color: var(--color-foreground);
+		font-size: 0.9rem;
+		font-weight: 600;
 		text-decoration: none;
+		transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+	}
+
+	.landing-links a[data-tone='blue'] {
+		--nav-accent: var(--color-pop-blue);
+	}
+
+	.landing-links a[data-tone='pink'] {
+		--nav-accent: var(--color-pop-pink);
+	}
+
+	.landing-links a[data-tone='lilac'] {
+		--nav-accent: var(--color-pop-lilac);
+	}
+
+	.landing-links a:hover,
+	.landing-links a:focus-visible {
+		border-color: color-mix(in srgb, var(--nav-accent) 52%, transparent);
+		background: color-mix(in srgb, var(--nav-accent) 18%, transparent);
+		color: var(--nav-accent);
 	}
 
 	.landing-links a:focus-visible {
-		outline: 2px solid #d5ff35;
+		outline: 2px solid var(--nav-accent);
 		outline-offset: 1px;
 	}
 
@@ -302,8 +326,8 @@
 
 	@media (hover: hover) and (pointer: fine) {
 		.landing-links a:hover {
-			background: rgb(255 255 255 / 7%);
-			color: #d5ff35;
+			background: color-mix(in srgb, var(--nav-accent) 18%, transparent);
+			color: var(--nav-accent);
 		}
 	}
 
