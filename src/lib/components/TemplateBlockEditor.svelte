@@ -9,6 +9,7 @@
 		TEMPLATE_BLOCK_TYPES,
 		TEMPLATE_EMBED_PROVIDER_OPTIONS,
 		TEMPLATE_LIST_STYLE_OPTIONS,
+		normalizeTemplateBlocks,
 		type TemplateBlock,
 		type TemplateBlockType
 	} from '#lib/schemas/templates';
@@ -19,7 +20,9 @@
 		previewKey = null
 	}: { blocks?: TemplateBlock[]; name?: string; previewKey?: string | null } = $props();
 
-	let items = $state<TemplateBlock[]>(untrack(() => blocks.map((block) => ({ ...block }))));
+	// A stored row can miss ids or hold the same block twice, which breaks a
+	// keyed list, so the editor starts from a clean, fully keyed copy.
+	let items = $state<TemplateBlock[]>(untrack(() => normalizeTemplateBlocks(blocks)));
 	let draggingIndex = $state<number | null>(null);
 	let overIndex = $state<number | null>(null);
 	let paletteType = $state<TemplateBlockType | null>(null);

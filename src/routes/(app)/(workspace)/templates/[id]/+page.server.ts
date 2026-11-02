@@ -1,5 +1,6 @@
-import { error, fail, redirect } from '@sveltejs/kit';import type { Actions, PageServerLoad } from './$types';
-import { updateProfileTemplateSchema } from '#lib/schemas/templates';
+import { error, fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { normalizeTemplateBlocks, updateProfileTemplateSchema } from '#lib/schemas/templates';
 import { getOwnedProfileTemplate, updateProfileTemplate } from '#lib/server/services/profile-content';
 import { getUserPlan } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
@@ -14,14 +15,18 @@ function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
 	return errors;
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export const load: PageServerLoad = async ({ locals, params }) => {
 	if (!locals.user) redirect(302, '/login');
+	// Any other id would reach Postgres as an invalid uuid and fail there.
+	if (!UUID_PATTERN.test(params.id)) error(404, 'Template not found');
 	const [template, plan] = await Promise.all([
 		getOwnedProfileTemplate(locals.user.id, params.id),
 		getUserPlan(locals.user.id)
 	]);
 	if (!template) error(404, 'Template not found');
-	return { template, plan };
+	return { template: { ...template, blocks: normalizeTemplateBlocks(template.blocks) }, plan };
 };
 
 export const actions: Actions = {

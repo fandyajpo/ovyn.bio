@@ -3,7 +3,7 @@
 	import { page } from '$app/state';
 	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
 	import { subscribePreview, type PreviewSnapshot } from '#lib/template-preview';
-	import type { TemplateBlock } from '#lib/schemas/templates';
+	import { normalizeTemplateBlocks, type TemplateBlock } from '#lib/schemas/templates';
 
 	let blocks = $state<TemplateBlock[]>([]);
 	let updatedAt = $state<number | null>(null);
@@ -15,7 +15,7 @@
 		const previewKey = key;
 		if (!previewKey) return;
 		return subscribePreview(previewKey, (snapshot: PreviewSnapshot) => {
-			blocks = snapshot.blocks;
+			blocks = normalizeTemplateBlocks(snapshot.blocks);
 			updatedAt = snapshot.updatedAt;
 			connected = true;
 		});

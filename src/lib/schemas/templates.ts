@@ -221,6 +221,118 @@ export function cleanTemplateBlocks(blocks: TemplateBlock[]): TemplateBlock[] {
 		});
 }
 
+const TEMPLATE_BLOCK_TYPE_SET = new Set<string>(TEMPLATE_BLOCK_TYPES);
+const TEMPLATE_LIST_STYLE_SET = new Set<string>(TEMPLATE_LIST_STYLES);
+const TEMPLATE_EMBED_PROVIDER_SET = new Set<string>(TEMPLATE_EMBED_PROVIDERS);
+
+/** A body keeps its line breaks; only blank values are dropped. */
+function readBlockBody(value: unknown, max: number): string | undefined {
+	if (typeof value !== 'string' || !value.trim()) return undefined;
+	return value.length > max ? value.slice(0, max) : value;
+}
+
+/** A single line field, trimmed. */
+function readBlockField(value: unknown, max: number): string | undefined {
+	if (typeof value !== 'string') return undefined;
+	const trimmed = value.trim();
+	if (!trimmed) return undefined;
+	return trimmed.length > max ? trimmed.slice(0, max) : trimmed;
+}
+
+/** Hands out unique keys for one keyed list, keeping the stored id when it can. */
+function idFactory(): (raw: unknown, fallback: string) => string {
+	const used = new Set<string>();
+	return (raw: unknown, fallback: string): string => {
+		const base = typeof raw === 'string' && raw.trim() ? raw.trim().slice(0, 64) : fallback;
+		let id = base;
+		let suffix = 2;
+		while (used.has(id)) {
+			id = `${base.slice(0, 56)}-${suffix}`;
+			suffix += 1;
+		}
+		used.add(id);
+		return id;
+	};
+}
+
+/**
+ * Blocks live in a jsonb column, so what comes back is whatever was saved:
+ * older rows can miss ids, list styles or the fields the editor expects, and a
+ * saved block can appear twice. Rendering keys blocks by id, so every block read
+ * from storage passes through here to get a unique key and known fields.
+ */
+export function normalizeTemplateBlocks(value: unknown): TemplateBlock[] {
+	if (!Array.isArray(value)) return [];
+
+	const nextBlockId = idFactory();
+	const blocks: TemplateBlock[] = [];
+
+	value.forEach((raw, index) => {
+		if (!raw || typeof raw !== 'object') return;
+		const source = raw as Record<string, unknown>;
+		if (typeof source.type !== 'string' || !TEMPLATE_BLOCK_TYPE_SET.has(source.type)) return;
+
+		const type = source.type as TemplateBlockType;
+		const block: TemplateBlock = { id: nextBlockId(source.id, `${type}-${index}`), type };
+
+		block.text = readBlockBody(source.text, 8000);
+		block.markdown = readBlockBody(source.markdown, 8000);
+		block.title = readBlockField(source.title, 120);
+		block.author = readBlockField(source.author, 80);
+		block.url = readBlockField(source.url, 500);
+		block.caption = readBlockField(source.caption, 200);
+		block.date = readBlockField(source.date, 28);
+		block.language = readBlockField(source.language, 24);
+		block.code = readBlockBody(source.code, 8000);
+
+		if (typeof source.style === 'string' && TEMPLATE_LIST_STYLE_SET.has(source.style)) {
+			block.style = source.style as TemplateListStyle;
+		}
+		if (typeof source.provider === 'string' && TEMPLATE_EMBED_PROVIDER_SET.has(source.provider)) {
+			block.provider = source.provider as TemplateEmbedProvider;
+		}
+		if (typeof source.columns === 'number' && Number.isFinite(source.columns)) {
+			block.columns = Math.min(4, Math.max(1, Math.round(source.columns)));
+		}
+
+		if (Array.isArray(source.items)) {
+			const nextItemId = idFactory();
+			const items = source.items.flatMap((entry: unknown, itemIndex: number) => {
+				if (!entry || typeof entry !== 'object') return [];
+				const item = entry as Record<string, unknown>;
+				return [
+					{
+						id: nextItemId(item.id, `item-${itemIndex}`),
+						text: readBlockField(item.text, 300) ?? '',
+						checked: item.checked === true
+					}
+				];
+			});
+			if (items.length) block.items = items;
+		}
+
+		if (Array.isArray(source.cells)) {
+			const nextCellId = idFactory();
+			const cells = source.cells.flatMap((entry: unknown, cellIndex: number) => {
+				if (!entry || typeof entry !== 'object') return [];
+				const cell = entry as Record<string, unknown>;
+				return [
+					{
+						id: nextCellId(cell.id, `cell-${cellIndex}`),
+						heading: readBlockField(cell.heading, 120),
+						markdown: readBlockBody(cell.markdown, 4000)
+					}
+				];
+			});
+			if (cells.length) block.cells = cells;
+		}
+
+		blocks.push(block);
+	});
+
+	return blocks;
+}
+
 /**
  * Turn an embed provider plus a normal page URL into the URL an iframe can load.
  * Returns null when the URL does not belong to that provider, so the block can

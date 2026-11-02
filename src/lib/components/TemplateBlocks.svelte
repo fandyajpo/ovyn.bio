@@ -1,8 +1,17 @@
 <script lang="ts">
 	import Markdown from './Markdown.svelte';
-	import { templateEmbedSrc, TEMPLATE_EMBED_PROVIDER_OPTIONS, type TemplateBlock } from '#lib/schemas/templates';
+	import {
+		normalizeTemplateBlocks,
+		templateEmbedSrc,
+		TEMPLATE_EMBED_PROVIDER_OPTIONS,
+		type TemplateBlock
+	} from '#lib/schemas/templates';
 
 	let { blocks = [] }: { blocks?: TemplateBlock[] } = $props();
+
+	// Stored blocks can come from an older row, so they are cleaned before
+	// rendering: every block, list item and grid cell needs its own key.
+	const safeBlocks = $derived(normalizeTemplateBlocks(blocks));
 
 	function embedSrc(block: TemplateBlock): string | null {
 		return templateEmbedSrc(block.provider, block.url ?? '');
@@ -19,7 +28,7 @@
 </script>
 
 <div class="page-blocks">
-	{#each blocks as block (block.id)}
+	{#each safeBlocks as block (block.id)}
 		{#if block.type === 'heading'}
 			<h2 class="page-block-heading">{block.text}</h2>
 		{:else if block.type === 'text'}
