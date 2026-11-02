@@ -6,10 +6,22 @@ import { AppError } from '#lib/server/utils/errors';
 
 const TIERS = ['free', 'premium', 'default'] as const;
 
+/** Postgres reports a missing migration as 42P01 (undefined_table). */
+function isMissingTable(err: unknown): boolean {
+	return Boolean(
+		err && typeof err === 'object' && 'code' in err && (err as { code?: string }).code === '42P01'
+	);
+}
+
 export const load: PageServerLoad = async ({ locals, url }) => {
 	await requirePlatformAdmin(locals.user?.id);
 	const query = url.searchParams.get('q') ?? '';
-	return { users: await listAdminPlanUsers(query), query };
+	try {
+		return { users: await listAdminPlanUsers(query), query, needsMigration: false };
+	} catch (err) {
+		if (isMissingTable(err)) return { users: [], query, needsMigration: true };
+		throw err;
+	}
 };
 
 export const actions: Actions = {
@@ -42,6 +54,9 @@ export const actions: Actions = {
 			};
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			if (isMissingTable(err)) {
+				return fail(503, { error: 'Run pnpm run db:migrate to create the plan_overrides table' });
+			}
 			console.error(err);
 			return fail(500, { error: 'Could not change that plan' });
 		}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Badge from '#lib/components/ui/Badge.svelte';
-	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import { formatDate } from '#lib/utils';
@@ -33,6 +32,12 @@
 		</form>
 	</header>
 
+	{#if data.needsMigration}
+		<p class="rounded-xl border border-amber-300/40 bg-amber-300/10 px-4 py-3 text-sm text-amber-200" role="alert">
+			The plan_overrides table is missing. Run <code class="font-mono">pnpm run db:migrate</code>, then reload this page.
+		</p>
+	{/if}
+
 	{#if form?.error}<p class="rounded-xl border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-300" role="alert">{form.error}</p>{/if}
 	{#if form?.ok}<p class="rounded-xl border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">{form.ok}</p>{/if}
 
@@ -54,13 +59,14 @@
 							<Badge tone={row.effectiveTier === 'premium' ? 'lilac' : 'neutral'} size="xs">{row.effectiveTier}</Badge>
 						</div>
 						<p class="mt-3 text-xs text-neutral-500">{sourceLabel(row.source)}{#if row.overrideUpdatedAt} · {formatDate(row.overrideUpdatedAt)}{/if}</p>
-						<form method="POST" action="?/setPlan" class="mt-4 flex flex-col gap-2 border-t border-neutral-800 pt-3">
+
+						<form method="POST" action="?/setPlan" class="plan-form mt-4 border-t border-neutral-800 pt-3">
 							<input type="hidden" name="userId" value={row.id} />
 							<input name="note" maxlength={200} placeholder="Note (optional)" class="plan-note" value={row.overrideNote ?? ''} />
-							<div class="flex flex-wrap gap-2">
-								<Button type="submit" name="tier" value="premium" variant="secondary" disabled={row.overrideTier === 'premium'}>Premium</Button>
-								<Button type="submit" name="tier" value="free" variant="secondary" disabled={row.overrideTier === 'free'}>Free</Button>
-								<Button type="submit" name="tier" value="default" variant="ghost" disabled={!row.overrideTier}>Use purchases</Button>
+							<div class="plan-buttons">
+								<button type="submit" name="tier" value="premium" class="plan-action" disabled={row.overrideTier === 'premium'}>Premium</button>
+								<button type="submit" name="tier" value="free" class="plan-action" disabled={row.overrideTier === 'free'}>Free</button>
+								<button type="submit" name="tier" value="default" class="plan-action plan-action--ghost" disabled={!row.overrideTier}>Use purchases</button>
 							</div>
 						</form>
 					</article>
@@ -68,40 +74,37 @@
 			</div>
 
 			<div class="hidden overflow-x-auto lg:block">
-				<table class="w-full min-w-[62rem] text-left text-sm">
+				<table class="w-full min-w-[58rem] text-left text-sm">
 					<thead class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
 						<tr>
 							<th scope="col" class="px-5 py-3">Account</th>
 							<th scope="col" class="px-5 py-3">Plan</th>
 							<th scope="col" class="px-5 py-3">Source</th>
-							<th scope="col" class="px-5 py-3">Override note</th>
-							<th scope="col" class="px-5 py-3"><span class="sr-only">Change plan</span></th>
+							<th scope="col" class="px-5 py-3">Change plan</th>
 						</tr>
 					</thead>
 					<tbody class="divide-y divide-neutral-800">
 						{#each data.users as row (row.id)}
 							<tr>
-								<td class="px-5 py-3">
+								<td class="px-5 py-3 align-top">
 									<span class="block font-medium text-neutral-100">{row.displayName || row.name}</span>
 									<span class="mt-0.5 block text-xs text-neutral-500">{row.slug ? `@${row.slug}` : 'No public page'}{#if row.email} · {row.email}{/if}</span>
 								</td>
-								<td class="px-5 py-3"><Badge tone={row.effectiveTier === 'premium' ? 'lilac' : 'neutral'} size="xs">{row.effectiveTier}</Badge></td>
-								<td class="px-5 py-3 text-neutral-400">
+								<td class="px-5 py-3 align-top"><Badge tone={row.effectiveTier === 'premium' ? 'lilac' : 'neutral'} size="xs">{row.effectiveTier}</Badge></td>
+								<td class="px-5 py-3 align-top text-neutral-400">
 									{sourceLabel(row.source)}
 									{#if row.overrideUpdatedAt}<span class="mt-0.5 block text-[11px] text-neutral-600">{formatDate(row.overrideUpdatedAt)}</span>{/if}
 								</td>
-								<td class="px-5 py-3 text-neutral-400">
-									<form method="POST" action="?/setPlan" id="plan-form-{row.id}" class="min-w-40">
+								<td class="px-5 py-3 align-top">
+									<form method="POST" action="?/setPlan" class="plan-form">
 										<input type="hidden" name="userId" value={row.id} />
-										<input name="note" maxlength={200} placeholder="Reason (optional)" class="plan-note" value={row.overrideNote ?? ''} />
+										<input name="note" maxlength={200} placeholder="Note (optional)" class="plan-note" value={row.overrideNote ?? ''} />
+										<div class="plan-buttons">
+											<button type="submit" name="tier" value="premium" class="plan-action" disabled={row.overrideTier === 'premium'}>Premium</button>
+											<button type="submit" name="tier" value="free" class="plan-action" disabled={row.overrideTier === 'free'}>Free</button>
+											<button type="submit" name="tier" value="default" class="plan-action plan-action--ghost" disabled={!row.overrideTier}>Use purchases</button>
+										</div>
 									</form>
-								</td>
-								<td class="px-5 py-3">
-									<div class="flex flex-wrap justify-end gap-2">
-										<Button type="submit" form="plan-form-{row.id}" name="tier" value="premium" variant="secondary" disabled={row.overrideTier === 'premium'}>Premium</Button>
-										<Button type="submit" form="plan-form-{row.id}" name="tier" value="free" variant="secondary" disabled={row.overrideTier === 'free'}>Free</Button>
-										<Button type="submit" form="plan-form-{row.id}" name="tier" value="default" variant="ghost" disabled={!row.overrideTier}>Use purchases</Button>
-									</div>
 								</td>
 							</tr>
 						{/each}
@@ -113,6 +116,12 @@
 </div>
 
 <style>
+	.plan-form {
+		display: grid;
+		gap: 0.45rem;
+		min-width: 17rem;
+	}
+
 	.plan-note {
 		width: 100%;
 		border: 1px solid var(--color-divider);
@@ -128,5 +137,44 @@
 		border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
 		outline: none;
 		box-shadow: 0 0 0 3px var(--color-accent-soft);
+	}
+
+	.plan-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.35rem;
+	}
+
+	.plan-action {
+		min-height: 2.2rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+		padding: 0.35rem 0.7rem;
+		color: var(--color-foreground);
+		font: inherit;
+		font-size: 0.72rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+	}
+
+	.plan-action:hover:not(:disabled) {
+		border-color: color-mix(in srgb, var(--color-accent) 50%, transparent);
+		background: var(--color-accent-soft);
+	}
+
+	.plan-action:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
+	}
+
+	.plan-action--ghost {
+		background: transparent;
+		color: var(--color-muted);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.plan-action { transition: none; }
 	}
 </style>
