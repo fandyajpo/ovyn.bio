@@ -67,7 +67,7 @@ async function assertNoGuild(tx: Tx, userId: string): Promise<void> {
 	const membership = await currentMembership(tx, userId);
 	if (membership) {
 		throw new ConflictError(
-			'You already belong to a guild. Leave your current guild first before joining or creating another one.'
+			'You already belong to a circle. Leave your current circle first before joining or creating another one.'
 		);
 	}
 }
@@ -142,7 +142,7 @@ export async function getMembership(userId: string) {
 // ---------------------------------------------------------------------------
 
 export async function createGuild(userId: string, input: GuildInput) {
-	if (!input.name.trim()) throw new ValidationError('Guild name is required');
+	if (!input.name.trim()) throw new ValidationError('Circle name is required');
 
 	return db.transaction(async (tx) => {
 		await lockUserForMembership(tx, userId);
@@ -164,14 +164,14 @@ export async function createGuild(userId: string, input: GuildInput) {
 				})
 				.returning();
 
-			if (!guild) throw new Error('Guild could not be created');
+			if (!guild) throw new Error('Circle could not be created');
 
 			await tx.insert(guildMembers).values({ userId, guildId: guild.id, role: 'owner' });
 
 			return guild;
 		} catch (err) {
 			if (isUniqueViolation(err, 'guild_members_pkey')) {
-				throw new ConflictError('You already belong to a guild');
+				throw new ConflictError('You already belong to a circle');
 			}
 			throw err;
 		}
@@ -189,16 +189,16 @@ export async function joinGuild(userId: string, slug: string) {
 			.where(and(eq(guilds.slug, slug), eq(guilds.status, 'active')))
 			.limit(1);
 
-		if (!guild) throw new NotFoundError('Guild not found');
+		if (!guild) throw new NotFoundError('Circle not found');
 		if (guild.visibility !== 'public') {
-			throw new ForbiddenError('This guild is private. You need an invitation to join.');
+			throw new ForbiddenError('This circle is private. You need an invitation to join.');
 		}
 
 		try {
 			await tx.insert(guildMembers).values({ userId, guildId: guild.id, role: 'member' });
 		} catch (err) {
 			if (isUniqueViolation(err, 'guild_members_pkey')) {
-				throw new ConflictError('You already belong to a guild');
+				throw new ConflictError('You already belong to a circle');
 			}
 			throw err;
 		}
@@ -210,10 +210,10 @@ export async function joinGuild(userId: string, slug: string) {
 export async function leaveGuild(userId: string) {
 	await db.transaction(async (tx) => {
 		const membership = await currentMembership(tx, userId);
-		if (!membership) throw new NotFoundError('You are not in a guild');
+		if (!membership) throw new NotFoundError('You are not in a circle');
 
 		const [guild] = await tx.select().from(guilds).where(eq(guilds.id, membership.guildId)).limit(1);
-		if (!guild) throw new NotFoundError('Guild not found');
+		if (!guild) throw new NotFoundError('Circle not found');
 
 		if (membership.role === 'owner') {
 			const [countRow] = await tx
@@ -223,11 +223,11 @@ export async function leaveGuild(userId: string) {
 
 			if (Number(countRow?.total ?? 0) > 1) {
 				throw new ConflictError(
-					'Owners must transfer ownership before leaving. Disband the guild if you are the only member.'
+					'Owners must transfer ownership before leaving. Disband the circle if you are the only member.'
 				);
 			}
 			throw new ConflictError(
-				'You are the only member. Use "Disband guild" instead of leaving.'
+				'You are the only member. Use "Disband circle" instead of leaving.'
 			);
 		}
 
@@ -251,10 +251,10 @@ export async function transferOwnership(ownerId: string, targetUserId: string) {
 			.limit(1);
 
 		if (!target || target.guildId !== membership.guildId) {
-			throw new ValidationError('That user is not a member of this guild');
+			throw new ValidationError('That user is not a member of this circle');
 		}
 		if (targetUserId === ownerId) {
-			throw new ValidationError('You already own this guild');
+			throw new ValidationError('You already own this circle');
 		}
 
 		await tx
@@ -285,7 +285,7 @@ export async function setMemberRole(actorId: string, targetUserId: string, role:
 			.limit(1);
 
 		if (!target || target.guildId !== actor.guildId) {
-			throw new NotFoundError('That user is not a member of this guild');
+			throw new NotFoundError('That user is not a member of this circle');
 		}
 
 		await tx
@@ -309,7 +309,7 @@ export async function removeMember(actorId: string, targetUserId: string) {
 			.limit(1);
 
 		if (!target || target.guildId !== actor.guildId) {
-			throw new NotFoundError('That user is not a member of this guild');
+			throw new NotFoundError('That user is not a member of this circle');
 		}
 		if (target.role === 'owner') {
 			throw new ForbiddenError('Transfer ownership before removing the owner');
@@ -322,11 +322,11 @@ export async function removeMember(actorId: string, targetUserId: string) {
 export async function disbandGuild(userId: string) {
 	await db.transaction(async (tx) => {
 		const membership = await currentMembership(tx, userId);
-		if (!membership) throw new NotFoundError('You are not in a guild');
+		if (!membership) throw new NotFoundError('You are not in a circle');
 
 		const [guild] = await tx.select().from(guilds).where(eq(guilds.id, membership.guildId)).limit(1);
 		if (!guild || guild.ownerId !== userId) {
-			throw new ForbiddenError('Only the owner can disband the guild');
+			throw new ForbiddenError('Only the owner can disband the circle');
 		}
 
 		// Soft delete keeps historical invitation/order data intact.
@@ -350,7 +350,7 @@ export async function updateGuild(
 	return db.transaction(async (tx) => {
 		const actor = await currentMembership(tx, actorId);
 		if (!actor || actor.role !== 'owner') {
-			throw new ForbiddenError('Only the owner can edit guild settings');
+			throw new ForbiddenError('Only the owner can edit circle settings');
 		}
 
 		const [updated] = await tx
@@ -359,7 +359,7 @@ export async function updateGuild(
 			.where(eq(guilds.id, guildId))
 			.returning();
 
-		if (!updated) throw new NotFoundError('Guild not found');
+		if (!updated) throw new NotFoundError('Circle not found');
 		return updated;
 	});
 }

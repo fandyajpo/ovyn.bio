@@ -51,12 +51,12 @@
 		</Card>
 
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your guild</p>
+			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your circle</p>
 			{#if data.guild}
 				<a href="/guild" class="mt-3 block font-medium text-lime-300 hover:underline">{data.guild.name}</a>
 				<p class="font-mono text-xs text-neutral-500">Joined {formatDate(data.membership?.joinedAt ?? data.guild.createdAt)}</p>
 			{:else}
-				<p class="mt-3 text-sm text-neutral-400">You're not in a guild yet.</p>
+				<p class="mt-3 text-sm text-neutral-400">You're not in a circle yet.</p>
 				<div class="mt-3 flex flex-col gap-2 sm:flex-row">
 					<Button href="/discover" variant="secondary" class="w-full sm:w-auto">Discover</Button>
 					<Button href="/guild/create" class="w-full sm:w-auto">Create one</Button>
@@ -124,7 +124,7 @@
 
 	{#if data.invitations.length > 0}
 		<Card class="p-5">
-			<h2 class="font-medium text-neutral-200">Guild invitations</h2>
+			<h2 class="font-medium text-neutral-200">Circle invitations</h2>
 			<ul class="mt-3 flex flex-col gap-2">
 				{#each data.invitations as inv (inv.invitation.id)}
 					<li class="flex flex-col items-start gap-2 rounded-lg bg-neutral-800/40 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">

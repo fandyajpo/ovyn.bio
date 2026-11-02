@@ -43,7 +43,7 @@
 			{#if confirmDelete}
 				Are you sure? This permanently deletes your profile and membership. This cannot be undone.
 			{:else}
-				Deleting your account removes your profile, uploads and guild membership.
+				Deleting your account removes your profile, uploads and circle membership.
 			{/if}
 		</p>
 		<Button variant="danger" onclick={() => (confirmDelete ? confirmDelete = false : confirmDelete = true)} class="mt-4">

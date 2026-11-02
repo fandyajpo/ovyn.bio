@@ -10,17 +10,17 @@
 </script>
 
 <svelte:head>
-	<title>Create a guild - ovyn</title>
+	<title>Create a circle - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-xl flex-col gap-6">
-	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Create a guild</h1>
+	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Create a circle</h1>
 	<p class="text-neutral-400">
-		You can belong to one guild at a time. Creating this guild makes you its owner.
+		You can belong to one circle at a time. Creating this circle makes you its owner.
 	</p>
 
 	<form method="POST" action="/guild/create" class="flex flex-col gap-5">
-		<Input name="name" label="Guild name" bind:value={name} required minlength={2} maxlength={50} />
+		<Input name="name" label="Circle name" bind:value={name} required minlength={2} maxlength={50} />
 		<Input name="description" label="Description" bind:value={description} textarea maxlength={500} />
 
 		<fieldset class="flex items-center gap-3">
@@ -39,6 +39,6 @@
 			<p class="text-sm text-red-400" role="alert">{form.error}</p>
 		{/if}
 
-		<Button type="submit">Create guild</Button>
+		<Button type="submit">Create circle</Button>
 	</form>
 </div>

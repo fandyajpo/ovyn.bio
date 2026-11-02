@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals, url }) => {
 
 export const actions: Actions = {
 	join: async ({ request, locals }) => {
-		if (!locals.user) return fail(401, { error: 'Sign in to join a guild' });
+		if (!locals.user) return fail(401, { error: 'Sign in to join a circle' });
 
 		const data = await request.formData();
 		const slug = data.get('slug');
@@ -28,7 +28,7 @@ export const actions: Actions = {
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
-			return fail(500, { error: 'Could not join the guild' });
+			return fail(500, { error: 'Could not join the circle' });
 		}
 	}
 };

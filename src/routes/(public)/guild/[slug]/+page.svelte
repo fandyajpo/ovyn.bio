@@ -7,11 +7,11 @@
 </script>
 
 <svelte:head>
-	<title>{data.guild.name} - ovyn guild</title>
+	<title>{data.guild.name} - ovyn circle</title>
 </svelte:head>
 
 {#if data.disbanded}
-	<div class="mx-auto max-w-md py-24 text-center text-neutral-500">This guild has been disbanded.</div>
+	<div class="mx-auto max-w-md py-24 text-center text-neutral-500">This circle has been disbanded.</div>
 {:else}
 	<article class="mx-auto flex max-w-3xl flex-col gap-6">
 		{#if data.bannerUrl}

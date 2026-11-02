@@ -20,11 +20,11 @@ import { rateLimit } from '#lib/server/utils/rate-limit';
 export const load: PageServerLoad = async ({ params, locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const guild = await getGuildBySlug(params.slug);
-	if (!guild) error(404, 'Guild not found');
+	if (!guild) error(404, 'Circle not found');
 
 	const membership = await getMembership(locals.user.id);
 	if (!membership || membership.guild.id !== guild.id) {
-		error(403, 'You are not a member of this guild');
+		error(403, 'You are not a member of this circle');
 	}
 
 	const role = membership.membership.role;
@@ -46,11 +46,11 @@ export const actions: Actions = {
 		const user = locals.user;
 
 		const guild = await getGuildBySlug(params.slug);
-		if (!guild) return fail(404, { error: 'Guild not found' });
+		if (!guild) return fail(404, { error: 'Circle not found' });
 
 		const membership = await getMembership(user.id);
 		if (!membership || membership.guild.id !== guild.id) {
-			return fail(403, { error: 'You are not a member of this guild' });
+			return fail(403, { error: 'You are not a member of this circle' });
 		}
 
 		try {

@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>Guild invitations - ovyn</title>
+	<title>Circle invitations - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">
@@ -32,7 +32,7 @@
 					</p>
 				</div>
 				{#if data.membership}
-					<span class="text-xs text-neutral-500">Leave your current guild first</span>
+					<span class="text-xs text-neutral-500">Leave your current circle first</span>
 				{:else}
 					<div class="flex gap-2">
 						<form method="POST" action="/guild/invitations">

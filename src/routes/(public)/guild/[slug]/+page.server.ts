@@ -5,7 +5,7 @@ import { presignDownload } from '#lib/server/storage';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const guild = await getGuildBySlug(params.slug);
-	if (!guild) error(404, 'Guild not found');
+	if (!guild) error(404, 'Circle not found');
 
 	const disbanded = guild.status !== 'active';
 	const members = disbanded ? [] : await listGuildMembers(guild.id);

@@ -8,7 +8,7 @@
 	const preferencePath = '/__ovyn_push_preferences__';
 
 	const categories = [
-		{ key: 'guild', label: 'Guild invitations and membership changes' },
+		{ key: 'guild', label: 'Circle invitations and membership changes' },
 		{ key: 'profile', label: 'Profile views and analytics' },
 		{ key: 'shop', label: 'Shop purchases and payment updates' },
 		{ key: 'referral', label: 'Referral and rewards activity' },

@@ -19,7 +19,6 @@
 		{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' },
 		{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
 		{ href: '/#plans', label: 'Plans', icon: '＋', tone: 'lilac' },
-		...(user ? [{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' }] : []),
 		{ href: '/#faq', label: 'FAQ', icon: '?', tone: 'lilac' }
 	]);
 

@@ -23,6 +23,7 @@
 
 	const accountLinks = [
 		{ href: '/account', label: 'Overview' },
+		{ href: '/guild', label: 'Circle' },
 		{ href: '/dashboard', label: 'Activity dashboard' },
 		{ href: '/account/analytics', label: 'Analytics' },
 		{ href: '/account/badges', label: 'Badges' },

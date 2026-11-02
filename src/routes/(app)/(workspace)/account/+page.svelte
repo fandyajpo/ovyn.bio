@@ -71,7 +71,18 @@
 		</Card>
 	</div>
 
-	<div class="grid gap-4 sm:grid-cols-3">
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		<Card class="p-5">
+			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your circle</p>
+			{#if data.circle}
+				<p class="mt-2 truncate font-[family-name:var(--font-display)] text-2xl font-bold">{data.circle.guild.name}</p>
+				<p class="text-sm text-neutral-500">Your role: {data.circle.membership.role}</p>
+				<a href="/guild" class="mt-3 inline-block text-sm text-lime-300 hover:underline">Open your circle</a>
+			{:else}
+				<p class="mt-2 text-sm text-neutral-300">You are not in a circle yet.</p>
+				<a href="/discover" class="mt-3 inline-block text-sm text-lime-300 hover:underline">Find your circle</a>
+			{/if}
+		</Card>
 		<Card class="p-5">
 			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile views · 30 days</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold">{data.analytics.views}</p>

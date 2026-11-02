@@ -41,7 +41,7 @@
 </svelte:head>
 
 <div class="mx-auto flex max-w-2xl flex-col gap-6">
-	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Manage guild</h1>
+	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Manage circle</h1>
 
 	{#if form?.error}
 		<p class="text-sm text-red-400" role="alert">{form.error}</p>
@@ -50,13 +50,13 @@
 		<p class="text-sm text-lime-300" role="status">{form.ok}</p>
 	{/if}
 
-	<!-- Only owners edit guild settings -->
+	<!-- Only owners edit circle settings -->
 	{#if data.role === 'owner'}
 		<form method="POST" action="/guild/{data.guild.slug}/manage" class="rounded-xl border border-neutral-800 p-5">
 			<input type="hidden" name="intent" value="settings" />
-			<h2 class="mb-4 font-medium text-neutral-200">Guild settings</h2>
+			<h2 class="mb-4 font-medium text-neutral-200">Circle settings</h2>
 			<div class="flex flex-col gap-4">
-				<Input name="name" label="Guild name" bind:value={name} required minlength={2} maxlength={50} />
+				<Input name="name" label="Circle name" bind:value={name} required minlength={2} maxlength={50} />
 				<Input name="description" label="Description" bind:value={description} textarea maxlength={500} />
 				<fieldset class="flex items-center gap-3">
 					<legend class="mb-1.5 text-sm font-medium text-neutral-300">Visibility</legend>

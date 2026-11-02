@@ -17,11 +17,11 @@
 </script>
 
 <svelte:head>
-	<title>{data.guild ? data.guild.name : 'My guild'} - ovyn</title>
+	<title>{data.guild ? data.guild.name : 'My circle'} - ovyn</title>
 </svelte:head>
 
 <div class="mx-auto flex max-w-3xl flex-col gap-6">
-	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">My guild</h1>
+	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">My circle</h1>
 
 	{#if form?.error}
 		<p class="rounded-lg border border-red-900/60 bg-red-950/30 px-4 py-3 text-sm text-red-300" role="alert">
@@ -31,10 +31,10 @@
 
 	{#if !data.guild}
 		<Card class="flex flex-col items-center gap-4 p-10 text-center">
-			<p class="text-neutral-400">You're not in a guild yet. ovyn is better with your circle.</p>
+			<p class="text-neutral-400">You're not in a circle yet. ovyn is better with your circle.</p>
 			<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-				<Button href="/discover" variant="secondary" class="w-full sm:w-auto">Discover guilds</Button>
-				<Button href="/guild/create" class="w-full sm:w-auto">Create a guild</Button>
+				<Button href="/discover" variant="secondary" class="w-full sm:w-auto">Discover circles</Button>
+				<Button href="/guild/create" class="w-full sm:w-auto">Create a circle</Button>
 			</div>
 		</Card>
 	{:else}
@@ -82,12 +82,12 @@
 							<input type="hidden" name="intent" value="disband" />
 							<Button type="submit" variant="danger">Yes, disband</Button>
 						</form>
-						<Button variant="ghost" onclick={() => (confirmingDisband = false)}>Keep guild</Button>
+						<Button variant="ghost" onclick={() => (confirmingDisband = false)}>Keep circle</Button>
 					{:else}
-						<Button variant="danger" onclick={() => (confirmingDisband = true)}>Disband guild</Button>
+						<Button variant="danger" onclick={() => (confirmingDisband = true)}>Disband circle</Button>
 					{/if}
 				{:else}
-					<p class="text-sm text-neutral-400">Transfer ownership in guild settings before leaving.</p>
+					<p class="text-sm text-neutral-400">Transfer ownership in circle settings before leaving.</p>
 				{/if}
 			{:else if confirmingLeave}
 				<form method="POST" action="/guild">
@@ -96,8 +96,8 @@
 				</form>
 				<Button variant="ghost" onclick={() => (confirmingLeave = false)}>Cancel</Button>
 			{:else}
-				<Button variant="danger" onclick={() => (confirmingLeave = true)}>Leave guild</Button>
-				<p class="text-xs text-neutral-500">You can join or create another guild after leaving.</p>
+				<Button variant="danger" onclick={() => (confirmingLeave = true)}>Leave circle</Button>
+				<p class="text-xs text-neutral-500">You can join or create another circle after leaving.</p>
 			{/if}
 		</section>
 	{/if}

@@ -71,7 +71,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 		} else {
 			const membership = await getMembership(locals.user.id);
 			if (!membership || membership.membership.role !== 'owner') {
-				return Response.json({ error: 'Only the guild owner can set the icon' }, { status: 403 });
+				return Response.json({ error: 'Only the circle owner can set the icon' }, { status: 403 });
 			}
 			await updateGuild(locals.user.id, membership.guild.id, { iconKey: key });
 		}

@@ -6,25 +6,25 @@
 </script>
 
 <svelte:head>
-	<title>Discover guilds - ovyn</title>
+	<title>Discover circles - ovyn</title>
 </svelte:head>
 
 <div class="flex flex-col gap-6">
 	<div>
 		<span class="sticker sticker--blue">FIND YOUR PEOPLE</span>
-		<h1 class="mt-4 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight">Discover guilds</h1>
+		<h1 class="mt-4 font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight">Discover circles</h1>
 		<p class="mt-1 text-neutral-400">
 			{#if data.membership}
 				You are a member of <a href="/guild/{data.membership.guild.slug}" class="text-lime-300">{data.membership.guild.name}</a>.
-				Leave your current guild before joining another one.
+				Leave your current circle before joining another one.
 			{:else}
-				Public guilds you can join right now. Private guilds need an invitation.
+				Public circles you can join right now. Private circles need an invitation.
 			{/if}
 		</p>
 	</div>
 
 	<form method="GET" class="max-w-md">
-		<Input name="q" label="Search" placeholder="Search by guild name" value={data.q ?? ''} />
+		<Input name="q" label="Search" placeholder="Search by circle name" value={data.q ?? ''} />
 	</form>
 
 	{#if form?.error}
@@ -35,13 +35,13 @@
 
 	{#if form?.ok}
 		<p class="rounded-lg border border-lime-300/40 bg-lime-300/10 px-4 py-3 text-sm text-lime-200" role="status">
-			Joined the guild. Welcome!
+			Joined the circle. Welcome!
 		</p>
 	{/if}
 
 	{#if data.guilds.length === 0}
 		<div class="rounded-xl border border-dashed border-neutral-800 p-12 text-center text-neutral-500">
-			{data.q ? 'No guilds match your search.' : 'No public guilds yet. Be the first to create one!'}
+			{data.q ? 'No circles match your search.' : 'No public circles yet. Be the first to create one!'}
 		</div>
 	{:else}
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -72,11 +72,11 @@
 					</div>
 
 					{#if data.membership?.guild.id === row.guild.id}
-						<span class="text-sm font-medium text-lime-300">Your guild</span>
+						<span class="text-sm font-medium text-lime-300">Your circle</span>
 					{:else if row.guild.visibility === 'private'}
 						<span class="text-sm text-neutral-500">Invite only</span>
 					{:else if data.membership}
-						<span class="text-sm text-neutral-500">Leave your current guild first to join this one</span>
+						<span class="text-sm text-neutral-500">Leave your current circle first to join this one</span>
 					{:else}
 						<form method="POST" action="/discover">
 							<input type="hidden" name="slug" value={row.guild.slug} />
@@ -84,7 +84,7 @@
 								type="submit"
 								class="w-full rounded-lg bg-lime-300 py-2 text-sm font-medium text-neutral-950 transition-colors hover:bg-lime-200"
 							>
-								Join guild
+								Join circle
 							</button>
 						</form>
 					{/if}

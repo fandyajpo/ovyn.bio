@@ -55,11 +55,11 @@ export async function createInvitation(
 			.where(eq(guildMembers.userId, inviteeUserId))
 			.limit(1);
 		if (inviteeMembership) {
-			throw new ConflictError('That user already belongs to a guild');
+			throw new ConflictError('That user already belongs to a circle');
 		}
 
 		const [guild] = await tx.select().from(guilds).where(eq(guilds.id, actor.guildId)).limit(1);
-		if (!guild || guild.status !== 'active') throw new NotFoundError('Guild not found');
+		if (!guild || guild.status !== 'active') throw new NotFoundError('Circle not found');
 
 		try {
 			const [invitation] = await tx
@@ -175,7 +175,7 @@ export async function acceptInvitation(
 			.limit(1);
 		if (existingMembership) {
 			throw new ConflictError(
-				'You already belong to a guild. Leave your current guild before accepting this invitation.'
+				'You already belong to a circle. Leave your current circle before accepting this invitation.'
 			);
 		}
 
@@ -184,7 +184,7 @@ export async function acceptInvitation(
 			.from(guilds)
 			.where(and(eq(guilds.id, invitation.guildId), eq(guilds.status, 'active')))
 			.limit(1);
-		if (!guild) throw new NotFoundError('This guild no longer exists');
+		if (!guild) throw new NotFoundError('This circle no longer exists');
 
 		await tx.insert(guildMembers).values({ userId: inviteeId, guildId: guild.id, role: 'member' });
 		await tx
