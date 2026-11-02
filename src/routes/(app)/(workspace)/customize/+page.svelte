@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
-	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
@@ -29,31 +28,13 @@
 		<span class="sticker sticker--pink">MAKE IT YOURS</span>
 		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Customize your page</h1>
 		<p class="mt-1 text-neutral-400">
-			Set your username colour, page background, picture, cover, audio and cursor.
+			Set your username colour, page background, cover, audio and cursor.
 			<a href="/settings/profile" class="text-lime-300 hover:underline">Edit your name, username and bio</a>.
 		</p>
 	</div>
 
 	{#if form?.error}<p class="text-sm text-red-400" role="alert">{form.error}</p>{/if}
 	{#if form?.ok}<p class="text-sm text-lime-300" role="status">{form.ok}</p>{/if}
-
-	<Card class="flex flex-col gap-4 p-5">
-		<div class="flex items-center gap-4">
-			<Avatar name={data.profile.displayName || data.profile.slug} src={data.avatarUrl} size="lg" />
-			<div>
-				<h2 class="font-medium text-neutral-100">Profile avatar</h2>
-				<p class="mt-1 text-xs text-neutral-500">Choose a custom image or restore your sign-in account picture.</p>
-			</div>
-		</div>
-		<div class="flex flex-wrap gap-2">
-			<UploadButton kind="avatar" existingKey={data.profile.avatarKey} label="Upload avatar" />
-			{#if data.profile.avatarKey}
-				<form method="POST" action="?/avatarReset">
-					<Button type="submit" variant="ghost">Use account picture</Button>
-				</form>
-			{/if}
-		</div>
-	</Card>
 
 	<Card class="flex flex-col gap-4 p-5">
 		<div>

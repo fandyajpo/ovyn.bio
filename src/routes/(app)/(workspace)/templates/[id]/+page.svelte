@@ -56,7 +56,7 @@
 			<a href="/templates" class="text-sm text-neutral-500 hover:text-lime-300">← Templates</a>
 			<span class="sticker sticker--lilac mt-3 block w-fit">LAYOUT BUILDER</span>
 			<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Edit {data.template.name}</h1>
-			<p class="mt-1 max-w-2xl text-neutral-400">Drag blocks to reorder them, add new content from the palette, and write with markdown. Save when it looks right.</p>
+			<p class="mt-1 max-w-2xl text-neutral-400">Drag blocks to reorder them, add grids, lists, code and embeds, and write with the rich text toolbar. Save when it looks right.</p>
 		</div>
 		<div>
 			<Button href="/templates" variant="ghost">All templates</Button>
@@ -87,7 +87,7 @@
 		</Card>
 
 		{#key editorKey}
-			<TemplateBlockEditor blocks={initialBlocks} />
+			<TemplateBlockEditor blocks={initialBlocks} previewKey={data.template.id} />
 		{/key}
 
 		<div class="sticky bottom-4 z-10 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-neutral-800/70 bg-neutral-950/85 px-4 py-3 backdrop-blur">

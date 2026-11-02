@@ -2,10 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { profileBackgroundSchema, profileUsernameColorSchema } from '#lib/schemas/profile';
 import {
-	getDiscordAccountByUserId,
 	getProfileByUserId,
 	setProfileAudioKey,
-	setProfileAvatar,
 	setProfileBackground,
 	setProfileBackgroundKey,
 	setProfileCursorKey,
@@ -18,35 +16,20 @@ import { getUserPlan } from '#lib/server/services/billing';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
-	const [profile, discord, plan] = await Promise.all([
+	const [profile, plan] = await Promise.all([
 		getProfileByUserId(locals.user.id),
-		getDiscordAccountByUserId(locals.user.id),
 		getUserPlan(locals.user.id)
 	]);
-	const [bannerUrl, avatarUrl, audioUrl, cursorUrl, backgroundUrl] = await Promise.all([
+	const [bannerUrl, audioUrl, cursorUrl, backgroundUrl] = await Promise.all([
 		profile.bannerKey ? presignDownload(profile.bannerKey) : null,
-		profile.avatarKey ? presignDownload(profile.avatarKey) : discord?.avatarUrl ?? locals.user.image ?? null,
 		profile.audioKey ? presignDownload(profile.audioKey) : null,
 		profile.cursorKey && plan.tier === 'premium' ? presignDownload(profile.cursorKey) : null,
 		profile.backgroundKey ? presignDownload(profile.backgroundKey) : null
 	]);
-	return { profile, avatarUrl, bannerUrl, audioUrl, cursorUrl, backgroundUrl, plan };
+	return { profile, bannerUrl, audioUrl, cursorUrl, backgroundUrl, plan };
 };
 
 export const actions: Actions = {
-	avatarReset: async ({ locals }) => {
-		if (!locals.user) redirect(302, '/login');
-		try {
-			rateLimit(`profile-avatar:${locals.user.id}`, 10, 60_000);
-			await setProfileAvatar(locals.user.id, null);
-			return { ok: 'Account picture restored.' };
-		} catch (err) {
-			if (err instanceof AppError) return fail(err.status, { error: err.message });
-			console.error(err);
-			return fail(500, { error: 'Could not restore your account picture' });
-		}
-	},
-
 	color: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		const data = await request.formData();

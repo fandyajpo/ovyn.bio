@@ -55,7 +55,7 @@
 				<Switch name="isPublic" label="Share in the community gallery" description="Public templates contain only preset styling and text." class="sm:col-span-2" />
 				<div class="sm:col-span-2"><Button type="submit">Save template</Button></div>
 			</form>
-			<p class="mt-3 text-xs text-neutral-500">After saving you land in the block builder, where you can drag content, write in markdown and add blog posts. Templates never expose your uploads, private account data or links.</p>
+			<p class="mt-3 text-xs text-neutral-500">After saving you land in the block builder, where you can drag content, write with the rich text toolbar, and build grids, lists, code blocks and embeds. Templates never expose your uploads, private account data or links.</p>
 		</Card>
 	{:else}
 		<Card class="flex flex-wrap items-center justify-between gap-4 p-5">

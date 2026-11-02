@@ -1,28 +1,43 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
-	import Markdown from './Markdown.svelte';
+	import { onMount, untrack } from 'svelte';
+	import RichTextEditor from './RichTextEditor.svelte';
 	import TemplateBlocks from './TemplateBlocks.svelte';
+	import { createPreviewPublisher, previewKeyFor, type PreviewPublisher } from '#lib/template-preview';
 	import {
 		TEMPLATE_BLOCK_HINTS,
 		TEMPLATE_BLOCK_LABELS,
 		TEMPLATE_BLOCK_TYPES,
+		TEMPLATE_EMBED_PROVIDER_OPTIONS,
+		TEMPLATE_LIST_STYLE_OPTIONS,
 		type TemplateBlock,
 		type TemplateBlockType
 	} from '#lib/schemas/templates';
 
-	let { blocks = [], name = 'blocks' }: { blocks?: TemplateBlock[]; name?: string } = $props();
+	let {
+		blocks = [],
+		name = 'blocks',
+		previewKey = null
+	}: { blocks?: TemplateBlock[]; name?: string; previewKey?: string | null } = $props();
 
 	let items = $state<TemplateBlock[]>(untrack(() => blocks.map((block) => ({ ...block }))));
 	let draggingIndex = $state<number | null>(null);
 	let overIndex = $state<number | null>(null);
 	let paletteType = $state<TemplateBlockType | null>(null);
-	let activeIndex = $state<number | null>(null);
-	let activeElement = $state<HTMLTextAreaElement | null>(null);
+
+	let previewSession = $state('');
+	let publisher = $state<PreviewPublisher | null>(null);
 
 	const serialized = $derived(JSON.stringify(items));
+	const activePreviewKey = $derived(
+		previewKey && previewSession ? previewKeyFor(previewKey, previewSession) : null
+	);
+
+	function newId(): string {
+		return crypto.randomUUID().slice(0, 12);
+	}
 
 	function createBlock(type: TemplateBlockType): TemplateBlock {
-		const id = crypto.randomUUID().slice(0, 12);
+		const id = newId();
 		if (type === 'heading') return { id, type, text: 'A new section' };
 		if (type === 'text') {
 			return { id, type, markdown: 'Write something here. **Bold**, *italic*, `code` and [links](https://ovyn.bio) all work.' };
@@ -33,11 +48,35 @@
 				type,
 				title: 'A new post',
 				date: new Date().toISOString().slice(0, 10),
-				markdown: 'Tell the story. Markdown works here too.'
+				markdown: 'Tell the story.'
 			};
 		}
 		if (type === 'quote') return { id, type, text: 'A line worth keeping.' };
 		if (type === 'image') return { id, type, url: '', caption: '' };
+		if (type === 'list') {
+			return {
+				id,
+				type,
+				style: 'bullet',
+				items: [
+					{ id: newId(), text: 'First item' },
+					{ id: newId(), text: 'Second item' }
+				]
+			};
+		}
+		if (type === 'code') return { id, type, language: 'javascript', code: 'console.log("hello from ovyn");' };
+		if (type === 'embed') return { id, type, provider: 'youtube', url: '', caption: '' };
+		if (type === 'grid') {
+			return {
+				id,
+				type,
+				columns: 2,
+				cells: [
+					{ id: newId(), heading: 'Card one', markdown: 'A short line about this card.' },
+					{ id: newId(), heading: 'Card two', markdown: 'Another short line.' }
+				]
+			};
+		}
 		return { id, type };
 	}
 
@@ -63,7 +102,7 @@
 		const current = items[index];
 		if (!current) return;
 		const next = [...items];
-		next.splice(index + 1, 0, { ...current, id: crypto.randomUUID().slice(0, 12) });
+		next.splice(index + 1, 0, { ...current, id: newId() });
 		items = next;
 	}
 
@@ -84,6 +123,52 @@
 		if (!moved) return;
 		next.splice(from < to ? to - 1 : to, 0, moved);
 		items = next;
+	}
+
+	function addListItem(index: number) {
+		const block = items[index];
+		if (!block) return;
+		updateBlock(index, { items: [...(block.items ?? []), { id: newId(), text: '' }] });
+	}
+
+	function updateListItem(index: number, itemIndex: number, patch: { text?: string; checked?: boolean }) {
+		const block = items[index];
+		if (!block) return;
+		const list = [...(block.items ?? [])];
+		const item = list[itemIndex];
+		if (!item) return;
+		list[itemIndex] = { ...item, ...patch };
+		updateBlock(index, { items: list });
+	}
+
+	function removeListItem(index: number, itemIndex: number) {
+		const block = items[index];
+		if (!block) return;
+		updateBlock(index, { items: (block.items ?? []).filter((_, position) => position !== itemIndex) });
+	}
+
+	function addGridCell(index: number) {
+		const block = items[index];
+		if (!block) return;
+		const cells = block.cells ?? [];
+		if (cells.length >= 12) return;
+		updateBlock(index, { cells: [...cells, { id: newId(), heading: '', markdown: '' }] });
+	}
+
+	function updateGridCell(index: number, cellIndex: number, patch: { heading?: string; markdown?: string }) {
+		const block = items[index];
+		if (!block) return;
+		const cells = [...(block.cells ?? [])];
+		const cell = cells[cellIndex];
+		if (!cell) return;
+		cells[cellIndex] = { ...cell, ...patch };
+		updateBlock(index, { cells });
+	}
+
+	function removeGridCell(index: number, cellIndex: number) {
+		const block = items[index];
+		if (!block) return;
+		updateBlock(index, { cells: (block.cells ?? []).filter((_, position) => position !== cellIndex) });
 	}
 
 	function resetDrag() {
@@ -118,48 +203,28 @@
 		resetDrag();
 	}
 
-	function onEditorFocus(index: number, event: FocusEvent) {
-		activeIndex = index;
-		activeElement = event.currentTarget as HTMLTextAreaElement;
-	}
-
 	function textValue(event: Event): string {
 		return (event.currentTarget as HTMLInputElement | HTMLTextAreaElement).value;
 	}
 
-	function wrapSelection(before: string, after = before) {
-		const element = activeElement;
-		if (!element || activeIndex === null) return;
-		const value = items[activeIndex]?.markdown ?? '';
-		const start = element.selectionStart ?? value.length;
-		const end = element.selectionEnd ?? start;
-		const selected = value.slice(start, end) || 'text';
-		const next = `${value.slice(0, start)}${before}${selected}${after}${value.slice(end)}`;
-		updateBlock(activeIndex, { markdown: next });
-		queueMicrotask(() => {
-			element.focus();
-			element.setSelectionRange(start + before.length, start + before.length + selected.length);
-		});
-	}
+	onMount(() => {
+		previewSession = crypto.randomUUID().slice(0, 8);
+		if (!previewKey) return;
+		const instance = createPreviewPublisher(previewKeyFor(previewKey, previewSession));
+		publisher = instance;
+		instance.publish(items, true);
+		return () => {
+			instance.dispose();
+			publisher = null;
+		};
+	});
 
-	function prefixSelection(prefix: string) {
-		const element = activeElement;
-		if (!element || activeIndex === null) return;
-		const value = items[activeIndex]?.markdown ?? '';
-		const start = element.selectionStart ?? 0;
-		const end = element.selectionEnd ?? 0;
-		const lineStart = value.lastIndexOf('\n', start - 1) + 1;
-		const next = `${value.slice(0, lineStart)}${prefix}${value.slice(lineStart)}`;
-		updateBlock(activeIndex, { markdown: next });
-		queueMicrotask(() => {
-			element.focus();
-			element.setSelectionRange(start + prefix.length, end + prefix.length);
-		});
-	}
-
-	function insertLink() {
-		wrapSelection('[', '](https://)');
-	}
+	$effect(() => {
+		void serialized;
+		const instance = publisher;
+		if (!instance) return;
+		instance.publish(items);
+	});
 </script>
 
 <input type="hidden" {name} value={serialized} />
@@ -185,7 +250,7 @@
 		<p class="palette-hint">Drag a block into the page, or tap one to add it at the end.</p>
 
 		{#if items.length === 0}
-			<p class="builder-empty">Your layout is empty. Add a heading, some text or a blog post to start.</p>
+			<p class="builder-empty">Your layout is empty. Add a heading, some text or a grid to start.</p>
 		{/if}
 
 		<div class="block-list">
@@ -222,48 +287,34 @@
 									oninput={(event) => updateBlock(index, { text: textValue(event) })}
 								/>
 							</label>
-						{:else if block.type === 'text' || block.type === 'blog'}
-			{#if block.type === 'blog'}
-								<div class="field-row">
-									<label class="block-field">
-										<span>Post title</span>
-										<input
-											class="block-input"
-											value={block.title ?? ''}
-											maxlength={120}
-											oninput={(event) => updateBlock(index, { title: textValue(event) })}
-										/>
-									</label>
-									<label class="block-field field-date">
-										<span>Date</span>
-										<input type="date" class="block-input" value={block.date ?? ''} oninput={(event) => updateBlock(index, { date: textValue(event) })} />
-									</label>
-								</div>
-							{/if}
-							<div class="markdown-editor">
-								<div class="markdown-toolbar">
-									<button type="button" onclick={() => wrapSelection('**')} title="Bold">B</button>
-									<button type="button" class="italic" onclick={() => wrapSelection('*')} title="Italic">I</button>
-									<button type="button" onclick={insertLink} title="Link">Link</button>
-									<button type="button" onclick={() => prefixSelection('## ')} title="Heading">H2</button>
-									<button type="button" onclick={() => prefixSelection('- ')} title="Bullet list">List</button>
-									<button type="button" onclick={() => prefixSelection('> ')} title="Quote">Quote</button>
-								</div>
-								<textarea
-									class="editor-textarea"
-									rows="6"
-									value={block.markdown ?? ''}
-									placeholder="Write with markdown: **bold**, *italic*, - lists, > quotes"
-									onfocus={(event) => onEditorFocus(index, event)}
-									oninput={(event) => updateBlock(index, { markdown: textValue(event) })}
-								></textarea>
-								<details class="markdown-preview">
-									<summary>Preview this block</summary>
-									<div class="preview-body">
-										<Markdown content={block.markdown ?? ''} />
-									</div>
-								</details>
+						{:else if block.type === 'text'}
+							<RichTextEditor
+								value={block.markdown ?? ''}
+								label="Text block"
+								onChange={(markdown) => updateBlock(index, { markdown })}
+							/>
+						{:else if block.type === 'blog'}
+							<div class="field-row">
+								<label class="block-field">
+									<span>Post title</span>
+									<input
+										class="block-input"
+										value={block.title ?? ''}
+										maxlength={120}
+										placeholder="A new post"
+										oninput={(event) => updateBlock(index, { title: textValue(event) })}
+									/>
+								</label>
+								<label class="block-field field-date">
+									<span>Date</span>
+									<input type="date" class="block-input" value={block.date ?? ''} oninput={(event) => updateBlock(index, { date: textValue(event) })} />
+								</label>
 							</div>
+							<RichTextEditor
+								value={block.markdown ?? ''}
+								label="Post body"
+								onChange={(markdown) => updateBlock(index, { markdown })}
+							/>
 						{:else if block.type === 'quote'}
 							<label class="block-field">
 								<span>Quote</span>
@@ -284,6 +335,89 @@
 							</label>
 						{:else if block.type === 'divider'}
 							<p class="block-note">A divider draws a soft line between sections.</p>
+						{:else if block.type === 'list'}
+							<div class="chip-row" role="group" aria-label="List style">
+								{#each TEMPLATE_LIST_STYLE_OPTIONS as option (option.value)}
+									<button type="button" class:is-active={block.style === option.value} onclick={() => updateBlock(index, { style: option.value })}>{option.label}</button>
+								{/each}
+							</div>
+							<div class="item-list">
+								{#each block.items ?? [] as item, itemIndex (item.id)}
+									<div class="item-row">
+										{#if block.style === 'task'}
+											<input
+												type="checkbox"
+												checked={Boolean(item.checked)}
+												aria-label={`Done: ${item.text || 'item'}`}
+												onchange={(event) => updateListItem(index, itemIndex, { checked: (event.currentTarget as HTMLInputElement).checked })}
+											/>
+										{/if}
+										<input
+											class="block-input"
+											value={item.text}
+											maxlength={300}
+											placeholder="List item"
+											oninput={(event) => updateListItem(index, itemIndex, { text: textValue(event) })}
+										/>
+										<button type="button" class="row-remove" onclick={() => removeListItem(index, itemIndex)} aria-label="Remove item">×</button>
+									</div>
+								{/each}
+							</div>
+							<button type="button" class="add-row" onclick={() => addListItem(index)}>+ Add item</button>
+						{:else if block.type === 'code'}
+							<label class="block-field">
+								<span>Language</span>
+								<input class="block-input" value={block.language ?? ''} maxlength={24} placeholder="javascript" oninput={(event) => updateBlock(index, { language: textValue(event) })} />
+							</label>
+							<label class="block-field">
+								<span>Code</span>
+								<textarea class="block-input block-code" rows="7" value={block.code ?? ''} spellcheck="false" oninput={(event) => updateBlock(index, { code: textValue(event) })}></textarea>
+							</label>
+						{:else if block.type === 'embed'}
+							<div class="chip-row" role="group" aria-label="Embed provider">
+								{#each TEMPLATE_EMBED_PROVIDER_OPTIONS as option (option.value)}
+									<button type="button" class:is-active={block.provider === option.value} onclick={() => updateBlock(index, { provider: option.value })}>{option.label}</button>
+								{/each}
+							</div>
+							<label class="block-field">
+								<span>Link to embed</span>
+								<input class="block-input" value={block.url ?? ''} placeholder="https://..." oninput={(event) => updateBlock(index, { url: textValue(event) })} />
+							</label>
+							<label class="block-field">
+								<span>Caption (optional)</span>
+								<input class="block-input" value={block.caption ?? ''} maxlength={200} oninput={(event) => updateBlock(index, { caption: textValue(event) })} />
+							</label>
+						{:else if block.type === 'grid'}
+							<div class="chip-row" role="group" aria-label="Grid columns">
+								{#each [1, 2, 3, 4] as count (count)}
+									<button type="button" class:is-active={(block.columns ?? 2) === count} onclick={() => updateBlock(index, { columns: count })}>{count} col{count === 1 ? '' : 's'}</button>
+								{/each}
+							</div>
+							<p class="block-note">Columns stack on small screens. Add a cell for each row of content.</p>
+							<div class="cell-list">
+								{#each block.cells ?? [] as cell, cellIndex (cell.id)}
+									<div class="cell-card">
+										<div class="cell-head">
+											<span>Cell {cellIndex + 1}</span>
+											<button type="button" class="row-remove" onclick={() => removeGridCell(index, cellIndex)} aria-label="Remove cell">×</button>
+										</div>
+										<input
+											class="block-input"
+											value={cell.heading ?? ''}
+											maxlength={120}
+											placeholder="Cell heading (optional)"
+											oninput={(event) => updateGridCell(index, cellIndex, { heading: textValue(event) })}
+										/>
+										<RichTextEditor
+											value={cell.markdown ?? ''}
+											label={`Grid cell ${cellIndex + 1}`}
+											minHeight="5rem"
+											onChange={(markdown) => updateGridCell(index, cellIndex, { markdown })}
+										/>
+									</div>
+								{/each}
+							</div>
+							<button type="button" class="add-row" onclick={() => addGridCell(index)}>+ Add cell</button>
 						{/if}
 					</div>
 				</article>
@@ -305,7 +439,12 @@
 	<aside class="builder-preview" aria-label="Live preview">
 		<div class="preview-head">
 			<span>Live preview</span>
-			<span class="preview-count">{items.length} block{items.length === 1 ? '' : 's'}</span>
+			<span class="preview-actions">
+				{#if activePreviewKey}
+					<a class="preview-open" href={`/templates/preview?key=${encodeURIComponent(activePreviewKey)}`} target="_blank" rel="noopener">Open tab ↗</a>
+				{/if}
+				<span class="preview-count">{items.length} block{items.length === 1 ? '' : 's'}</span>
+			</span>
 		</div>
 		<div class="preview-stage">
 			<TemplateBlocks blocks={items} />
@@ -434,7 +573,6 @@
 		color: var(--color-foreground);
 		font: inherit;
 		font-size: 0.84rem;
-		transition: border-color 160ms ease, box-shadow 160ms ease;
 	}
 
 	.block-input:focus,
@@ -445,67 +583,92 @@
 	}
 
 	.block-textarea { resize: vertical; line-height: 1.6; }
+	.block-code { font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.6; resize: vertical; }
 	.field-row { display: grid; gap: 0.7rem; }
 
-	.markdown-editor {
-		overflow: hidden;
+	.chip-row { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+
+	.chip-row button {
+		min-height: 2rem;
 		border: 1px solid var(--color-divider);
-		border-radius: 0.85rem;
-		background: color-mix(in srgb, var(--color-background) 66%, transparent);
-	}
-
-	.markdown-toolbar {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.2rem;
-		border-bottom: 1px solid var(--color-divider);
-		padding: 0.35rem;
-	}
-
-	.markdown-toolbar button {
-		min-height: 1.85rem;
-		border: 0;
-		border-radius: 0.45rem;
+		border-radius: 999px;
 		background: transparent;
-		padding: 0.2rem 0.55rem;
+		padding: 0.25rem 0.7rem;
 		color: var(--color-muted);
 		font: inherit;
-		font-size: 0.7rem;
+		font-size: 0.72rem;
 		font-weight: 600;
 		cursor: pointer;
+		transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
 	}
 
-	.markdown-toolbar button:hover { background: var(--color-accent-soft); color: var(--color-foreground); }
-	.markdown-toolbar .italic { font-style: italic; }
+	.chip-row button:hover { border-color: color-mix(in srgb, var(--color-accent) 40%, transparent); color: var(--color-foreground); }
+	.chip-row button.is-active { border-color: color-mix(in srgb, var(--color-accent) 55%, transparent); background: var(--color-accent-soft); color: var(--color-accent); }
 
-	.editor-textarea {
-		width: 100%;
-		min-height: 8rem;
-		resize: vertical;
-		border: 0;
+	.item-list { display: grid; gap: 0.4rem; }
+
+	.item-row {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+	}
+
+	.item-row input[type='checkbox'] { flex: 0 0 auto; }
+
+	.row-remove {
+		display: grid;
+		width: 2rem;
+		height: 2rem;
+		flex: 0 0 auto;
+		place-items: center;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.55rem;
 		background: transparent;
-		padding: 0.75rem 0.8rem;
-		color: var(--color-foreground);
-		font-family: var(--font-mono);
-		font-size: 0.8rem;
-		line-height: 1.65;
-	}
-
-	.editor-textarea:focus { outline: none; }
-
-	.markdown-preview { border-top: 1px solid var(--color-divider); }
-
-	.markdown-preview summary {
-		cursor: pointer;
-		padding: 0.45rem 0.8rem;
 		color: var(--color-muted);
-		font-size: 0.7rem;
-		list-style: none;
+		font-size: 0.95rem;
+		cursor: pointer;
+		transition: color 140ms ease, border-color 140ms ease;
 	}
 
-	.markdown-preview summary::-webkit-details-marker { display: none; }
-	.markdown-preview[open] summary { color: var(--color-accent); }
-	.preview-body { padding: 0.2rem 0.85rem 0.85rem; }
+	.row-remove:hover { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); color: var(--color-danger); }
+
+	.add-row {
+		width: fit-content;
+		border: 1px dashed var(--color-divider);
+		border-radius: 0.6rem;
+		background: transparent;
+		padding: 0.35rem 0.7rem;
+		color: var(--color-muted);
+		font: inherit;
+		font-size: 0.72rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: color 140ms ease, border-color 140ms ease;
+	}
+
+	.add-row:hover { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent); color: var(--color-accent); }
+
+	.cell-list { display: grid; gap: 0.6rem; }
+
+	.cell-card {
+		display: grid;
+		gap: 0.5rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.85rem;
+		padding: 0.6rem;
+	}
+
+	.cell-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		color: var(--color-muted);
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
 
 	.block-note { color: var(--color-muted); font-size: 0.78rem; }
 
@@ -549,6 +712,21 @@
 		font-weight: 600;
 	}
 
+	.preview-actions { display: flex; align-items: center; gap: 0.6rem; }
+
+	.preview-open {
+		border: 1px solid var(--color-divider);
+		border-radius: 999px;
+		padding: 0.2rem 0.6rem;
+		color: var(--color-accent);
+		font-size: 0.66rem;
+		font-weight: 600;
+		text-decoration: none;
+		transition: border-color 140ms ease, background-color 140ms ease;
+	}
+
+	.preview-open:hover { border-color: color-mix(in srgb, var(--color-accent) 45%, transparent); background: var(--color-accent-soft); }
+
 	.preview-count {
 		color: var(--color-muted);
 		font-family: var(--font-mono);
@@ -569,6 +747,10 @@
 		.palette-chip,
 		.block-card,
 		.block-tools button,
+		.chip-row button,
+		.add-row,
+		.row-remove,
+		.preview-open,
 		.drop-end { transition: none; }
 	}
 </style>
