@@ -151,7 +151,7 @@
 		font-size: 0.65rem;
 	}
 
-	.asset-error { color: #f87171; font-size: 0.75rem; }
+	.asset-error { color: var(--color-danger); font-size: 0.75rem; }
 
 	@media (prefers-reduced-motion: reduce) {
 		.asset-drop { transition: none; }

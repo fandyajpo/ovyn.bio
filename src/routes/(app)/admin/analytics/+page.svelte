@@ -209,12 +209,12 @@
 	}
 
 	.chart-bar--revenue {
-		background: linear-gradient(180deg, var(--color-pop-pink), color-mix(in srgb, var(--color-pop-pink) 42%, #25211f));
+		background: linear-gradient(180deg, var(--color-pop-pink), color-mix(in srgb, var(--color-pop-pink) 42%, var(--color-surface)));
 		box-shadow: 0 0 18px color-mix(in srgb, var(--color-pop-pink) 24%, transparent);
 	}
 
 	.chart-bar--orders {
-		background: linear-gradient(180deg, var(--color-pop-blue), color-mix(in srgb, var(--color-pop-blue) 40%, #1b2426));
+		background: linear-gradient(180deg, var(--color-pop-blue), color-mix(in srgb, var(--color-pop-blue) 40%, var(--color-surface)));
 	}
 
 	.chart-label {

@@ -28,7 +28,7 @@ const SEED = [
 		price: 5000,
 		pointsPrice: 250,
 		description: 'A subtle electric lime ring for your avatar.',
-		accent: '#D5FF35'
+		accent: '#CDBCF3'
 	},
 	{
 		name: 'Neon Ring',
@@ -55,7 +55,7 @@ const SEED = [
 		price: 8000,
 		pointsPrice: 350,
 		description: 'Subtle lime wash for your profile header.',
-		accent: '#D5FF35'
+		accent: '#CDBCF3'
 	},
 	{
 		name: 'Midnight Grid',
@@ -73,7 +73,7 @@ const SEED = [
 		price: 0,
 		pointsPrice: 0,
 		description: 'For the early ones. Free forever.',
-		accent: '#D5FF35'
+		accent: '#CDBCF3'
 	},
 	{
 		name: 'Verified Vibes',

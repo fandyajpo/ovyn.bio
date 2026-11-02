@@ -143,7 +143,7 @@
 					name="accentColor"
 					label="Accent color"
 					value={fieldValue('accentColor', cosmetic?.accentColor ?? '')}
-					placeholder="#D5FF35"
+					placeholder="#CDBCF3"
 					pattern="#[0-9a-fA-F]{6}"
 					error={errors.accentColor}
 				/>

@@ -92,9 +92,9 @@
 	}
 
 	.ovyn-button--danger {
-		border-color: color-mix(in srgb, #f87171 32%, transparent);
-		background: color-mix(in srgb, #f87171 10%, transparent);
-		color: #f87171;
+		border-color: color-mix(in srgb, var(--color-danger) 32%, transparent);
+		background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+		color: var(--color-danger);
 	}
 
 	@media (hover: hover) and (pointer: fine) {
@@ -117,8 +117,8 @@
 		}
 
 		.ovyn-button--danger:hover:not(:disabled) {
-			background: color-mix(in srgb, #f87171 18%, transparent);
-			color: #fecaca;
+			background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+			color: var(--color-danger-strong);
 		}
 	}
 

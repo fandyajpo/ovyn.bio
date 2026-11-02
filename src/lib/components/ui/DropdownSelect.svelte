@@ -197,7 +197,7 @@
 
 	.ovyn-required { margin-left: 0.2rem; color: var(--color-pop-pink); }
 	.ovyn-field-hint { color: var(--color-muted); font-size: 0.7rem; line-height: 1.5; }
-	.ovyn-field-error { color: #f87171; font-size: 0.75rem; line-height: 1.5; }
+	.ovyn-field-error { color: var(--color-danger); font-size: 0.75rem; line-height: 1.5; }
 
 	.ovyn-dropdown { position: relative; }
 
@@ -231,7 +231,7 @@
 	}
 
 	.ovyn-dropdown-trigger[aria-invalid='true'] {
-		border-color: color-mix(in srgb, #f87171 62%, transparent);
+		border-color: color-mix(in srgb, var(--color-danger) 62%, transparent);
 	}
 
 	.ovyn-dropdown-trigger:disabled { cursor: not-allowed; opacity: 0.6; }

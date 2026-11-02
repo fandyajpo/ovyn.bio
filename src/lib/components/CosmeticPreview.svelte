@@ -5,7 +5,7 @@
 		kind,
 		name,
 		assetUrl = null,
-		accentColor = '#D5FF35',
+		accentColor = 'var(--color-accent)',
 		limited = false
 	}: {
 		kind: 'frame' | 'wallpaper' | 'badge';
@@ -14,49 +14,191 @@
 		accentColor?: string | null;
 		limited?: boolean;
 	} = $props();
-	const resolvedAccent = $derived(accentColor ?? '#D5FF35');
+	const resolvedAccent = $derived(accentColor ?? 'var(--color-accent)');
 </script>
 
-<div role="img" aria-label={`Profile preview for ${name}`} class="relative flex h-36 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-[#151714]">
+<div role="img" aria-label={`Profile preview for ${name}`} class="cosmetic-preview">
 	{#if kind === 'wallpaper'}
 		{#if assetUrl}
-			<img src={assetUrl} alt="" class="absolute inset-0 size-full object-cover" />
+			<img src={assetUrl} alt="" class="cosmetic-wallpaper" />
+			<div class="wallpaper-scrim" aria-hidden="true"></div>
 		{:else}
-			<div class="absolute inset-0 opacity-50" style={`background: radial-gradient(circle at 75% 25%, ${resolvedAccent}, transparent 45%), var(--color-preview-stage)`}></div>
+			<div class="wallpaper-fallback" style={`background: radial-gradient(circle at 75% 25%, ${resolvedAccent}, transparent 50%)`}></div>
 		{/if}
-		<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent"></div>
 		<span class="sticker sticker--dark absolute left-3 top-3">WALLPAPER ON</span>
-		<div class="absolute bottom-3 left-3 flex items-center gap-2">
+		<div class="wallpaper-copy {assetUrl ? 'is-photo' : ''}">
 			<Avatar name="Your profile" size="sm" />
-			<div><p class="font-[family-name:var(--font-display)] text-sm font-bold text-white">your.name</p><p class="font-mono text-[10px] text-white/70">YOUR PROFILE</p></div>
+			<div>
+				<p class="wallpaper-name">your.name</p>
+				<p class="wallpaper-handle">YOUR PROFILE</p>
+			</div>
 		</div>
 	{:else}
-		<div class="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3">
+		<div class="cosmetic-preview-card">
 			<div class="relative">
 				<Avatar name="Your profile" size="md" />
 				{#if kind === 'frame'}
 					{#if assetUrl}
-						<img src={assetUrl} alt="" class="pointer-events-none absolute -inset-2 size-[calc(100%+16px)] object-contain" />
+						<img src={assetUrl} alt="" class="cosmetic-frame" />
 					{:else}
-					<span class="pointer-events-none absolute -inset-1 rounded-full border-[3px]" style={`border-color: ${resolvedAccent}`}></span>
+						<span class="cosmetic-frame-fallback" style={`border-color: ${resolvedAccent}`}></span>
 					{/if}
 				{/if}
 			</div>
 			<div class="min-w-0">
 				<div class="flex items-center gap-1.5">
-					<p class="font-[family-name:var(--font-display)] text-sm font-bold text-neutral-100">your.name</p>
+					<p class="cosmetic-preview-name">your.name</p>
 					{#if kind === 'badge'}
 						{#if assetUrl}
-							<img src={assetUrl} alt="" class="size-7 object-contain" />
+							<img src={assetUrl} alt="" class="cosmetic-badge-art" />
 						{:else}
-							<span class="grid size-6 place-items-center rounded-full border text-xs font-bold" style={`border-color: ${resolvedAccent}; color: ${resolvedAccent}`}>✓</span>
+							<span class="cosmetic-badge-fallback" style={`border-color: ${resolvedAccent}; color: ${resolvedAccent}`}>✓</span>
 						{/if}
 					{/if}
 				</div>
-				<p class="font-mono text-[10px] tracking-widest text-neutral-500">ovyn profile</p>
+				<p class="cosmetic-preview-caption">ovyn profile</p>
 			</div>
 		</div>
 	{/if}
 	{#if limited}<span class="sticker sticker--pink absolute bottom-2 right-2">LIMITED DROP</span>{/if}
-	<span class="pointer-events-none absolute right-3 top-3 font-mono text-[9px] uppercase tracking-widest text-white/40">{kind} / preview</span>
+	<span class="cosmetic-preview-kind">{kind} / preview</span>
 </div>
+
+<style>
+	.cosmetic-preview {
+		position: relative;
+		display: flex;
+		height: 9rem;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+		border: 1px solid var(--color-divider);
+		border-radius: 1.15rem;
+		background:
+			radial-gradient(ellipse at 75% 20%, color-mix(in srgb, var(--color-accent) 14%, transparent), transparent 58%),
+			var(--color-preview-stage);
+	}
+
+	.cosmetic-wallpaper {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	.wallpaper-scrim {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(to top, rgb(0 0 0 / 78%), rgb(0 0 0 / 16%) 55%, transparent);
+	}
+
+	.wallpaper-fallback {
+		position: absolute;
+		inset: 0;
+		opacity: 0.5;
+	}
+
+	.wallpaper-copy {
+		position: absolute;
+		bottom: 0.75rem;
+		left: 0.75rem;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.wallpaper-name {
+		color: var(--color-foreground);
+		font-family: var(--font-display);
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+
+	.wallpaper-handle {
+		color: var(--color-muted);
+		font-family: var(--font-mono);
+		font-size: 0.58rem;
+		letter-spacing: 0.14em;
+	}
+
+	.wallpaper-copy.is-photo .wallpaper-name { color: #fff; }
+	.wallpaper-copy.is-photo .wallpaper-handle { color: rgb(255 255 255 / 74%); }
+
+	.cosmetic-preview-card {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 1.1rem;
+		background: color-mix(in srgb, var(--color-background) 58%, transparent);
+		padding: 0.75rem 1rem;
+		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 6%, transparent);
+	}
+
+	.cosmetic-frame {
+		position: absolute;
+		inset: -0.5rem;
+		width: calc(100% + 1rem);
+		height: calc(100% + 1rem);
+		object-fit: contain;
+		pointer-events: none;
+	}
+
+	.cosmetic-frame-fallback {
+		position: absolute;
+		inset: -0.25rem;
+		border: 3px solid;
+		border-radius: 50%;
+		pointer-events: none;
+	}
+
+	.cosmetic-badge-art {
+		width: 1.75rem;
+		height: 1.75rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+		padding: 0.12rem;
+		object-fit: contain;
+	}
+
+	.cosmetic-badge-fallback {
+		display: grid;
+		width: 1.4rem;
+		height: 1.4rem;
+		place-items: center;
+		border: 1px solid;
+		border-radius: 50%;
+		font-size: 0.7rem;
+		font-weight: 700;
+	}
+
+	.cosmetic-preview-name {
+		color: var(--color-foreground);
+		font-family: var(--font-display);
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+
+	.cosmetic-preview-caption {
+		color: var(--color-muted);
+		font-family: var(--font-mono);
+		font-size: 0.6rem;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+	}
+
+	.cosmetic-preview-kind {
+		position: absolute;
+		top: 0.6rem;
+		right: 0.75rem;
+		color: var(--color-muted);
+		font-family: var(--font-mono);
+		font-size: 0.55rem;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		opacity: 0.8;
+	}
+</style>

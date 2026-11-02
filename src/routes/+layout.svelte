@@ -147,7 +147,7 @@
 		border-radius: 0.75rem;
 		background: var(--color-accent);
 		padding: 0.75rem 1rem;
-		color: #111210;
+		color: var(--color-on-accent);
 		font-weight: 700;
 	}
 

@@ -7,7 +7,7 @@
 		theme = next;
 		document.documentElement.dataset.theme = next;
 		document.documentElement.style.colorScheme = next;
-		document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#111210' : '#fff6e9');
+		document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#111117' : '#faf7f4');
 		if (persist) {
 			try {
 				localStorage.setItem('ovyn-theme', next);

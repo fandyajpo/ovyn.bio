@@ -128,7 +128,7 @@
 
 	.ovyn-required { margin-left: 0.2rem; color: var(--color-pop-pink); }
 	.ovyn-checkbox-hint { padding-left: 2.15rem; color: var(--color-muted); font-size: 0.7rem; line-height: 1.5; }
-	.ovyn-checkbox-error { padding-left: 2.15rem; color: #f87171; font-size: 0.75rem; line-height: 1.5; }
+	.ovyn-checkbox-error { padding-left: 2.15rem; color: var(--color-danger); font-size: 0.75rem; line-height: 1.5; }
 
 	@media (prefers-reduced-motion: reduce) {
 		.ovyn-checkbox-box,

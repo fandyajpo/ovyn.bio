@@ -95,7 +95,7 @@ Account settings let each device manage browser notification permission and even
 
 Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), custom select dropdowns, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. File uploads use a drag and drop dropzone that also works by click and keyboard.
 
-The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type.
+The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type. Badges, stickers, toasts and status colors all resolve from theme tokens, so they stay legible against both the dark and the light palette.
 
 Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages linked from the footer and from the sign-in screen.
 

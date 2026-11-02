@@ -408,7 +408,7 @@
 	}
 
 	.block-tools button:disabled { opacity: 0.35; cursor: not-allowed; }
-	.block-remove:hover { border-color: color-mix(in srgb, #f87171 50%, transparent); color: #f87171; }
+	.block-remove:hover { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); color: var(--color-danger); }
 
 	.block-body {
 		display: grid;

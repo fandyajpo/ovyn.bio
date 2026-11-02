@@ -35,7 +35,7 @@
 			</div>
 		</div>
 		{#if bio}<p class="mt-4 line-clamp-2 min-h-10 text-sm leading-5 text-neutral-400">{bio}</p>{:else}<p class="mt-4 min-h-10 font-mono text-xs uppercase tracking-wider text-neutral-600">No bio, all aura.</p>{/if}
-		<div class="mt-5 flex items-center justify-between border-t border-white/10 pt-3">
+		<div class="mt-5 flex items-center justify-between border-t border-[color:var(--color-divider)] pt-3">
 			<span class="font-mono text-[10px] uppercase tracking-widest text-neutral-600">Member since {formatDate(createdAt)}</span>
 			<span class="font-mono text-xs font-bold text-neutral-200 group-hover:text-lime-300">VIEW <span aria-hidden="true">↗</span></span>
 		</div>
