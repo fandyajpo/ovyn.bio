@@ -43,7 +43,7 @@
 
 	const productTypeOptions = [
 		{ value: 'cosmetic', label: 'Cosmetic' },
-		{ value: 'plan', label: 'Premium lifetime plan' }
+		{ value: 'plan', label: 'Premium monthly plan' }
 	];
 	const cosmeticKindOptions = [
 		{ value: 'frame', label: 'Avatar frame' },
@@ -53,7 +53,6 @@
 
 	let category = $state<string>(values.category ?? product?.category ?? 'cosmetic');
 	const showsCosmetic = $derived(isCreate ? category === 'cosmetic' : product?.category === 'cosmetic');
-	const priceReadonly = $derived(!isCreate && product?.category === 'plan' && product.durationDays !== 30);
 
 	function fieldValue(key: string, fallback: string) {
 		return values[key] ?? fallback;
@@ -87,14 +86,13 @@
 	<Input name="name" label="Name" value={fieldValue('name', product?.name ?? '')} required minlength={2} maxlength={100} error={errors.name} />
 	<Input
 		name="price"
-		label={priceReadonly ? 'Lifetime price (IDR)' : 'Price (IDR)'}
+		label="Price (IDR)"
 		type="number"
 		value={fieldValue('price', product ? String(product.price) : '')}
-		min={priceReadonly ? 1 : 0}
+		min={0}
 		step={1}
 		required
-		readonly={priceReadonly}
-		hint={priceReadonly ? 'Lifetime Premium is fixed at Rp 100.000.' : null}
+		hint={isCreate ? 'Premium is Rp 30.000 for 30 days.' : null}
 		error={errors.price}
 	/>
 	<Input
@@ -112,17 +110,17 @@
 			name="durationDays"
 			label="Duration in days"
 			type="number"
-			value={fieldValue('durationDays', '')}
+			value={fieldValue('durationDays', product ? String(product.durationDays ?? '') : '30')}
 			min={1}
 			max={365}
-			hint="Leave blank for lifetime Premium. Legacy 30-day plans keep their duration."
+			hint="Premium is billed in 30-day months. Cosmetics ignore this field."
 			error={errors.durationDays}
 		/>
 	{:else if product}
 		<input type="hidden" name="durationDays" value={product.durationDays ?? ''} />
 		{#if product.category === 'plan'}
 			<p class="self-center text-sm text-neutral-500">
-				{product.durationDays === 30 ? 'Legacy 30-day plan. Keep the price and duration unchanged or deactivate it.' : 'Lifetime access with no expiry.'}
+				{product.durationDays === 30 ? 'Monthly plan: Rp 30.000 for 30 days.' : 'Legacy plan. Saving with 30 days converts it to the monthly plan.'}
 			</p>
 		{/if}
 	{/if}

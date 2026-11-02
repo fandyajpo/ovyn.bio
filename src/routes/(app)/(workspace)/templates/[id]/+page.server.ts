@@ -1,5 +1,4 @@
-import { error, fail, redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
+import { error, fail, redirect } from '@sveltejs/kit';import type { Actions, PageServerLoad } from './$types';
 import { updateProfileTemplateSchema } from '#lib/schemas/templates';
 import { getOwnedProfileTemplate, updateProfileTemplate } from '#lib/server/services/profile-content';
 import { getUserPlan } from '#lib/server/services/billing';
@@ -58,11 +57,12 @@ export const actions: Actions = {
 			}
 			rateLimit(`profile-template-save:${locals.user.id}`, 40, 60_000);
 			await updateProfileTemplate(locals.user.id, parsed.data);
-			return { ok: 'Layout saved.' };
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
 			return fail(500, { error: 'Could not save this layout' });
 		}
+
+		redirect(303, `/templates?saved=${encodeURIComponent(parsed.data.name)}`);
 	}
 };

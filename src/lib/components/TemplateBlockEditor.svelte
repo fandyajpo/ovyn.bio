@@ -407,7 +407,7 @@
 		color: var(--color-foreground);
 	}
 
-	.block-tools button:disabled { opacity: 0.35; cursor: not-allowed; }
+	.block-tools button:disabled { cursor: not-allowed; color: var(--color-muted); }
 	.block-remove:hover { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); color: var(--color-danger); }
 
 	.block-body {

@@ -97,7 +97,7 @@
 		outline-offset: 3px;
 	}
 
-	.switch-control input:disabled + .switch-track { opacity: 0.45; }
+	.switch-control input:disabled + .switch-track { border-color: var(--color-divider); }
 	.switch-label:has(input:disabled) { cursor: not-allowed; }
 
 	@media (prefers-reduced-motion: reduce) {

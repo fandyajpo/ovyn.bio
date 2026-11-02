@@ -3,6 +3,34 @@ import { z } from 'zod';
 export const PROFILE_THEME_IDS = ['default', 'midnight', 'bubblegum', 'ocean', 'forest'] as const;
 export const profileThemeSchema = z.enum(PROFILE_THEME_IDS);
 
+export const PROFILE_BACKGROUND_TEXTURES = ['none', 'grid', 'dots', 'waves'] as const;
+export const profileBackgroundTextureSchema = z.enum(PROFILE_BACKGROUND_TEXTURES);
+
+export const PROFILE_BACKGROUND_TEXTURE_OPTIONS = [
+	{ value: 'none', label: 'Plain' },
+	{ value: 'grid', label: 'Soft grid' },
+	{ value: 'dots', label: 'Fine dots' },
+	{ value: 'waves', label: 'Slow waves' }
+] as const;
+
+export const profileUsernameColorSchema = z.preprocess(
+	(value) => {
+		if (value === undefined || value === null) return null;
+		if (typeof value !== 'string') return value;
+		const trimmed = value.trim();
+		return trimmed === '' ? null : trimmed;
+	},
+	z
+		.string()
+		.regex(/^#[0-9a-f]{6}$/i, 'Use a six-digit hex colour like #CDBCF3')
+		.nullable()
+);
+
+export const profileBackgroundSchema = z.object({
+	texture: profileBackgroundTextureSchema,
+	fixed: z.preprocess((value) => value === 'on' || value === true, z.boolean())
+});
+
 export const PROFILE_THEME_OPTIONS = [
 	{ value: 'default', label: 'ovyn original' },
 	{ value: 'midnight', label: 'Midnight Grid' },

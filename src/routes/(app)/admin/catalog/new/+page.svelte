@@ -20,7 +20,7 @@
 	<header>
 		<a href="/admin/catalog" class="text-sm text-neutral-500 hover:text-lime-300">← Catalog</a>
 		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">New product</h1>
-		<p class="mt-1 text-neutral-400">Add a lifetime Premium plan or a profile cosmetic. New listings start inactive unless you publish them.</p>
+		<p class="mt-1 text-neutral-400">Add a monthly Premium plan or a profile cosmetic. New listings start inactive unless you publish them.</p>
 	</header>
 
 	{#if form?.error}

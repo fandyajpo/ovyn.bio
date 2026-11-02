@@ -21,11 +21,29 @@
 	<div>
 		<span class="sticker sticker--lilac">STYLE EXCHANGE</span>
 		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Templates</h1>
-		<p class="mt-1 max-w-2xl text-neutral-400">Save your current theme as a template. Keep it private or share it with the community so others can preview and use it.</p>
+		<p class="mt-1 max-w-2xl text-neutral-400">Build a page layout from content blocks, then apply it to your page. Keep it private or share it with the community so others can preview and use it.</p>
 	</div>
 
 	{#if form?.error}<p class="text-sm text-red-400" role="alert">{form.error}</p>{/if}
 	{#if form?.ok}<p class="text-sm text-lime-300" role="status">{form.ok}</p>{/if}
+	{#if data.created}<p class="text-sm text-lime-300" role="status">Created {data.created}. Open Edit layout to arrange it.</p>{/if}
+	{#if data.saved}<p class="text-sm text-lime-300" role="status">Saved {data.saved}.</p>{/if}
+
+	{#if data.appliedTemplate}
+		<Card class="flex flex-wrap items-center justify-between gap-4 border-lime-300/30 p-5">
+			<div>
+				<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">Applied layout</p>
+				<p class="mt-1 font-medium text-neutral-100">{data.appliedTemplate.name}</p>
+				<p class="text-xs text-neutral-500">{data.appliedTemplate.theme} · live on your public page</p>
+			</div>
+			<div class="flex flex-wrap gap-2">
+				{#if myTemplates.some((item) => item.template.id === data.appliedTemplate?.id)}
+					<Button href={`/templates/${data.appliedTemplate?.id ?? ''}`} variant="secondary">Edit layout</Button>
+				{/if}
+				<Button href="/{data.profile.slug}" variant="ghost">View my page</Button>
+			</div>
+		</Card>
+	{/if}
 
 	{#if data.plan.tier === 'premium'}
 		<Card class="p-5">
@@ -41,7 +59,7 @@
 		</Card>
 	{:else}
 		<Card class="flex flex-wrap items-center justify-between gap-4 p-5">
-			<div><h2 class="font-medium text-neutral-100">Profile layouts are part of Premium</h2><p class="mt-1 text-sm text-neutral-400">Upgrade once for lifetime layout customization and templates.</p></div>
+			<div><h2 class="font-medium text-neutral-100">Profile layouts are part of Premium</h2><p class="mt-1 text-sm text-neutral-400">Premium includes layout editing, applied layouts and templates.</p></div>
 			<Button href="/upgrade">Explore Premium</Button>
 		</Card>
 	{/if}

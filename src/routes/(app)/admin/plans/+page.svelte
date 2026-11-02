@@ -165,8 +165,10 @@
 	}
 
 	.plan-action:disabled {
-		opacity: 0.4;
 		cursor: not-allowed;
+		color: var(--color-muted);
+		border-color: var(--color-divider);
+		background: transparent;
 	}
 
 	.plan-action--ghost {

@@ -93,7 +93,7 @@
 		{:else if status === 'paid'}
 			{#if data.product.category === 'plan'}
 				{#if data.product.durationDays === null}
-					<p class="text-lime-300">Payment received. Your Premium lifetime access is active.</p>
+					<p class="text-lime-300">Payment received. Your Premium access is active for 30 days.</p>
 				{:else}
 					<p class="text-lime-300">Payment received. Your {data.product.durationDays}-day legacy Premium access is active.</p>
 				{/if}

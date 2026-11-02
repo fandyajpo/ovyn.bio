@@ -3,14 +3,21 @@
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
+	import Checkbox from '#lib/components/ui/Checkbox.svelte';
+	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
-	import { PROFILE_THEME_OPTIONS } from '#lib/schemas/profile';
+	import { PROFILE_BACKGROUND_TEXTURE_OPTIONS } from '#lib/schemas/profile';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
-	const themeOptions = PROFILE_THEME_OPTIONS.map((option) => ({ ...option }));
-	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
-	const backgroundVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
+	const textureOptions = PROFILE_BACKGROUND_TEXTURE_OPTIONS.map((option) => ({ ...option }));
+	const coverIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
+	const coverVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
+	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.backgroundKey ?? ''));
+	const backgroundVideoType = $derived(data.profile.backgroundKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
+	const colorPreview = $derived(
+		/^#[0-9a-f]{6}$/i.test(data.profile.usernameColor ?? '') ? (data.profile.usernameColor as string) : 'var(--color-accent)'
+	);
 </script>
 
 <svelte:head>
@@ -21,7 +28,10 @@
 	<div>
 		<span class="sticker sticker--pink">MAKE IT YOURS</span>
 		<h1 class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">Customize your page</h1>
-		<p class="mt-1 text-neutral-400">Choose a visual theme and personalize your picture, background, audio and cursor. <a href="/settings/profile" class="text-lime-300 hover:underline">Edit your name, username and bio</a>.</p>
+		<p class="mt-1 text-neutral-400">
+			Set your username colour, page background, picture, cover, audio and cursor.
+			<a href="/settings/profile" class="text-lime-300 hover:underline">Edit your name, username and bio</a>.
+		</p>
 	</div>
 
 	{#if form?.error}<p class="text-sm text-red-400" role="alert">{form.error}</p>{/if}
@@ -46,37 +56,77 @@
 	</Card>
 
 	<Card class="flex flex-col gap-4 p-5">
-		<h2 class="font-medium text-neutral-100">Page background</h2>
+		<div>
+			<h2 class="font-medium text-neutral-100">Username colour</h2>
+			<p class="mt-1 text-sm text-neutral-400">Colours your @handle on the public page. Leave it empty to use the theme accent.</p>
+		</div>
+		<form method="POST" action="?/color" class="flex flex-wrap items-end gap-3">
+			<Input
+				name="usernameColor"
+				label="Hex colour"
+				value={data.profile.usernameColor ?? ''}
+				placeholder="#CDBCF3"
+				pattern="#[0-9a-fA-F]{6}"
+				class="w-full sm:max-w-48"
+				hint="Six digits, like #CDBCF3."
+			/>
+			<span class="color-swatch" style={`background: ${colorPreview}`} aria-hidden="true"></span>
+			<Button type="submit">Save colour</Button>
+		</form>
+		<p class="font-mono text-sm" style={`color: ${colorPreview}`}>ovyn.bio/{data.profile.slug}</p>
+	</Card>
+
+	<Card class="flex flex-col gap-4 p-5">
+		<div>
+			<h2 class="font-medium text-neutral-100">Page background</h2>
+			<p class="mt-1 text-sm text-neutral-400">Choose one of our built-in textures, or upload your own image. A background image sits behind the whole page.</p>
+		</div>
+		<form method="POST" action="?/background" class="flex flex-col gap-3 sm:max-w-md">
+			<Select name="texture" label="Built-in texture" options={textureOptions} value={data.profile.backgroundTexture} />
+			<Checkbox name="fixed" label="Keep the background fixed while scrolling" checked={data.profile.backgroundFixed} />
+			<Button type="submit" class="w-fit">Save background</Button>
+		</form>
+		<div class="flex flex-wrap items-center gap-3">
+			{#if data.backgroundUrl}
+				{#if backgroundIsVideo}
+					<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="h-16 w-28 rounded-xl object-cover"><source src={data.backgroundUrl} type={backgroundVideoType} /></video>
+				{:else}
+					<img src={data.backgroundUrl} alt="Current background preview" class="h-16 w-28 rounded-xl object-cover" />
+				{/if}
+			{:else}
+				<div class="h-16 w-28 rounded-xl border border-dashed border-neutral-700 bg-neutral-900"></div>
+			{/if}
+			<div class="min-w-0">
+				<p class="text-sm text-neutral-300">Background image</p>
+				<p class="mt-1 text-xs text-neutral-500">JPG, PNG, WebP, GIF, MP4 or WebM · max 25 MB</p>
+			</div>
+		</div>
+		<div class="flex flex-wrap gap-2">
+			<UploadButton kind="background" existingKey={data.profile.backgroundKey} label="Upload background image" />
+			{#if data.profile.backgroundKey}
+				<form method="POST" action="?/clearBackgroundImage"><Button type="submit" variant="ghost">Remove image</Button></form>
+			{/if}
+		</div>
+	</Card>
+
+	<Card class="flex flex-col gap-4 p-5">
+		<h2 class="font-medium text-neutral-100">Header cover</h2>
 		<div class="flex items-center gap-4">
 			{#if data.bannerUrl}
-				{#if backgroundIsVideo}
-					<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="h-16 w-28 rounded-xl object-cover"><source src={data.bannerUrl} type={backgroundVideoType} /></video>
+				{#if coverIsVideo}
+					<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="h-16 w-28 rounded-xl object-cover"><source src={data.bannerUrl} type={coverVideoType} /></video>
 				{:else}
-					<img src={data.bannerUrl} alt="Current background preview" class="h-16 w-28 rounded-xl object-cover" />
+					<img src={data.bannerUrl} alt="Current cover preview" class="h-16 w-28 rounded-xl object-cover" />
 				{/if}
 			{:else}
 				<div class="h-16 w-28 rounded-xl border border-dashed border-neutral-700 bg-neutral-900"></div>
 			{/if}
 			<div>
-				<p class="text-sm text-neutral-300">Upload a still or animated background.</p>
+				<p class="text-sm text-neutral-300">The banner at the top of your page.</p>
 				<p class="mt-1 text-xs text-neutral-500">JPG, PNG, WebP, GIF, MP4 or WebM · max 25 MB</p>
 			</div>
 		</div>
-		<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload background" />
-	</Card>
-
-	<Card class="flex flex-col gap-4 p-5">
-		<h2 class="font-medium text-neutral-100">Theme</h2>
-		<p class="text-sm text-neutral-400">Themes can also be saved as templates and shared with the community.</p>
-		<form method="POST" action="?/theme" class="flex flex-col items-start gap-3 sm:flex-row sm:items-end">
-			<Select name="theme" label="Page theme" options={themeOptions} value={data.profile.theme} class="w-full sm:max-w-sm" />
-			<Button type="submit">Save theme</Button>
-		</form>
-		<div class="template-preview max-w-xl rounded-xl p-5" data-profile-theme={data.profile.theme}>
-			<span class="sticker sticker--dark">LIVE PREVIEW</span>
-			<p class="mt-4 font-[family-name:var(--font-display)] text-xl font-bold">{data.profile.displayName || data.profile.slug}</p>
-			<p class="font-mono text-xs">ovyn.bio/{data.profile.slug}</p>
-		</div>
+		<UploadButton kind="banner" existingKey={data.profile.bannerKey} label="Upload cover" />
 	</Card>
 
 	<Card class="flex flex-col gap-4 p-5">
@@ -117,3 +167,14 @@
 
 	<a href="/{data.profile.slug}" class="text-sm text-lime-300 hover:underline">Preview my public page ↗</a>
 </div>
+
+<style>
+	.color-swatch {
+		display: inline-block;
+		width: 2.6rem;
+		height: 2.6rem;
+		border: 1px solid var(--color-divider);
+		border-radius: 0.8rem;
+		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 12%, transparent);
+	}
+</style>

@@ -1,6 +1,6 @@
 import type { RequestHandler } from './$types';
 import { assertOwnObjectKey, presignUpload, type UploadKind } from '#lib/server/storage';
-import { setProfileAudioKey, setProfileAvatar, setProfileBanner, setProfileCursorKey } from '#lib/server/services/profiles';
+import { setProfileAudioKey, setProfileAvatar, setProfileBackgroundKey, setProfileBanner, setProfileCursorKey } from '#lib/server/services/profiles';
 import { getMembership, updateGuild } from '#lib/server/services/guilds';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
@@ -16,7 +16,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 		const body = (await request.json()) as { kind?: string; contentType?: string; sizeBytes?: number };
 		if (
-			(body.kind !== 'banner' && body.kind !== 'avatar' && body.kind !== 'icon' && body.kind !== 'cosmetic' && body.kind !== 'audio' && body.kind !== 'cursor') ||
+			(body.kind !== 'banner' && body.kind !== 'avatar' && body.kind !== 'icon' && body.kind !== 'cosmetic' && body.kind !== 'audio' && body.kind !== 'cursor' && body.kind !== 'background') ||
 			!body.contentType ||
 			typeof body.sizeBytes !== 'number'
 		) {
@@ -47,7 +47,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 	const kind = body.kind;
 	const key = body.key;
 
-	if ((kind !== 'banner' && kind !== 'avatar' && kind !== 'icon' && kind !== 'audio' && kind !== 'cursor') || typeof key !== 'string') {
+	if ((kind !== 'banner' && kind !== 'avatar' && kind !== 'icon' && kind !== 'audio' && kind !== 'cursor' && kind !== 'background') || typeof key !== 'string') {
 		return Response.json({ error: 'Invalid request' }, { status: 422 });
 	}
 
@@ -66,6 +66,8 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 				return Response.json({ error: 'Custom cursor effects are a Premium feature' }, { status: 403 });
 			}
 			await setProfileCursorKey(locals.user.id, key);
+		} else if (kind === 'background') {
+			await setProfileBackgroundKey(locals.user.id, key);
 		} else {
 			const membership = await getMembership(locals.user.id);
 			if (!membership || membership.membership.role !== 'owner') {

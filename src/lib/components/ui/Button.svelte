@@ -66,7 +66,12 @@
 		transition: transform 160ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease, color 200ms ease;
 	}
 
-	.ovyn-button:disabled { cursor: not-allowed; opacity: 0.55; }
+	.ovyn-button:disabled { cursor: not-allowed; color: var(--color-muted); }
+	.ovyn-button--primary:disabled {
+		background: color-mix(in srgb, var(--color-accent) 34%, var(--color-surface));
+		border-color: color-mix(in srgb, var(--color-accent) 24%, transparent);
+		box-shadow: none;
+	}
 	.ovyn-button:active:not(:disabled) { transform: scale(0.97); }
 
 	.ovyn-button--primary {

@@ -45,7 +45,7 @@
 		},
 		{
 			question: 'What does Premium cost?',
-			answer: 'Premium is a one-time payment of Rp 100.000 for lifetime access. There is no subscription renewal.'
+			answer: 'Premium is Rp 30.000 a month: 30 days per payment, renewed by hand, with no automatic charge.'
 		}
 	];
 </script>
@@ -164,8 +164,8 @@
 	<Reveal>
 		<div class="mx-auto mb-10 max-w-xl text-center">
 			<p class="landing-eyebrow justify-center">SIMPLE PLANS, NO SURPRISES</p>
-			<h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Start free. Stay forever.</h2>
-			<p class="mt-3 text-sm leading-7 text-neutral-400">A great page starts free. Upgrade once when you want the full creative toolkit.</p>
+			<h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Start free. Add more when you need it.</h2>
+			<p class="mt-3 text-sm leading-7 text-neutral-400">A great page starts free. Add Premium for Rp 30.000 a month when you want the full creative toolkit.</p>
 		</div>
 	</Reveal>
 	<div class="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
@@ -179,8 +179,8 @@
 		</Reveal>
 		<Reveal delay={100} class="h-full">
 			<article class="plan-card plan-card--premium h-full">
-				<div class="flex items-center justify-between gap-3"><h3>Premium</h3><span class="premium-mark">ONE PAYMENT</span></div>
-				<p class="plan-price">Rp 100.000 <span>lifetime</span></p>
+				<div class="flex items-center justify-between gap-3"><h3>Premium</h3><span class="premium-mark">30 DAYS</span></div>
+				<p class="plan-price">Rp 30.000 <span>per month</span></p>
 				<p class="mb-5 text-sm text-neutral-400">Everything in Free, plus room to make your profile unmistakably yours.</p>
 				<ul>{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✦</span>{feature}</li>{/each}</ul>
 				<p class="plan-rollout-note">Layouts, the Premium badge and cursor effects are live now. Fonts, widgets, SEO, typewriter text, aliases and extra preferences are in development.</p>

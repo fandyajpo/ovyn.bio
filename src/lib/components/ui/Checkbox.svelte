@@ -117,8 +117,8 @@
 		outline-offset: 3px;
 	}
 
-	.ovyn-checkbox-input:disabled + .ovyn-checkbox-box { opacity: 0.5; }
-	.ovyn-checkbox:has(input:disabled) { cursor: not-allowed; opacity: 0.75; }
+	.ovyn-checkbox-input:disabled + .ovyn-checkbox-box { border-color: var(--color-divider); }
+	.ovyn-checkbox:has(input:disabled) { cursor: not-allowed; color: var(--color-muted); }
 
 	.ovyn-checkbox-text {
 		color: var(--color-foreground);

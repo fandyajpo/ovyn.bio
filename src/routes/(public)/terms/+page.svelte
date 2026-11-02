@@ -37,7 +37,7 @@
 		{
 			title: '5. Plans, cosmetics and points',
 			paragraphs: [
-				'Free is the default plan. Premium is a one-time payment of Rp 100.000 that unlocks lifetime access, with no automatic renewal and no recurring charge.',
+				'Free is the default plan. Premium is Rp 30.000 for 30 days of access. There is no automatic renewal or recurring charge; you renew by paying again from your account.',
 				'Cosmetics can be bought once or redeemed with points. Limited drops may have a stock cap or an end date, and stock is reserved while a checkout is pending.',
 				'Points are a non-cash reward currency earned through check-ins and referrals. They have no monetary value, cannot be transferred or cashed out, and may be adjusted if a reward is abused.',
 				'Purchases are final except where a refund is required by applicable law. Contact us before opening a payment dispute so we can help.'

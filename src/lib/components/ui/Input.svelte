@@ -279,7 +279,7 @@
 	}
 
 	.ovyn-input:disabled,
-	.ovyn-input[readonly] { cursor: default; opacity: 0.66; }
+	.ovyn-input[readonly] { cursor: default; color: color-mix(in srgb, var(--color-muted) 92%, transparent); }
 
 	.ovyn-input--textarea {
 		min-height: 7.5rem;
@@ -380,7 +380,7 @@
 		outline-offset: 3px;
 	}
 
-	.ovyn-choice-input:disabled + .ovyn-choice-box { opacity: 0.5; }
+	.ovyn-choice-input:disabled + .ovyn-choice-box { border-color: var(--color-divider); }
 
 	.ovyn-choice-text {
 		color: var(--color-foreground);
@@ -388,7 +388,7 @@
 		line-height: 1.5;
 	}
 
-	.ovyn-choice:has(input:disabled) { cursor: not-allowed; opacity: 0.7; }
+	.ovyn-choice:has(input:disabled) { cursor: not-allowed; color: var(--color-muted); }
 
 	@media (prefers-reduced-motion: reduce) {
 		.ovyn-control::after,

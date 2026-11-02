@@ -247,6 +247,40 @@ export async function setProfileTheme(userId: string, theme: string) {
 	return updated;
 }
 
+export async function setProfileUsernameColor(userId: string, usernameColor: string | null) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ usernameColor, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
+export async function setProfileBackground(
+	userId: string,
+	backgroundTexture: string,
+	backgroundFixed: boolean
+) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ backgroundTexture, backgroundFixed, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
+export async function setProfileBackgroundKey(userId: string, backgroundKey: string | null) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ backgroundKey, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
 export async function getProfileBySlug(slug: string) {
 	const [row] = await db
 		.select({ profile: profiles, discord: discordAccounts, authUser: user })

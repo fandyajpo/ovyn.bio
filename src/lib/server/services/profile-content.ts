@@ -198,7 +198,7 @@ export async function deleteProfileTemplate(userId: string, templateId: string) 
 
 export async function applyProfileTemplate(userId: string, templateId: string) {
 	const [template] = await db
-		.select({ theme: profileTemplates.theme, blocks: profileTemplates.blocks })
+		.select({ id: profileTemplates.id, theme: profileTemplates.theme, blocks: profileTemplates.blocks })
 		.from(profileTemplates)
 		.where(
 			and(
@@ -211,9 +211,19 @@ export async function applyProfileTemplate(userId: string, templateId: string) {
 
 	const [profile] = await db
 		.update(profiles)
-		.set({ theme: template.theme, blocks: template.blocks, updatedAt: new Date() })
+		.set({ theme: template.theme, blocks: template.blocks, templateId: template.id, updatedAt: new Date() })
 		.where(eq(profiles.userId, userId))
 		.returning({ theme: profiles.theme });
 	if (!profile) throw new NotFoundError('Profile not found');
 	return profile.theme;
+}
+
+/** The template currently applied to a page, for the templates list. */
+export async function getAppliedProfileTemplate(templateId: string) {
+	const [row] = await db
+		.select({ id: profileTemplates.id, name: profileTemplates.name, theme: profileTemplates.theme })
+		.from(profileTemplates)
+		.where(eq(profileTemplates.id, templateId))
+		.limit(1);
+	return row ?? null;
 }

@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import {
 	cosmetics,
@@ -41,8 +41,8 @@ export async function createCheckout(userId: string, productId: string) {
 		.limit(1);
 
 	if (!product) throw new NotFoundError('Product not found or not available');
-	if (product.category === 'plan' && (product.price !== 100_000 || product.durationDays !== null)) {
-		throw new ValidationError('Premium is a one-time Rp 100.000 lifetime plan');
+	if (product.category === 'plan' && (product.price !== 30_000 || product.durationDays !== 30)) {
+		throw new ValidationError('Premium is Rp 30.000 for 30 days');
 	}
 
 	const [profile] = await db
@@ -419,7 +419,7 @@ export async function listActiveProducts() {
 	return db
 		.select()
 		.from(products)
-		.where(and(eq(products.active, true), eq(products.category, 'plan'), isNull(products.durationDays), eq(products.price, 100_000), gt(products.price, 0)))
+		.where(and(eq(products.active, true), eq(products.category, 'plan'), eq(products.durationDays, 30), eq(products.price, 30_000), gt(products.price, 0)))
 		.orderBy(desc(products.price));
 }
 

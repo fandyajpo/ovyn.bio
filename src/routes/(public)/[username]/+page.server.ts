@@ -18,23 +18,31 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		displayName: row.profile.displayName,
 		bio: row.profile.bio,
 		theme: row.profile.theme,
+		usernameColor: row.profile.usernameColor,
+		backgroundTexture: row.profile.backgroundTexture,
+		backgroundFixed: row.profile.backgroundFixed,
 		visibility: row.profile.visibility,
 		blocks: row.profile.blocks ?? [],
 		createdAt: row.profile.createdAt
 	};
 	const bannerIsVideo = /\.(mp4|webm)$/i.test(row.profile.bannerKey ?? '');
 	const bannerVideoType = row.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4';
+	const backgroundIsVideo = /\.(mp4|webm)$/i.test(row.profile.backgroundKey ?? '');
+	const backgroundVideoType = row.profile.backgroundKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4';
 
 	// Private profiles are not exposed/tracked for non-owners.
 	if (row.profile.visibility === 'private' && !isOwner) {
 		return {
 			private: true,
-			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', blocks: [] },
+			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', usernameColor: null, backgroundTexture: 'none', blocks: [] },
 			discord: null,
 			avatarUrl: null,
 			bannerUrl: null,
 			bannerIsVideo: false,
 			bannerVideoType: 'video/mp4',
+			backgroundUrl: null,
+			backgroundIsVideo: false,
+			backgroundVideoType: 'video/mp4',
 			audioUrl: null,
 			cursorUrl: null,
 			links: [],
@@ -56,7 +64,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		getUserPlan(row.profile.userId)
 	]);
 
-	const [frameUrl, wallpaperUrl, badgeUrl, avatarUrl, bannerUrl, audioUrl, cursorUrl] = await Promise.all([
+	const [frameUrl, wallpaperUrl, badgeUrl, avatarUrl, bannerUrl, audioUrl, cursorUrl, backgroundUrl] = await Promise.all([
 		cosmetics.frameUrl,
 		cosmetics.wallpaperUrl,
 		cosmetics.badgeUrl,
@@ -66,7 +74,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			: row.discord?.avatarUrl ?? row.authUser.image ?? null,
 		row.profile.bannerKey ? presignDownload(row.profile.bannerKey) : null,
 		row.profile.audioKey ? presignDownload(row.profile.audioKey) : null,
-		row.profile.cursorKey && plan.tier === 'premium' ? presignDownload(row.profile.cursorKey) : null
+		row.profile.cursorKey && plan.tier === 'premium' ? presignDownload(row.profile.cursorKey) : null,
+		row.profile.backgroundKey ? presignDownload(row.profile.backgroundKey) : null
 	]);
 
 	const guild = membership ? await getGuildById(membership.guild.id) : null;
@@ -79,6 +88,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		bannerUrl,
 		bannerIsVideo,
 		bannerVideoType,
+		backgroundUrl,
+		backgroundIsVideo,
+		backgroundVideoType,
 		audioUrl,
 		cursorUrl,
 		links,

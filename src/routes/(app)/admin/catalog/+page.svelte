@@ -12,16 +12,12 @@
 	const KIND_LABEL = { frame: 'Avatar frame', wallpaper: 'Wallpaper', badge: 'Badge' } as const;
 
 	function typeLabel(row: CatalogRow) {
-		if (row.product.category === 'plan') {
-			return row.product.durationDays === 30 ? 'Legacy 30-day plan' : 'Lifetime Premium';
-		}
+		if (row.product.category === 'plan') return 'Premium monthly';
 		return row.cosmetic ? KIND_LABEL[row.cosmetic.kind] : 'Cosmetic';
 	}
 
 	function availability(row: CatalogRow) {
-		if (row.product.category === 'plan') {
-			return row.product.durationDays === 30 ? '30 days of access' : 'Lifetime access';
-		}
+		if (row.product.category === 'plan') return '30 days of access';
 		if (!row.cosmetic) return 'Details missing';
 		const parts = [row.cosmetic.stockLimit === null ? 'Unlimited stock' : `${row.cosmetic.stockLimit} in stock`];
 		if (row.cosmetic.pointsPrice !== null) parts.push(`${row.cosmetic.pointsPrice} points`);
@@ -54,7 +50,7 @@
 	{#if data.products.length === 0}
 		<Card class="p-10 text-center">
 			<p class="font-medium text-neutral-200">No catalog products yet</p>
-			<p class="mt-1 text-sm text-neutral-500">Create a lifetime Premium plan or a profile cosmetic to get started.</p>
+			<p class="mt-1 text-sm text-neutral-500">Create a monthly Premium plan or a profile cosmetic to get started.</p>
 			<Button href="/admin/catalog/new" variant="secondary" class="mt-4">Create the first product</Button>
 		</Card>
 	{:else}

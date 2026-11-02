@@ -1,5 +1,5 @@
 /**
- * Seeds the shop with starter cosmetics and the lifetime Premium plan.
+ * Seeds the shop with starter cosmetics and the monthly Premium plan.
  *
  * Idempotent - re-running updates starter values and restores bundled SVG art.
  * Cosmetic artwork is served from `static/cosmetics` until an admin replaces
@@ -126,24 +126,23 @@ try {
 		});
 	}
 
-	// Rename the older capitalised plan so re-seeding an existing database does
-	// not leave two active Premium rows behind.
+	// Retire the legacy lifetime starter plan, then publish the monthly plan.
 	await sql`
-		UPDATE products SET name = 'ovyn Premium Lifetime'
-		WHERE name = 'OVYN Premium Lifetime'
-			AND NOT EXISTS (SELECT 1 FROM products WHERE name = 'ovyn Premium Lifetime')
+		UPDATE products SET active = false, updated_at = now()
+		WHERE category = 'plan'
+			AND (duration_days IS NULL OR name IN ('ovyn Premium Lifetime', 'OVYN Premium Lifetime'))
 	`;
 
 	await sql`
 		INSERT INTO products (name, description, price, currency, active, category, duration_days)
-		VALUES ('ovyn Premium Lifetime', 'One-time payment for lifetime profile customization.', 100000, 'IDR', true, 'plan', NULL)
+		VALUES ('ovyn Premium Monthly', '30 days of Premium. Renew manually each month.', 30000, 'IDR', true, 'plan', 30)
 		ON CONFLICT (name) DO UPDATE
-		SET description = EXCLUDED.description, price = 100000,
-			active = true, category = 'plan', duration_days = NULL
+		SET description = EXCLUDED.description, price = 30000,
+			active = true, category = 'plan', duration_days = 30
 	`;
 
 	const [{ count }] = await sql`SELECT count(*)::int AS count FROM cosmetics`;
-	console.log(`Seed complete: ${count} cosmetics and the Premium lifetime plan.`);
+	console.log(`Seed complete: ${count} cosmetics and the Premium monthly plan.`);
 	console.log('Starter SVG artwork is bundled under static/cosmetics; replace it later from /admin/catalog if desired.');
 } catch (err) {
 	console.error('Seed failed:', err instanceof Error ? err.message : err);

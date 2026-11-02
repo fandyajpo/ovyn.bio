@@ -5,26 +5,35 @@ import {
 	profileTemplateIdSchema,
 	updateProfileTemplateVisibilitySchema
 } from '#lib/schemas/templates';
-import { createProfileTemplate, applyProfileTemplate, deleteProfileTemplate, listProfileTemplates, setProfileTemplateVisibility } from '#lib/server/services/profile-content';
+import { createProfileTemplate, applyProfileTemplate, deleteProfileTemplate, getAppliedProfileTemplate, listProfileTemplates, setProfileTemplateVisibility } from '#lib/server/services/profile-content';
 import { getProfileByUserId } from '#lib/server/services/profiles';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 import { getUserPlan } from '#lib/server/services/billing';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals, url }) => {
 	if (!locals.user) redirect(302, '/login');
 	const [profile, templates, plan] = await Promise.all([
 		getProfileByUserId(locals.user.id),
 		listProfileTemplates(locals.user.id),
 		getUserPlan(locals.user.id)
 	]);
-	return { profile, templates, plan };
+	const appliedTemplate = profile.templateId ? await getAppliedProfileTemplate(profile.templateId) : null;
+	return {
+		profile,
+		templates,
+		plan,
+		appliedTemplate,
+		created: url.searchParams.get('created'),
+		saved: url.searchParams.get('saved')
+	};
 };
 
 export const actions: Actions = {
 	create: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		let createdId: string | null = null;
+		let createdName: string | null = null;
 		const data = await request.formData();
 		const parsed = createProfileTemplateSchema.safeParse({
 			name: data.get('name'),
@@ -41,6 +50,7 @@ export const actions: Actions = {
 			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			const created = await createProfileTemplate(locals.user.id, parsed.data);
 			createdId = created.id;
+			createdName = created.name;
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
@@ -48,7 +58,7 @@ export const actions: Actions = {
 		}
 
 		if (!createdId) return fail(500, { error: 'Could not create your template' });
-		redirect(303, `/templates/${createdId}`);
+		redirect(303, `/templates?created=${encodeURIComponent(createdName ?? 'template')}`);
 	},
 
 	apply: async ({ request, locals }) => {

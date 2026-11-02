@@ -234,7 +234,7 @@
 		border-color: color-mix(in srgb, var(--color-danger) 62%, transparent);
 	}
 
-	.ovyn-dropdown-trigger:disabled { cursor: not-allowed; opacity: 0.6; }
+	.ovyn-dropdown-trigger:disabled { cursor: not-allowed; color: var(--color-muted); }
 	.ovyn-dropdown-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.ovyn-dropdown-value.is-placeholder { color: color-mix(in srgb, var(--color-muted) 85%, transparent); }
 
@@ -333,7 +333,7 @@
 		transform: scale(1.15);
 	}
 
-	.ovyn-dropdown-option:disabled { cursor: not-allowed; opacity: 0.45; }
+	.ovyn-dropdown-option:disabled { cursor: not-allowed; color: var(--color-muted); }
 
 	.ovyn-dropdown-option:focus-visible {
 		outline: 2px solid var(--color-accent);

@@ -71,6 +71,14 @@ export const profiles = pgTable(
 		audioKey: text('audio_key'),
 		cursorKey: text('cursor_key'),
 		theme: text('theme').notNull().default('default'),
+		/** Optional hex colour for the @handle on the public page. */
+		usernameColor: text('username_color'),
+		/** Built-in page texture id; 'none' leaves the surface plain. */
+		backgroundTexture: text('background_texture').notNull().default('none'),
+		backgroundKey: text('background_key'),
+		backgroundFixed: boolean('background_fixed').notNull().default(true),
+		/** Layout template currently applied to this page (FK lives in migration 0007). */
+		templateId: uuid('template_id'),
 		/** Ordered page blocks applied from a template; rendered on the public page. */
 		blocks: jsonb('blocks').$type<TemplateBlock[]>().notNull().default(sql`'[]'::jsonb`),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
@@ -249,7 +257,7 @@ export const products = pgTable('products', {
 	currency: text('currency').notNull().default('IDR'),
 	active: boolean('active').notNull().default(false),
 	category: productCategoryEnum('category').notNull().default('plan'),
-	/** Term in days for legacy plans; lifetime Premium plans keep this null. */
+	/** Term in days: 30 for the monthly Premium plan; legacy plans may keep null. */
 	durationDays: integer('duration_days'),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()

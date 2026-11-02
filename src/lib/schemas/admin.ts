@@ -74,11 +74,11 @@ export const adminCreateProductSchema = z
 				context.addIssue({ code: 'custom', path: ['pointsPrice'], message: 'A free cosmetic needs a points price (use 0 for free)' });
 			}
 		} else if (product.category === 'plan') {
-			if (product.durationDays !== null) {
-				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Premium is lifetime access; leave duration blank' });
+			if (product.durationDays !== 30) {
+				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Premium is billed in 30-day months' });
 			}
-			if (product.price !== 100_000) {
-				context.addIssue({ code: 'custom', path: ['price'], message: 'Premium lifetime access costs Rp 100.000' });
+			if (product.price !== 30_000) {
+				context.addIssue({ code: 'custom', path: ['price'], message: 'Premium costs Rp 30.000 per month' });
 			}
 		}
 	});

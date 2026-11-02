@@ -143,12 +143,12 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 - **Limited drops** - cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** - one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
 - **Profile analytics** - counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
-- **Plans** - Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
+- **Plans** - Free is the default. Premium is Rp 30.000 for 30 days, renewed manually with no automatic charge. Access is derived server-side from successful payment records; an admin override may also grant or force a plan; legacy time-limited plans remain supported for existing orders.
 - **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Account and admin areas hide the public navbar and footer on every screen size and link back to the landing page. Platform admins get the `/admin` entry from their account overview, never from the public navigation. Admin and guild permissions remain enforced server-side.
 - **Profile links and templates** - public links are scheme-validated before display. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
 - **Referral rewards** - each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
 
-Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter cosmetics and the Rp 100.000 lifetime Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
+Whenever the schema changes, run `npm run db:generate`, review the generated migration, then run `npm run db:migrate`. After migrations, run `npm run db:seed-shop` once to add starter cosmetics and the Rp 30.000 monthly Premium plan. Re-running it restores starter catalog values, so make catalog changes in the admin panel after seeding.
 
 ## Monetization administration
 
@@ -159,9 +159,9 @@ your account overview. The admin area has its own sidebar and no public navbar
 or footer. It lets you browse the catalog as a table, create and edit cosmetics
 and Premium plans on their own pages, set prices, points costs, drop
 limits/end dates, upload cosmetic art, and review recent orders/revenue.
-Cosmetics and lifetime Premium plans can be activated; new products remain
-inactive until published. Premium plans are fixed at Rp 100.000 for lifetime
-access. Products are deactivated rather than deleted so purchase history and
+Cosmetics and the monthly Premium plan can be activated; new products remain
+inactive until published. Premium plans are fixed at Rp 30.000 for 30 days.
+Products are deactivated rather than deleted so purchase history and
 ownership remain intact. `/admin/plans` switches an account between Free and
 Premium by writing an override that wins over purchase-derived access; clearing
 it puts the account back on whatever it actually bought. DOKU refunds are not

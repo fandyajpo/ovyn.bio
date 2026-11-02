@@ -6,7 +6,7 @@
 		kind,
 		existingKey = null,
 		label
-	}: { kind: 'banner' | 'avatar' | 'icon' | 'audio' | 'cursor'; existingKey?: string | null; label: string } = $props();
+	}: { kind: 'banner' | 'avatar' | 'icon' | 'audio' | 'cursor' | 'background'; existingKey?: string | null; label: string } = $props();
 
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
@@ -110,7 +110,7 @@
 <input
 	{@attach attachInput}
 	type="file"
-	accept={kind === 'banner'
+	accept={kind === 'banner' || kind === 'background'
 		? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm'
 		: kind === 'audio'
 			? 'audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm'
@@ -148,7 +148,7 @@
 	}
 
 	.upload-dropzone:active:not(:disabled) { transform: scale(0.995); }
-	.upload-dropzone:disabled { cursor: progress; opacity: 0.78; }
+	.upload-dropzone:disabled { cursor: progress; }
 
 	.upload-dropzone.is-dragging {
 		border-color: color-mix(in srgb, var(--color-accent) 78%, transparent);

@@ -23,7 +23,7 @@
 		},
 		{
 			title: 'Plans and payments',
-				body: 'Free is available forever. Premium is a one-time Rp 100.000 payment for lifetime access, with no renewals.',
+				body: 'Free is available forever. Premium is Rp 30.000 for 30 days, renewed by hand with no automatic charge.',
 				link: '/upgrade',
 				label: 'View plans'
 		}

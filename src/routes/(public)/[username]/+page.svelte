@@ -34,8 +34,18 @@
 	<article
 		class="profile-canvas"
 		data-profile-theme={p.theme}
+		data-profile-texture={p.backgroundTexture ?? 'none'}
 		style={data.cursorUrl ? `cursor: url('${data.cursorUrl}') 0 0, auto` : undefined}
 	>
+		{#if data.backgroundUrl}
+			{#if data.backgroundIsVideo}
+				<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="profile-background {p.backgroundFixed ? 'is-fixed' : ''}">
+					<source src={data.backgroundUrl} type={data.backgroundVideoType} />
+				</video>
+			{:else}
+				<img src={data.backgroundUrl} alt="" class="profile-background {p.backgroundFixed ? 'is-fixed' : ''}" />
+			{/if}
+		{/if}
 		{#if data.cosmetics?.wallpaperUrl}
 			<img src={data.cosmetics.wallpaperUrl} alt="" class="profile-wallpaper" />
 		{/if}
@@ -59,7 +69,7 @@
 					<div class="profile-identity-copy">
 						<p class="profile-overline">ovyn / personal space</p>
 						<h1>{displayName}{#if data.cosmetics?.badgeUrl}<ProfileBadge label="ovyn profile badge" src={data.cosmetics.badgeUrl} />{/if}{#if data.isPremium}<span class="premium-profile-mark" aria-label="ovyn Premium member">✦</span>{/if}</h1>
-						<p class="profile-handle">@{p.slug}</p>
+						<p class="profile-handle" style={p.usernameColor ? `color: ${p.usernameColor}` : undefined}>@{p.slug}</p>
 						{#if data.discord}<p class="profile-discord">Discord · {data.discord.username}</p>{/if}
 					</div>
 				</div>
@@ -122,6 +132,52 @@
 		inset: 0;
 		width: 100%;
 		height: 100%;
+	}
+
+	.profile-background {
+		position: absolute;
+		z-index: -3;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0.3;
+		filter: saturate(0.85);
+	}
+
+	.profile-background.is-fixed {
+		position: fixed;
+		height: 100svh;
+	}
+
+	.profile-canvas[data-profile-texture='grid'] .profile-atmosphere::after,
+	.profile-canvas[data-profile-texture='dots'] .profile-atmosphere::after,
+	.profile-canvas[data-profile-texture='waves'] .profile-atmosphere::after {
+		position: absolute;
+		inset: 0;
+		content: '';
+		pointer-events: none;
+	}
+
+	.profile-canvas[data-profile-texture='grid'] .profile-atmosphere::after {
+		background-image:
+			linear-gradient(color-mix(in srgb, var(--color-foreground) 7%, transparent) 1px, transparent 1px),
+			linear-gradient(90deg, color-mix(in srgb, var(--color-foreground) 7%, transparent) 1px, transparent 1px);
+		background-size: 3rem 3rem;
+	}
+
+	.profile-canvas[data-profile-texture='dots'] .profile-atmosphere::after {
+		background-image: radial-gradient(color-mix(in srgb, var(--color-foreground) 12%, transparent) 1px, transparent 1.4px);
+		background-size: 1.1rem 1.1rem;
+	}
+
+	.profile-canvas[data-profile-texture='waves'] .profile-atmosphere::after {
+		background-image: repeating-radial-gradient(
+			circle at 50% 120%,
+			transparent 0 2rem,
+			color-mix(in srgb, var(--color-accent) 14%, transparent) 2.05rem 2.12rem,
+			transparent 2.17rem 4rem
+		);
 	}
 
 	.profile-wallpaper {

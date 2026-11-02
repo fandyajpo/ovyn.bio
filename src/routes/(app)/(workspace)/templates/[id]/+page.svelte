@@ -70,7 +70,7 @@
 		<Card class="flex flex-wrap items-center justify-between gap-4 p-5">
 			<div>
 				<h2 class="font-medium text-neutral-100">Saving layouts is part of Premium</h2>
-				<p class="mt-1 text-sm text-neutral-400">Upgrade once for lifetime layout editing and templates.</p>
+				<p class="mt-1 text-sm text-neutral-400">Premium includes layout editing and templates.</p>
 			</div>
 			<Button href="/upgrade">Explore Premium</Button>
 		</Card>

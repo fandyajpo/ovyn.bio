@@ -171,8 +171,8 @@ export async function createCatalogProduct(input: AdminCreateProduct): Promise<v
 			throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
 		}
 	} else {
-		if (input.price !== 100_000) throw new ValidationError('Premium lifetime access costs Rp 100.000');
-		if (input.durationDays !== null) throw new ValidationError('Premium is lifetime access; leave duration blank');
+		if (input.price !== 30_000) throw new ValidationError('Premium costs Rp 30.000 per month');
+		if (input.durationDays !== 30) throw new ValidationError('Premium is billed in 30-day months');
 	}
 
 	try {
@@ -229,12 +229,8 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 					.limit(1);
 				if (!cosmetic) throw new ConflictError('The cosmetic record is missing');
 			} else if (product.category === 'plan') {
-				if (product.durationDays === 30) {
-					if (input.durationDays !== 30 || input.price < 1) {
-						throw new ValidationError('Keep legacy 30-day plans unchanged or deactivate them');
-					}
-				} else if (input.price !== 100_000 || input.durationDays !== null) {
-					throw new ValidationError('Premium lifetime access costs Rp 100.000 with no expiry');
+				if (input.price !== 30_000 || input.durationDays !== 30) {
+					throw new ValidationError('Premium costs Rp 30.000 for 30 days');
 				}
 			}
 

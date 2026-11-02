@@ -125,7 +125,7 @@
 		box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-accent) 12%, transparent);
 	}
 
-	.asset-drop.is-busy { cursor: progress; opacity: 0.8; }
+	.asset-drop.is-busy { cursor: progress; }
 
 	.asset-icon {
 		display: grid;
