@@ -84,30 +84,43 @@
 			{/each}
 		</nav>
 
-		<button type="button" bind:this={mobileMenuButton} onclick={toggleMobileMenu} class="mobile-menu-toggle" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} aria-controls="mobile-primary-menu">
-			<span class="menu-glyph" aria-hidden="true"><span></span></span>
-		</button>
+		<div class="nav-actions">
+			{#if user}
+				<div class="relative">
+					<button type="button" bind:this={accountButton} onclick={toggleAccountMenu} class="account-trigger" aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'} aria-expanded={accountMenuOpen} aria-controls="account-menu">
+						<span class="account-avatar">
+							<Avatar name={user.name} src={user.image} size="sm" />
+						</span>
+					</button>
 
-		{#if user}
-			<div class="relative">
-				<button type="button" bind:this={accountButton} onclick={toggleAccountMenu} class="account-trigger flex min-h-12 min-w-14 items-center justify-center gap-2.5 rounded-full px-2.5 transition-colors" aria-label={accountMenuOpen ? 'Close account menu' : 'Open account menu'} aria-expanded={accountMenuOpen} aria-controls="account-menu">
-					<Avatar name={user.name} src={user.image} size="md" />
-					<span class="hidden text-sm text-neutral-300 xl:inline">Account</span>
-				</button>
+					{#if accountMenuOpen}
+						<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-xl border py-1 shadow-xl" transition:fly={{ y: -6, duration: 150 }}>
+							<div class="account-menu-head">
+								<span class="account-avatar account-avatar--menu">
+									<Avatar name={user.name} src={user.image} size="sm" />
+								</span>
+								<div class="min-w-0">
+									<p class="truncate text-sm font-medium text-neutral-100">{user.name}</p>
+									<p class="account-menu-caption">Signed in</p>
+								</div>
+							</div>
+							<hr class="my-1 border-neutral-800" />
+							<a href="/account" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Account overview</a>
+							<a href="/customize" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Customize page</a>
+							<a href="/upgrade" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Plans &amp; upgrade</a>
+							<hr class="my-1 border-neutral-800" />
+							<button type="button" onclick={logout} class="block min-h-11 w-full px-4 py-3 text-left text-sm text-red-400 transition-colors hover:bg-neutral-800">Sign out</button>
+						</div>
+					{/if}
+				</div>
+			{:else}
+				<a href="/login" class="inline-flex min-h-10 shrink-0 items-center rounded-full bg-lime-300 px-3.5 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-lime-200">Sign in</a>
+			{/if}
 
-				{#if accountMenuOpen}
-					<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border py-1 shadow-xl" transition:fly={{ y: -6, duration: 150 }}>
-						<a href="/account" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Account overview</a>
-						<a href="/customize" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Customize page</a>
-						<a href="/upgrade" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Plans &amp; upgrade</a>
-						<hr class="my-1 border-neutral-800" />
-						<button type="button" onclick={logout} class="block min-h-11 w-full px-4 py-3 text-left text-sm text-red-400 transition-colors hover:bg-neutral-800">Sign out</button>
-					</div>
-				{/if}
-			</div>
-		{:else}
-			<a href="/login" class="inline-flex min-h-11 shrink-0 items-center rounded-lg bg-lime-300 px-4 py-2 text-sm font-semibold text-neutral-950 transition-colors hover:bg-lime-200">Sign in</a>
-		{/if}
+			<button type="button" bind:this={mobileMenuButton} onclick={toggleMobileMenu} class="mobile-menu-toggle" aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'} aria-expanded={mobileMenuOpen} aria-controls="mobile-primary-menu">
+				<span class="menu-glyph" aria-hidden="true"><span></span></span>
+			</button>
+		</div>
 	</div>
 </header>
 
@@ -162,6 +175,68 @@
 
 	.site-header-inner {
 		gap: clamp(0.75rem, 2vw, 1.75rem);
+	}
+
+	.nav-actions {
+		display: flex;
+		flex: 0 0 auto;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.account-trigger {
+		display: grid;
+		width: 2.55rem;
+		height: 2.55rem;
+		place-items: center;
+		border: 1px solid var(--color-divider);
+		border-radius: 999px;
+		background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+		padding: 0;
+		cursor: pointer;
+		transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+	}
+
+	.account-trigger:hover {
+		border-color: color-mix(in srgb, var(--color-accent) 48%, transparent);
+		box-shadow: 0 0 0 3px var(--color-accent-soft);
+	}
+
+	.account-trigger:active { transform: scale(0.96); }
+
+	.account-avatar {
+		display: grid;
+		width: 2.05rem;
+		height: 2.05rem;
+		place-items: center;
+		overflow: hidden;
+		border-radius: 999px;
+	}
+
+	.account-avatar :global(img) {
+		width: 100%;
+		height: 100%;
+		border-radius: 999px;
+		object-fit: cover;
+	}
+
+	.account-avatar :global(span) { border-radius: 999px; }
+
+	.account-menu-head {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		padding: 0.55rem 0.75rem 0.6rem;
+	}
+
+	.account-avatar--menu { width: 2.2rem; height: 2.2rem; }
+
+	.account-menu-caption {
+		color: var(--color-muted);
+		font-family: var(--font-mono);
+		font-size: 0.58rem;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
 	}
 
 	.desktop-navigation {

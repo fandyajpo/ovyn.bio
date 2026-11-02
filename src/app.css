@@ -1140,3 +1140,66 @@ html[data-theme='light'] body {
 	.faq-item:not(.is-open):hover .faq-toggle,
 	.app-footer nav a:hover { transform: none !important; }
 }
+
+
+
+/* Landing: create section and hero pills */
+.landing-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	border: 1px solid var(--color-divider);
+	border-radius: 999px;
+	background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+	padding: 0.3rem 0.7rem;
+	color: var(--color-muted);
+	font-size: 0.68rem;
+	font-weight: 600;
+	letter-spacing: 0.07em;
+	text-transform: uppercase;
+}
+
+.landing-pill em {
+	color: var(--color-accent);
+	font-style: normal;
+	font-family: var(--font-mono);
+	font-size: 0.62rem;
+}
+
+.landing-orbit--stage {
+	top: -25%;
+	right: -18%;
+	width: min(70%, 30rem);
+	border-color: color-mix(in srgb, var(--color-pop-blue) 16%, transparent);
+}
+
+.create-card {
+	height: 100%;
+	border: 1px solid var(--color-divider);
+	border-radius: 1.35rem;
+	background: color-mix(in srgb, var(--color-surface) 68%, transparent);
+	padding: 1.15rem 1.15rem 1.3rem;
+	transition: transform 220ms ease, border-color 220ms ease;
+}
+
+.create-glyph {
+	display: grid;
+	width: 2.2rem;
+	height: 2.2rem;
+	place-items: center;
+	border-radius: 0.75rem;
+	background: var(--color-accent-soft);
+	color: var(--color-accent);
+	font-size: 1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.create-card:hover {
+		transform: translateY(-3px);
+		border-color: color-mix(in srgb, var(--color-accent) 32%, transparent);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.create-card { transition: none; }
+}

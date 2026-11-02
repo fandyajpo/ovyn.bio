@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
+	import LandingDemo from '#lib/components/LandingDemo.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import { slide } from 'svelte/transition';
 
@@ -48,6 +48,32 @@
 			answer: 'Premium is Rp 30.000 a month: 30 days per payment, renewed by hand, with no automatic charge.'
 		}
 	];
+	const creates = [
+		{
+			icon: '✦',
+			title: 'Personal brand',
+			copy: 'A page that looks designed, with your name, your colours and the things you actually care about.',
+			tag: 'profile'
+		},
+		{
+			icon: '◉',
+			title: 'A circle',
+			copy: 'Find and keep the people who get you, with a circle that starts from your own page.',
+			tag: 'community'
+		},
+		{
+			icon: '◇',
+			title: 'Flex',
+			copy: 'Badges, frames, wallpapers and layouts that say something without shouting.',
+			tag: 'cosmetics'
+		},
+		{
+			icon: '✳',
+			title: 'Expression',
+			copy: 'Backgrounds, textures, audio, a cursor and a layout builder, all in your own taste.',
+			tag: 'customise'
+		}
+	];
 </script>
 
 <svelte:window bind:scrollY />
@@ -73,7 +99,7 @@
 			</Reveal>
 			<Reveal delay={140}>
 				<p class="max-w-xl text-base leading-8 text-neutral-400 sm:text-lg">
-					Your profile is more than a link. Build a space that feels like you, show off what you love, and bring your circle closer.
+					Build a personal brand that actually looks like you, keep your circle close, and flex the things you love. All of it living on one link.
 				</p>
 			</Reveal>
 			<Reveal delay={210}>
@@ -87,46 +113,48 @@
 				</div>
 			</Reveal>
 			<Reveal delay={280}>
-				<div class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-neutral-500">
-					<span><span class="text-lime-300">01</span> claim a username</span>
-					<span><span class="text-pop-pink">02</span> make it yours</span>
-					<span><span class="text-pop-blue">03</span> share it everywhere</span>
+				<div class="flex flex-wrap items-center gap-2">
+					<span class="landing-pill"><em>01</em> personal brand</span>
+					<span class="landing-pill"><em>02</em> circle</span>
+					<span class="landing-pill"><em>03</em> flex</span>
+					<span class="landing-pill"><em>04</em> expression</span>
 				</div>
 			</Reveal>
 		</div>
 
-		<Reveal delay={150} stagger class="landing-profile-stage relative mx-auto w-full max-w-lg">
-			<div class="landing-profile-orbit" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
-			<div class="landing-profile-preview relative">
-				<div class="flex items-center justify-between gap-4" data-reveal-item style="--reveal-order: 0">
-					<p class="landing-eyebrow">ovyn / your space</p>
-					<span class="profile-live"><span class="status-dot"></span> YOUR PAGE</span>
-				</div>
-				<div class="mt-10 flex items-center gap-5" data-reveal-item style="--reveal-order: 1">
-					<div class="relative">
-						<Avatar name="your name" size="xl" />
-						<span class="avatar-orbit" aria-hidden="true"></span>
-					</div>
-					<div class="min-w-0">
-						<p class="truncate text-2xl font-semibold">your name here</p>
-						<p class="mt-1 text-sm text-neutral-500">@your-corner</p>
-					</div>
-				</div>
-				<p class="mt-7 max-w-sm text-sm leading-7 text-neutral-400" data-reveal-item style="--reveal-order: 2">A little bit of your world, the things you love, and every place your people can find you.</p>
-				<div class="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm text-neutral-300" data-reveal-item style="--reveal-order: 3">
-					<a href="/discover">Your people <span class="text-pop-pink">↗</span></a>
-					<a href="/shop">Your style <span class="text-pop-blue">↗</span></a>
-					<a href="/login">Your link <span class="text-lime-300">↗</span></a>
-				</div>
-			</div>
-			<span class="orbit-caption orbit-caption--one">YOUR VIBE, EVERYWHERE</span>
-			<span class="orbit-caption orbit-caption--two">MAKE YOUR MARK</span>
+		<Reveal delay={150} class="landing-profile-stage relative mx-auto w-full lg:max-w-none">
+			<div class="landing-orbit landing-orbit--stage" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
+			<LandingDemo />
 		</Reveal>
 	</div>
 </section>
 
 <section class="brand-ribbon" aria-label="ovyn community">
 	<span>ovyn</span><i></i><span>your identity</span><i></i><span>your circle</span><i></i><span>your internet</span><i></i><span>ovyn</span>
+</section>
+
+<section id="create" class="landing-section py-14 sm:py-20">
+	<Reveal>
+		<div class="max-w-2xl">
+			<p class="landing-eyebrow">WHAT YOU CAN CREATE</p>
+			<h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">One page. Everything you are.</h2>
+			<p class="mt-3 text-sm leading-7 text-neutral-400">
+				A personal brand that looks intentional, a circle that feels close, and enough flex to show what you love.
+			</p>
+		</div>
+	</Reveal>
+	<div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+		{#each creates as item, index (item.title)}
+			<Reveal delay={index * 70}>
+				<article class="create-card">
+					<span class="create-glyph" aria-hidden="true">{item.icon}</span>
+					<h3 class="mt-4 font-medium text-neutral-100">{item.title}</h3>
+					<p class="mt-2 text-sm leading-6 text-neutral-400">{item.copy}</p>
+					<p class="mt-4 font-mono text-[10px] uppercase tracking-wider text-neutral-500">{item.tag}</p>
+				</article>
+			</Reveal>
+		{/each}
+	</div>
 </section>
 
 <section id="features" class="landing-section grid gap-8 py-16 sm:py-24 md:grid-cols-[.75fr_1.25fr]">

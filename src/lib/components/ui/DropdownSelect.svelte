@@ -250,7 +250,7 @@
 	.ovyn-dropdown-selected { display: flex; flex: 1 1 auto; min-width: 0; align-items: center; gap: 0.55rem; }
 	.ovyn-dropdown-icon { display: grid; flex: 0 0 auto; place-items: center; }
 	.ovyn-dropdown-value { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.ovyn-dropdown-value.is-placeholder { color: color-mix(in srgb, var(--color-muted) 85%, transparent); }
+	.ovyn-dropdown-value.is-placeholder { color: var(--color-muted); }
 
 	.ovyn-dropdown-caret {
 		display: grid;
@@ -281,16 +281,15 @@
 		background: var(--color-menu-glass);
 		padding: 0.4rem;
 		box-shadow: 0 22px 48px rgb(0 0 0 / 32%);
-		opacity: 0;
+		opacity: 1;
 		visibility: hidden;
 		pointer-events: none;
 		transform: translateY(-0.35rem) scale(0.985);
 		transform-origin: top center;
-		transition: opacity 150ms ease, transform 170ms ease, visibility 0s linear 170ms;
+		transition: transform 170ms ease, visibility 0s linear 170ms;
 	}
 
 	.ovyn-dropdown-panel:not([aria-hidden='true']) {
-		opacity: 1;
 		visibility: visible;
 		pointer-events: auto;
 		transform: translateY(0) scale(1);
