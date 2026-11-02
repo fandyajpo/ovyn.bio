@@ -20,7 +20,7 @@
 	<title>{data.guild ? data.guild.name : 'My circle'} - ovyn</title>
 </svelte:head>
 
-<div class="mx-auto flex max-w-3xl flex-col gap-6">
+<div class="flex flex-col gap-6">
 	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">My circle</h1>
 
 	{#if form?.error}
