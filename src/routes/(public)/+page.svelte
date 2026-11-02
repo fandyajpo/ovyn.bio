@@ -33,7 +33,7 @@
 
 	// The landing is a small playground: the headline cycles, you can type your
 	// own name into the demo, and the primary button leans toward the cursor.
-	const headlines = ['impossible to ignore.', 'one link, all of you.', 'unmistakably yours.'];
+	const headlines = ['impossible to ignore.', 'one link, all of you on it.', 'unmistakably yours.'];
 
 	let headlineIndex = $state(0);
 	const headline = $derived(headlines[headlineIndex] ?? headlines[0] ?? '');
