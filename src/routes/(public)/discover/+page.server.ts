@@ -22,7 +22,7 @@ export const actions: Actions = {
 		if (typeof slug !== 'string') return fail(422, { error: 'Invalid request' });
 
 		try {
-			rateLimit(`join:${locals.user.id}`, 10, 60_000);
+			await rateLimit(`join:${locals.user.id}`, 10, 60_000);
 			await joinGuild(locals.user.id, slug);
 			return { ok: true };
 		} catch (err) {

@@ -352,7 +352,7 @@ export async function updateGuild(
 
 	const updated = await db.transaction(async (tx) => {
 		const actor = await currentMembership(tx, actorId);
-		if (!actor || actor.role !== 'owner') {
+		if (!actor || actor.role !== 'owner' || actor.guildId !== guildId) {
 			throw new ForbiddenError('Only the owner can edit circle settings');
 		}
 

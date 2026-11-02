@@ -417,6 +417,25 @@ export const paymentEvents = pgTable(
 );
 
 // ---------------------------------------------------------------------------
+// Rate limiting
+// ---------------------------------------------------------------------------
+
+/**
+ * One fixed window per limiter key, kept in the database so every serverless
+ * instance counts the same requests.
+ */
+export const rateLimits = pgTable(
+	'rate_limits',
+	{
+		key: text('key').primaryKey(),
+		count: integer('count').notNull().default(1),
+		windowStart: timestamp('window_start', { withTimezone: true }).notNull().defaultNow(),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull()
+	},
+	(t) => [index('rate_limits_expires_at_idx').on(t.expiresAt)]
+);
+
+// ---------------------------------------------------------------------------
 // Relations
 // ---------------------------------------------------------------------------
 

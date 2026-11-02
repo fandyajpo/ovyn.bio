@@ -54,7 +54,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`guild-manage:${user.id}`, 30, 60_000);
+			await rateLimit(`guild-manage:${user.id}`, 30, 60_000);
 
 			const userId = data.get('userId');
 			const invitationId = data.get('invitationId');

@@ -25,7 +25,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`checkout:${user.id}`, 5, 60_000);
+			await rateLimit(`checkout:${user.id}`, 5, 60_000);
 			const { order } = await createCheckout(user.id, productId);
 			redirect(302, `/checkout/${order.id}`);
 		} catch (err) {

@@ -47,7 +47,7 @@ export const actions: Actions = {
 			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
 				return fail(403, { error: 'Saving profile layouts is a Premium feature' });
 			}
-			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			const created = await createProfileTemplate(locals.user.id, parsed.data);
 			if (!created) return fail(500, { error: 'Could not create your template' });
 			createdId = created.id;
@@ -72,7 +72,7 @@ export const actions: Actions = {
 			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
 				return fail(403, { error: 'Applying profile layouts is a Premium feature' });
 			}
-			rateLimit(`profile-template-apply:${locals.user.id}`, 30, 60_000);
+			await rateLimit(`profile-template-apply:${locals.user.id}`, 30, 60_000);
 			await applyProfileTemplate(locals.user.id, parsed.data.id);
 			return { ok: 'Template applied to your page.' };
 		} catch (err) {
@@ -92,7 +92,7 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: 'Invalid template setting' });
 
 		try {
-			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			await setProfileTemplateVisibility(locals.user.id, parsed.data.id, parsed.data.isPublic);
 			return { ok: parsed.data.isPublic ? 'Template shared publicly.' : 'Template is private.' };
 		} catch (err) {
@@ -109,7 +109,7 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: 'Invalid template' });
 
 		try {
-			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			await deleteProfileTemplate(locals.user.id, parsed.data.id);
 			return { ok: 'Template deleted.' };
 		} catch (err) {

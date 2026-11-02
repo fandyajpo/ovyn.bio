@@ -25,7 +25,7 @@ export const actions: Actions = {
 		if (typeof invitationId !== 'string') return fail(422, { error: 'Invalid request' });
 
 		try {
-			rateLimit(`invite-action:${user.id}`, 20, 60_000);
+			await rateLimit(`invite-action:${user.id}`, 20, 60_000);
 			if (intent === 'accept') {
 				const guild = await acceptInvitation(user.id, invitationId);
 				return { ok: true, slug: guild.slug };

@@ -12,9 +12,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) return Response.json({ error: 'unauthenticated' }, { status: 401 });
 
 	try {
-		rateLimit(`upload:${locals.user.id}`, 20, 60_000);
+		await rateLimit(`upload:${locals.user.id}`, 20, 60_000);
 
-		const body = (await request.json()) as { kind?: string; contentType?: string; sizeBytes?: number };
+		const body = (await request.json()) as { kind?: string; contentType?: string; sizeBytes?: number; scope?: string };
 		if (
 			(body.kind !== 'banner' && body.kind !== 'avatar' && body.kind !== 'icon' && body.kind !== 'cosmetic' && body.kind !== 'audio' && body.kind !== 'cursor' && body.kind !== 'background') ||
 			!body.contentType ||
@@ -24,6 +24,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 		if (body.kind === 'cosmetic' && !(await isPlatformAdmin(locals.user.id))) {
 			return Response.json({ error: 'Admin access required' }, { status: 403 });
+		}
+		if (body.kind === 'icon' || body.scope === 'circle') {
+			const membership = await getMembership(locals.user.id);
+			if (!membership || membership.membership.role !== 'owner') {
+				return Response.json({ error: 'Only the circle owner can set the circle artwork' }, { status: 403 });
+			}
 		}
 
 		const kind: UploadKind = body.kind;
@@ -43,9 +49,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 export const PUT: RequestHandler = async ({ request, locals }) => {
 	if (!locals.user) return Response.json({ error: 'unauthenticated' }, { status: 401 });
 
-	const body = (await request.json()) as { kind?: string; key?: string };
+	const body = (await request.json()) as { kind?: string; key?: string; scope?: string };
 	const kind = body.kind;
 	const key = body.key;
+	// Circle artwork shares its upload kinds with the profile, so the scope says
+	// which record a finished upload belongs to.
+	const scope = body.scope === 'circle' ? 'circle' : 'profile';
 
 	if ((kind !== 'banner' && kind !== 'avatar' && kind !== 'icon' && kind !== 'audio' && kind !== 'cursor' && kind !== 'background') || typeof key !== 'string') {
 		return Response.json({ error: 'Invalid request' }, { status: 422 });
@@ -54,7 +63,7 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 	try {
 		assertOwnObjectKey(locals.user.id, kind as UploadKind, key);
 
-		if (kind === 'banner') {
+		if (kind === 'banner' && scope === 'profile') {
 			// The profile wallpaper.
 			await setProfileBanner(locals.user.id, key);
 		} else if (kind === 'avatar') {
@@ -68,12 +77,18 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 			await setProfileCursorKey(locals.user.id, key);
 		} else if (kind === 'background') {
 			await setProfileBackgroundKey(locals.user.id, key);
-		} else {
+		} else if (kind === 'icon' || scope === 'circle') {
 			const membership = await getMembership(locals.user.id);
 			if (!membership || membership.membership.role !== 'owner') {
-				return Response.json({ error: 'Only the circle owner can set the icon' }, { status: 403 });
+				return Response.json({ error: 'Only the circle owner can set the circle artwork' }, { status: 403 });
 			}
-			await updateGuild(locals.user.id, membership.guild.id, { iconKey: key });
+			await updateGuild(
+				locals.user.id,
+				membership.guild.id,
+				kind === 'icon' ? { iconKey: key } : { bannerKey: key }
+			);
+		} else {
+			return Response.json({ error: 'Invalid request' }, { status: 422 });
 		}
 		return Response.json({ ok: true, key });
 	} catch (err) {

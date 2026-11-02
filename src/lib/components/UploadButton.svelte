@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { invalidateAll } from '$app/navigation';
 	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import { cn } from '#lib/utils';
 	import { optimizeImage } from '#lib/image-optimize';
@@ -7,13 +8,18 @@
 	let {
 		kind,
 		existingKey = null,
-		label
-	}: { kind: 'banner' | 'avatar' | 'icon' | 'audio' | 'cursor' | 'background'; existingKey?: string | null; label: string } = $props();
+		label,
+		scope = 'profile'
+	}: {
+		kind: 'banner' | 'avatar' | 'icon' | 'audio' | 'cursor' | 'background';
+		existingKey?: string | null;
+		label: string;
+		scope?: 'profile' | 'circle';
+	} = $props();
 
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
 	let dragging = $state(false);
-	let currentKey = $derived(existingKey);
 
 	function attachInput(element: HTMLInputElement) {
 		input = element;
@@ -71,7 +77,7 @@
 			const res = await fetch('/api/uploads', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ kind, contentType: file.type, sizeBytes: file.size })
+				body: JSON.stringify({ kind, scope, contentType: file.type, sizeBytes: file.size })
 			});
 			const json = await res.json();
 			if (!res.ok) throw new Error(json.error ?? 'Upload rejected');
@@ -86,16 +92,17 @@
 			const save = await fetch('/api/uploads', {
 				method: 'PUT',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ kind, key: json.key })
+				body: JSON.stringify({ kind, scope, key: json.key })
 			});
 			if (!save.ok) {
 				const result = await save.json().catch(() => null);
 				throw new Error(result?.error ?? 'Could not save the file');
 			}
 
-			currentKey = json.key;
 			toast('success', `${kind} updated`);
-			location.reload();
+			// Refresh the page data so the new file shows up, without losing
+			// whatever the visitor was typing in the form around the upload.
+			await invalidateAll();
 		} catch (err) {
 			toast('error', err instanceof Error ? err.message : 'Upload failed');
 		} finally {
@@ -123,9 +130,9 @@
 	</span>
 	<span class="upload-copy">
 		<span class="upload-title">{uploading ? 'Uploading your file' : dragging ? 'Drop it right here' : label}</span>
-		<span class="upload-hint">{currentKey ? 'Your current file will be replaced' : 'Drag and drop, or browse from this device'}</span>
+		<span class="upload-hint">{existingKey ? 'Your current file will be replaced' : 'Drag and drop, or browse from this device'}</span>
 	</span>
-	<span class="upload-action">{uploading ? 'Working' : currentKey ? 'Replace' : 'Browse'}</span>
+	<span class="upload-action">{uploading ? 'Working' : existingKey ? 'Replace' : 'Browse'}</span>
 </button>
 <input
 	{@attach attachInput}

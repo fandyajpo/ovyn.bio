@@ -7,7 +7,7 @@ export const GET: RequestHandler = async ({ url, locals }) => {
 	if (!locals.user) return Response.json({ error: 'unauthenticated' }, { status: 401 });
 
 	try {
-		rateLimit(`username-check:${locals.user.id}`, 60, 60_000);
+		await rateLimit(`username-check:${locals.user.id}`, 60, 60_000);
 		return Response.json(
 			await checkUsernameAvailability(locals.user.id, url.searchParams.get('username') ?? ''),
 			{ headers: { 'Cache-Control': 'no-store' } }

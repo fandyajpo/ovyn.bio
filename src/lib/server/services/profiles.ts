@@ -46,6 +46,33 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
 }
 
 /**
+ * Every signed-in account needs a profile row, even when the Discord identity
+ * cannot be read, so the workspace and public pages never meet a missing row.
+ */
+async function ensureProfile(userId: string, fallbackName: string): Promise<void> {
+	const [authUser] = await db
+		.select({ name: user.name })
+		.from(user)
+		.where(eq(user.id, userId))
+		.limit(1);
+	if (!authUser) return;
+
+	await db.transaction(async (tx) => {
+		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+		const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1);
+		if (profile) return;
+		await tx
+			.insert(profiles)
+			.values({
+				userId,
+				slug: await availableSlug(tx, authUser.name || fallbackName),
+				displayName: authUser.name || fallbackName
+			})
+			.onConflictDoNothing({ target: profiles.userId });
+	});
+}
+
+/**
  * Sync Discord identity when available and ensure every OAuth user has a
  * profile with a unique slug. Runs inside Better Auth's session-create hook,
  * so failures must not block sign-in. ovyn profile details stay user-owned.
@@ -58,26 +85,7 @@ export async function provisionUser(userId: string): Promise<void> {
 		.limit(1);
 
 	if (!acc?.accessToken) {
-		const [authUser] = await db
-			.select({ name: user.name })
-			.from(user)
-			.where(eq(user.id, userId))
-			.limit(1);
-		if (!authUser) return;
-
-		await db.transaction(async (tx) => {
-			await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
-			const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1);
-			if (profile) return;
-			await tx
-				.insert(profiles)
-				.values({
-					userId,
-					slug: await availableSlug(tx, authUser.name || 'ovyn'),
-					displayName: authUser.name || 'ovyn member'
-				})
-				.onConflictDoNothing({ target: profiles.userId });
-		});
+		await ensureProfile(userId, 'ovyn member');
 		return;
 	}
 
@@ -85,7 +93,13 @@ export async function provisionUser(userId: string): Promise<void> {
 	try {
 		discordUser = await fetchDiscordUser(acc.accessToken);
 	} catch (err) {
+		// A stale Discord token must not leave the account without a profile.
 		console.error('Discord identity fetch failed', err);
+		try {
+			await ensureProfile(userId, 'ovyn member');
+		} catch (profileError) {
+			console.error('Profile provisioning failed', profileError);
+		}
 		return;
 	}
 

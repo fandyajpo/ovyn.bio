@@ -38,7 +38,7 @@ export const actions: Actions = {
 			return fail(422, { error: 'Use a six-digit hex colour like #CDBCF3, or leave it empty' });
 		}
 		try {
-			rateLimit(`profile-color:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-color:${locals.user.id}`, 20, 60_000);
 			await setProfileUsernameColor(locals.user.id, parsed.data);
 			return { ok: parsed.data ? 'Username colour saved.' : 'Username colour reset.' };
 		} catch (err) {
@@ -57,7 +57,7 @@ export const actions: Actions = {
 		});
 		if (!parsed.success) return fail(422, { error: 'Pick a valid background texture' });
 		try {
-			rateLimit(`profile-background:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-background:${locals.user.id}`, 20, 60_000);
 			await setProfileBackground(locals.user.id, parsed.data.texture, parsed.data.fixed);
 			return { ok: 'Background saved.' };
 		} catch (err) {
@@ -70,7 +70,7 @@ export const actions: Actions = {
 	clearBackgroundImage: async ({ locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		try {
-			rateLimit(`profile-background:${locals.user.id}`, 20, 60_000);
+			await rateLimit(`profile-background:${locals.user.id}`, 20, 60_000);
 			await setProfileBackgroundKey(locals.user.id, null);
 			return { ok: 'Background image removed.' };
 		} catch (err) {
@@ -83,7 +83,7 @@ export const actions: Actions = {
 	clearAudio: async ({ locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		try {
-			rateLimit(`profile-audio:${locals.user.id}`, 10, 60_000);
+			await rateLimit(`profile-audio:${locals.user.id}`, 10, 60_000);
 			await setProfileAudioKey(locals.user.id, null);
 			return { ok: 'Audio removed.' };
 		} catch (err) {
@@ -96,7 +96,7 @@ export const actions: Actions = {
 	clearCursor: async ({ locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		try {
-			rateLimit(`profile-cursor:${locals.user.id}`, 10, 60_000);
+			await rateLimit(`profile-cursor:${locals.user.id}`, 10, 60_000);
 			await setProfileCursorKey(locals.user.id, null);
 			return { ok: 'Cursor removed.' };
 		} catch (err) {

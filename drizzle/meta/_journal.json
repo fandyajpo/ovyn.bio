@@ -57,6 +57,13 @@
       "when": 1793610000000,
       "tag": "0007_profile_appearance",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793620000000,
+      "tag": "0008_rate_limits",
+      "breakpoints": true
     }
   ]
 }

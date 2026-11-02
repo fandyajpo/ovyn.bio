@@ -24,7 +24,7 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: parsed.error.issues[0]?.message ?? 'Check the link details' });
 
 		try {
-			rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
+			await rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
 			await addProfileLink(locals.user.id, parsed.data);
 			return { ok: 'Link added.' };
 		} catch (err) {
@@ -41,7 +41,7 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: 'Invalid link' });
 
 		try {
-			rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
+			await rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
 			await deleteProfileLink(locals.user.id, parsed.data.id);
 			return { ok: 'Link removed.' };
 		} catch (err) {

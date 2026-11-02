@@ -58,7 +58,7 @@ export const actions: Actions = {
 	checkin: async ({ locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		try {
-			rateLimit(`daily-checkin:${locals.user.id}`, 5, 60_000);
+			await rateLimit(`daily-checkin:${locals.user.id}`, 5, 60_000);
 			return { checkin: await claimDailyCheckin(locals.user.id) };
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });

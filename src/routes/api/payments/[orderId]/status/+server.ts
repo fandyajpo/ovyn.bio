@@ -12,7 +12,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) return Response.json({ error: 'unauthenticated' }, { status: 401 });
 
 	try {
-		rateLimit(`pay-status:${locals.user.id}`, 30, 60_000);
+		await rateLimit(`pay-status:${locals.user.id}`, 30, 60_000);
 		const status = await syncPaymentStatus(params.orderId, locals.user.id);
 		return Response.json({ status });
 	} catch (err) {

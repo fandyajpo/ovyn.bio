@@ -28,7 +28,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`guild-create:${user.id}`, 3, 60_000);
+			await rateLimit(`guild-create:${user.id}`, 3, 60_000);
 			const guild = await createGuild(user.id, parsed.data);
 			redirect(302, `/guild/${guild.slug}/manage`);
 		} catch (err) {

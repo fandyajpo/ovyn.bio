@@ -60,7 +60,7 @@ export const actions: Actions = {
 			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
 				return fail(403, { error: 'Editing profile layouts is a Premium feature' });
 			}
-			rateLimit(`profile-template-save:${locals.user.id}`, 40, 60_000);
+			await rateLimit(`profile-template-save:${locals.user.id}`, 40, 60_000);
 			await updateProfileTemplate(locals.user.id, parsed.data);
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });

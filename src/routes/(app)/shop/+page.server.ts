@@ -21,7 +21,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`shop-buy:${user.id}`, 5, 60_000);
+			await rateLimit(`shop-buy:${user.id}`, 5, 60_000);
 			const { order } = await createCheckout(user.id, productId);
 			redirect(302, `/checkout/${order.id}`);
 		} catch (err) {
@@ -36,7 +36,7 @@ export const actions: Actions = {
 		const cosmeticId = data.get('cosmeticId');
 		if (typeof cosmeticId !== 'string' || !cosmeticId) return fail(422, { error: 'Invalid item' });
 		try {
-			rateLimit(`shop-redeem:${locals.user.id}`, 10, 60_000);
+			await rateLimit(`shop-redeem:${locals.user.id}`, 10, 60_000);
 			await redeemCosmeticWithPoints(locals.user.id, cosmeticId);
 			return { ok: true };
 		} catch (err) {
@@ -58,7 +58,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`shop-equip:${user.id}`, 20, 60_000);
+			await rateLimit(`shop-equip:${user.id}`, 20, 60_000);
 			await setEquippedCosmetic(
 				user.id,
 				kind as CosmeticKind,

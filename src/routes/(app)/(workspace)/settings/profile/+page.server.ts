@@ -54,7 +54,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`profile-identity:${user.id}`, 10, 60_000);
+			await rateLimit(`profile-identity:${user.id}`, 10, 60_000);
 			await updateProfileIdentity(user.id, parsed.data);
 			return { ok: true };
 		} catch (err) {
@@ -73,7 +73,7 @@ export const actions: Actions = {
 	avatarReset: async ({ locals }) => {
 		if (!locals.user) redirect(302, '/login');
 		try {
-			rateLimit(`profile-avatar:${locals.user.id}`, 10, 60_000);
+			await rateLimit(`profile-avatar:${locals.user.id}`, 10, 60_000);
 			await setProfileAvatar(locals.user.id, null);
 			return { ok: true };
 		} catch (err) {
@@ -94,7 +94,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`profile-visibility:${user.id}`, 10, 60_000);
+			await rateLimit(`profile-visibility:${user.id}`, 10, 60_000);
 			await setProfileVisibility(user.id, parsed.data.visibility);
 			return { ok: true };
 		} catch (err) {
@@ -116,7 +116,7 @@ export const actions: Actions = {
 		}
 
 		try {
-			rateLimit(`equip:${user.id}`, 20, 60_000);
+			await rateLimit(`equip:${user.id}`, 20, 60_000);
 			await setEquippedCosmetic(
 				user.id,
 				kind as CosmeticKind,

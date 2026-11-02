@@ -126,6 +126,12 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   table, DOKU is called from server endpoints only, webhook signatures are
   verified against the raw body, and events are idempotent via unique
   `provider_event_id`. Terminal payment states never regress.
+- **Rate limits** are fixed windows stored in the database, so limits hold
+  across serverless instances and a new deployment does not reset them.
+  Sensitive endpoints (checkout, payment status, uploads, invites, circle
+  changes, template saves) answer `429` when a user exceeds their window; if the
+  database is unreachable a per-instance memory window keeps the endpoint
+  working.
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
   a key is attached to a profile. Replacing an avatar, cover, background,

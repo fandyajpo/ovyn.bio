@@ -70,7 +70,7 @@
 				<div class="flex flex-wrap items-center gap-3">
 					<Button type="submit">Save settings</Button>
 					<UploadButton kind="icon" existingKey={data.guild.iconKey} label="Upload icon" />
-					<UploadButton kind="banner" existingKey={data.guild.bannerKey} label="Upload banner" />
+					<UploadButton kind="banner" scope="circle" existingKey={data.guild.bannerKey} label="Upload banner" />
 				</div>
 			</div>
 		</form>
