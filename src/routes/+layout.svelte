@@ -4,7 +4,6 @@
 	import type { LayoutData } from './$types';
 	import '../app.css';
 	import Nav from '#lib/components/Nav.svelte';
-	import AppNavigation from '#lib/components/AppNavigation.svelte';
 	import FooterSurprise from '#lib/components/FooterSurprise.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 
@@ -23,8 +22,7 @@
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		<Nav user={data.user} isAdmin={data.isAdmin} {isLanding} />
 
-		<div class="app-workspace" data-landing={isLanding ? 'true' : 'false'}>
-			{#if !isLanding}<AppNavigation isAuthenticated={Boolean(data.user)} isAdmin={data.isAdmin} />{/if}
+		<div class="app-workspace">
 			<main id="main-content" class="page-content" tabindex="-1">
 				<div class="page-container">
 					{@render children()}
@@ -61,16 +59,14 @@
 	}
 
 	.app-workspace {
-		display: grid;
 		min-width: 0;
 		flex: 1;
-		grid-template-columns: minmax(0, 1fr);
 	}
 
 	.page-content {
 		width: 100%;
 		min-width: 0;
-		padding: 1.25rem max(1rem, env(safe-area-inset-right)) calc(6.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+		padding: 1.25rem max(1rem, env(safe-area-inset-right)) calc(1.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
 	}
 
 	.page-container {
@@ -89,6 +85,9 @@
 
 	.app-frame[data-landing='true'] .app-footer {
 		margin-top: 1.5rem;
+	}
+
+	.app-footer {
 		padding-bottom: env(safe-area-inset-bottom);
 	}
 
@@ -124,23 +123,9 @@
 	}
 
 	@media (min-width: 40rem) {
-		.app-workspace:not([data-landing='true']) {
-			grid-template-columns: 4.5rem minmax(0, 1fr);
-		}
-
 		.page-content {
 			padding-block: 1.5rem;
 			padding-inline: max(1.25rem, env(safe-area-inset-left)) max(1.25rem, env(safe-area-inset-right));
-		}
-
-		.app-frame:not([data-landing='true']) .app-footer {
-			padding-bottom: 0;
-		}
-	}
-
-	@media (min-width: 64rem) {
-		.app-workspace:not([data-landing='true']) {
-			grid-template-columns: 15rem minmax(0, 1fr);
 		}
 	}
 </style>
