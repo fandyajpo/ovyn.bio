@@ -1,29 +1,11 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { themeState, setTheme } from '#lib/theme.svelte.ts';
 
-	let theme = $state<'dark' | 'light'>('dark');
-
-	function setTheme(next: 'dark' | 'light', persist = true) {
-		theme = next;
-		document.documentElement.dataset.theme = next;
-		document.documentElement.style.colorScheme = next;
-		document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'dark' ? '#16130f' : '#fff6e9');
-		if (persist) {
-			try {
-				localStorage.setItem('ovyn-theme', next);
-			} catch {
-				// The selected theme still applies for this session.
-			}
-		}
-	}
-
-	onMount(() => {
-		const current = document.documentElement.dataset.theme;
-		setTheme(current === 'light' ? 'light' : 'dark', false);
-	});
+	const theme = themeState;
+	const current = $derived(theme.value);
 
 	function toggleTheme() {
-		setTheme(theme === 'dark' ? 'light' : 'dark');
+		setTheme(current === 'dark' ? 'light' : 'dark');
 	}
 </script>
 
@@ -31,11 +13,11 @@
 	type="button"
 	class="theme-toggle"
 	onclick={toggleTheme}
-	aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-	aria-pressed={theme === 'light'}
-	title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-label={current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+	aria-pressed={current === 'light'}
+	title={current === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
 >
-	<span aria-hidden="true">{theme === 'dark' ? '☼' : '☾'}</span>
+	<span aria-hidden="true">{current === 'dark' ? '☼' : '☾'}</span>
 </button>
 
 <style>

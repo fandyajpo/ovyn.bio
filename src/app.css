@@ -65,22 +65,52 @@
 }
 
 @theme {
-	/* Light is the default surface: warm paper, plum ink, honey accent. */
+	--color-background: #111210;
+	--color-surface: #1b1d19;
+	--color-foreground: #f1f0e9;
+	--color-muted: #92958a;
+	--color-accent: #d5ff35;
+	--color-accent-soft: rgb(213 255 53 / 12%);
+	--color-on-accent: #111210;
+	--color-pop-pink: #ff78a8;
+	--color-pop-blue: #83e6ff;
+	--color-pop-lilac: #c4a5ff;
+	--color-divider: rgb(255 255 255 / 12%);
+	--color-surface-raised: #242720;
+	--color-preview-stage: #151714;
+	--color-nav-glass: rgb(17 18 16 / 94%);
+	--color-menu-glass: rgb(20 21 18 / 97%);
+
+	--font-display: 'Newsreader', Georgia, serif;
+	--font-sans: 'Poppins', system-ui, sans-serif;
+	--font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+	--font-serif: 'Newsreader', Georgia, serif;
+	--font-pixel: 'Geist Pixel', ui-monospace, monospace;
+}
+
+:root {
+	color-scheme: dark;
+	scroll-behavior: smooth;
+	scrollbar-width: none;
+}
+
+html[data-theme='light'] {
+	color-scheme: light;
 	--color-background: #fff6e9;
 	--color-surface: #fffdf8;
+	--color-surface-raised: #f3e6d2;
+	--color-preview-stage: #f3e6d2;
 	--color-foreground: #28233d;
 	--color-muted: #70677a;
 	--color-accent: #e7b953;
 	--color-accent-soft: rgb(231 185 83 / 18%);
 	--color-on-accent: #28233d;
+	--color-divider: rgb(55 40 67 / 15%);
+	--color-nav-glass: rgb(255 246 233 / 96%);
+	--color-menu-glass: rgb(255 253 248 / 98%);
 	--color-pop-pink: #ee8397;
 	--color-pop-blue: #71c0bd;
 	--color-pop-lilac: #b8a1d7;
-	--color-divider: rgb(55 40 67 / 15%);
-	--color-surface-raised: #f3e6d2;
-	--color-preview-stage: #f3e6d2;
-	--color-nav-glass: rgb(255 246 233 / 96%);
-	--color-menu-glass: rgb(255 253 248 / 98%);
 	--color-lime-300: #e7b953;
 	--color-lime-200: #f1d38f;
 	--color-neutral-50: #fffaf2;
@@ -94,44 +124,6 @@
 	--color-neutral-800: #e5d9c7;
 	--color-neutral-900: #f3e8d6;
 	--color-neutral-950: #fffaf2;
-
-	--font-display: 'Newsreader', Georgia, serif;
-	--font-sans: 'Poppins', system-ui, sans-serif;
-	--font-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-	--font-serif: 'Newsreader', Georgia, serif;
-	--font-pixel: 'Geist Pixel', ui-monospace, monospace;
-}
-
-/* Warm charcoal instead of near-black, and a softer citrus accent. */
-html[data-theme='dark'] {
-	color-scheme: dark;
-	--color-background: #16130f;
-	--color-surface: #201c17;
-	--color-foreground: #f4efe6;
-	--color-muted: #a0998a;
-	--color-accent: #cdf06a;
-	--color-accent-soft: rgb(205 240 106 / 12%);
-	--color-on-accent: #14120d;
-	--color-pop-pink: #ff8fae;
-	--color-pop-blue: #8fd8dd;
-	--color-pop-lilac: #c6b0f2;
-	--color-divider: rgb(255 248 238 / 12%);
-	--color-surface-raised: #2a2620;
-	--color-preview-stage: #191612;
-	--color-nav-glass: rgb(22 19 15 / 94%);
-	--color-menu-glass: rgb(26 22 18 / 97%);
-	--color-lime-300: #cdf06a;
-	--color-lime-200: #dcf79a;
-	--color-neutral-700: #3b342b;
-	--color-neutral-800: #2a2620;
-	--color-neutral-900: #1d1915;
-	--color-neutral-950: #14110e;
-}
-
-:root {
-	color-scheme: light;
-	scroll-behavior: smooth;
-	scrollbar-width: none;
 }
 
 html[data-theme='light'] body {

@@ -100,10 +100,11 @@ You must add:
 ovyn can be installed from supported browsers as a standalone app. Its service worker caches versioned build and static assets, shows an offline fallback for navigation, and avoids caching personalized server-rendered pages.
 
 The interface uses Poppins for controls with a warm serif (Newsreader) for
-headings, and a soft, low-contrast palette that opens in cream and switches to a
-warm charcoal at night. Profile wallpapers accept JPEG, PNG, WebP, GIF, MP4 and
-WebM uploads up to 25 MB. Custom profile audio is user-initiated (never
-autoplayed); custom cursor images are PNG/WebP uploads.
+headings, on a soft, low-contrast palette that opens dark and has a cream light
+mode. The theme choice is remembered and follows you across open tabs. Profile
+wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom
+profile audio is user-initiated (never autoplayed); custom cursor images are
+PNG/WebP uploads.
 
 Account settings let each device manage browser notification permission and event-category preferences, with a local test notification. The service worker can receive and filter push payloads, but remote push subscriptions and server delivery are not wired yet; VAPID support remains follow-up work.
 

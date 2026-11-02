@@ -1,12 +1,19 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import '../app.css';
 	import Nav from '#lib/components/Nav.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
+	import { startThemeSync } from '#lib/theme.svelte.ts';
 
 	let { children }: { children: any } = $props();
+
+	// One place keeps the theme in step with every other open tab.
+	onMount(() => {
+		startThemeSync();
+	});
 	const isLanding = $derived(page.url.pathname === '/');
 	const isProfilePage = $derived(page.route.id?.endsWith('/[username]') ?? false);
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);

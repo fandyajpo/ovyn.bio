@@ -1,19 +1,17 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 	<head>
 		<script>
 			try {
-				const stored = localStorage.getItem('ovyn-theme');
-				const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-				const theme = stored === 'light' || stored === 'dark' ? stored : prefersDark ? 'dark' : 'light';
-				document.documentElement.dataset.theme = theme;
+				const theme = localStorage.getItem('ovyn-theme');
+				if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
 			} catch {}
 		</script>
 		<meta charset="utf-8" />
 		<link rel="icon" href="%sveltekit.assets%/favicon.svg" type="image/svg+xml" />
 		<link rel="manifest" href="%sveltekit.assets%/manifest.webmanifest" />
 		<link rel="apple-touch-icon" href="%sveltekit.assets%/icons/ovyn-apple.svg" />
-		<meta name="theme-color" content="#fff6e9" />
+		<meta name="theme-color" content="#111117" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 		<meta name="apple-mobile-web-app-title" content="ovyn" />
