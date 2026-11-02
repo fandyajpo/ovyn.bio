@@ -292,3 +292,48 @@ body {
 		box-shadow: 8px 9px 0 rgb(131 230 255 / 22%);
 	}
 }
+
+
+
+#features,
+#faq {
+	scroll-margin-top: 5rem;
+}
+
+.app-frame[data-landing='true'] .hero-stage {
+	padding: 2rem clamp(1.25rem, 4vw, 3rem);
+	border-radius: 1.5rem;
+}
+
+.app-frame[data-landing='true'] .hero-stage > .relative.grid {
+	gap: 2rem;
+}
+
+.app-frame[data-landing='true'] .hero-stage h1 {
+	font-size: clamp(2.5rem, 5.5vw, 4.25rem);
+}
+
+.app-frame[data-landing='true'] #features,
+.app-frame[data-landing='true'] #faq {
+	gap: 0.85rem;
+	padding-block: 2rem;
+}
+
+.app-frame[data-landing='true'] #features .collage-card {
+	padding: 1.25rem;
+}
+
+.app-frame[data-landing='true'] #features .collage-card h2 {
+	margin-top: 1.25rem;
+}
+
+.app-frame[data-landing='true'] .cta-panel {
+	padding-block: 2.25rem;
+	border-radius: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		scroll-behavior: auto;
+	}
+}

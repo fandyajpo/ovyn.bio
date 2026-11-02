@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page } from '$app/state';
 	import { QueryClient, QueryClientProvider } from '@tanstack/svelte-query';
 	import type { LayoutData } from './$types';
 	import '../app.css';
@@ -8,6 +9,7 @@
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 
 	let { data, children }: { data: LayoutData; children: any } = $props();
+	const isLanding = $derived(page.url.pathname === '/');
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -17,12 +19,12 @@
 </script>
 
 <QueryClientProvider client={queryClient}>
-	<div class="app-frame">
+	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
-		<Nav user={data.user} isAdmin={data.isAdmin} />
+		<Nav user={data.user} isAdmin={data.isAdmin} {isLanding} />
 
-		<div class="app-workspace">
-			<AppNavigation isAuthenticated={Boolean(data.user)} isAdmin={data.isAdmin} />
+		<div class="app-workspace" data-landing={isLanding ? 'true' : 'false'}>
+			{#if !isLanding}<AppNavigation isAuthenticated={Boolean(data.user)} isAdmin={data.isAdmin} />{/if}
 			<main id="main-content" class="page-content" tabindex="-1">
 				<div class="page-container">
 					{@render children()}
@@ -68,7 +70,7 @@
 	.page-content {
 		width: 100%;
 		min-width: 0;
-		padding: 1.5rem max(1rem, env(safe-area-inset-right)) calc(6.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+		padding: 1.25rem max(1rem, env(safe-area-inset-right)) calc(6.5rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
 	}
 
 	.page-container {
@@ -77,8 +79,17 @@
 		margin-inline: auto;
 	}
 
-	.app-footer {
-		padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+	.app-frame[data-landing='true'] .page-container {
+		max-width: 76rem;
+	}
+
+	.app-frame[data-landing='true'] .page-content {
+		padding-bottom: calc(1.5rem + env(safe-area-inset-bottom));
+	}
+
+	.app-frame[data-landing='true'] .app-footer {
+		margin-top: 1.5rem;
+		padding-bottom: env(safe-area-inset-bottom);
 	}
 
 	.app-footer-inner {
@@ -113,22 +124,22 @@
 	}
 
 	@media (min-width: 40rem) {
-		.app-workspace {
+		.app-workspace:not([data-landing='true']) {
 			grid-template-columns: 4.5rem minmax(0, 1fr);
 		}
 
 		.page-content {
-			padding-block: 2rem;
+			padding-block: 1.5rem;
 			padding-inline: max(1.25rem, env(safe-area-inset-left)) max(1.25rem, env(safe-area-inset-right));
 		}
 
-		.app-footer {
+		.app-frame:not([data-landing='true']) .app-footer {
 			padding-bottom: 0;
 		}
 	}
 
 	@media (min-width: 64rem) {
-		.app-workspace {
+		.app-workspace:not([data-landing='true']) {
 			grid-template-columns: 15rem minmax(0, 1fr);
 		}
 	}
