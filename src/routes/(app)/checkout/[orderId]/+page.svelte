@@ -46,8 +46,8 @@
 	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Complete your payment</h1>
 
 	<Card class="flex flex-col gap-4 p-6">
-		<div class="flex items-center justify-between">
-			<div>
+		<div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+			<div class="min-w-0">
 				<p class="text-sm text-neutral-400">{data.product.name}</p>
 				<p class="font-[family-name:var(--font-display)] text-2xl font-bold">
 					{formatIdr(data.order.amount)}
@@ -74,9 +74,9 @@
 						? 'Virtual account number'
 						: 'Payment code'}
 				</p>
-				<div class="mt-1 flex items-center justify-between gap-3">
-					<p class="font-mono text-xl tracking-wider text-lime-300">{data.payment.paymentCode}</p>
-					<Button variant="secondary" onclick={copyVa}>{copied ? 'Copied!' : 'Copy'}</Button>
+				<div class="mt-1 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-between">
+					<p class="min-w-0 break-all font-mono text-xl tracking-wider text-lime-300">{data.payment.paymentCode}</p>
+					<Button variant="secondary" class="w-full sm:w-auto" onclick={copyVa}>{copied ? 'Copied!' : 'Copy'}</Button>
 				</div>
 			</div>
 
@@ -99,8 +99,8 @@
 		{/if}
 	</Card>
 
-	<div class="flex gap-3">
-		<Button href="/billing" variant="secondary">Plans &amp; billing</Button>
-		<Button href="/billing/history" variant="ghost">Payment history</Button>
+	<div class="flex flex-col gap-2 sm:flex-row">
+		<Button href="/billing" variant="secondary" class="w-full sm:w-auto">Plans &amp; billing</Button>
+		<Button href="/billing/history" variant="ghost" class="w-full sm:w-auto">Payment history</Button>
 	</div>
 </div>

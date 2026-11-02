@@ -39,7 +39,7 @@
 <section class="hero-stage relative isolate overflow-hidden rounded-[2rem] border border-white/10 px-5 py-10 sm:px-10 sm:py-14 lg:px-14">
 	<div class="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full border border-lime-300/10 sm:size-96" aria-hidden="true"></div>
 	<div class="pointer-events-none absolute right-20 top-20 size-3 rounded-full bg-pop-pink shadow-[0_0_36px_12px_rgba(255,120,168,0.18)]" aria-hidden="true"></div>
-	<div class="relative grid items-center gap-12 lg:grid-cols-[1.05fr_.95fr]">
+	<div class="relative grid items-center gap-12 md:grid-cols-[1.05fr_.95fr]">
 		<div class="flex flex-col items-start gap-5">
 			<Reveal delay={0}>
 				<div class="flex flex-wrap items-center gap-3">
@@ -117,7 +117,7 @@
 	</div>
 </section>
 
-<section id="features" class="grid gap-4 py-12 sm:grid-cols-3 sm:py-16">
+<section id="features" class="grid gap-4 py-12 md:grid-cols-3 sm:py-16">
 	<Reveal delay={0} class="h-full">
 		<a href={data.user ? '/settings/profile' : '/login'} class="collage-card collage-card--pink group block h-full rounded-[1.6rem] bg-[#20191c] p-6 sm:p-7">
 			<div class="flex items-center justify-between"><span class="font-mono text-xs text-neutral-500">01 / IDENTITY</span><span class="sticker sticker--pink">MAKE IT YOU</span></div>
@@ -133,7 +133,7 @@
 		</a>
 	</Reveal>
 	<Reveal delay={180} class="h-full">
-		<a href="/shop" class="collage-card group block h-full rounded-[1.6rem] bg-[#1b1d17] p-6 sm:rotate-1 sm:p-7">
+		<a href={data.user ? '/shop' : '/login'} class="collage-card group block h-full rounded-[1.6rem] bg-[#1b1d17] p-6 sm:rotate-1 sm:p-7">
 			<div class="flex items-center justify-between"><span class="font-mono text-xs text-neutral-500">03 / EXPRESSION</span><span class="sticker">LITTLE FLEX</span></div>
 			<h2 class="mt-8 font-[family-name:var(--font-display)] text-2xl font-bold">Details matter.<br />So does the vibe.</h2>
 			<p class="mt-3 text-sm leading-6 text-neutral-400">Frames, wallpapers, and badges. Collect them, style them, make the page yours.</p>
@@ -169,7 +169,7 @@
 	</Reveal>
 {/if}
 
-<section id="faq" class="grid gap-8 py-12 sm:grid-cols-[.8fr_1.2fr] sm:py-16">
+<section id="faq" class="grid gap-8 py-12 md:grid-cols-[.8fr_1.2fr] sm:py-16">
 	<Reveal delay={0}>
 		<div class="max-w-sm">
 			<span class="sticker sticker--blue">GOOD TO KNOW</span>

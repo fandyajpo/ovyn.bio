@@ -21,9 +21,26 @@
 		{#if data.orders.length === 0}
 			<p class="p-8 text-center text-neutral-500">No orders recorded yet.</p>
 		{:else}
-			<div class="overflow-x-auto">
-				<table class="w-full text-left text-sm">
-					<thead class="font-mono text-xs uppercase text-neutral-500"><tr><th class="px-4 py-3">Date</th><th class="px-4 py-3">Product</th><th class="px-4 py-3">Buyer</th><th class="px-4 py-3">Amount</th><th class="px-4 py-3">Payment method</th><th class="px-4 py-3">Order / payment</th></tr></thead>
+			<div class="grid gap-3 p-3 lg:hidden">
+				{#each data.orders as order (order.orderId)}
+					<article class="rounded-xl border border-neutral-800 bg-neutral-950/50 p-4">
+						<div class="flex items-start justify-between gap-3">
+							<div class="min-w-0"><h2 class="truncate font-medium text-neutral-100">{order.productName}</h2><p class="mt-1 font-mono text-[10px] uppercase text-neutral-500">{order.productCategory}</p></div>
+							<p class="shrink-0 font-mono text-sm text-neutral-200">{formatIdr(order.amount)}</p>
+						</div>
+						<p class="mt-3 text-sm text-neutral-400">{order.customerSlug ? `@${order.customerSlug}` : 'Buyer unavailable'}</p>
+						<dl class="mt-4 grid grid-cols-2 gap-3 border-t border-neutral-800 pt-3 text-sm">
+							<div><dt class="text-xs text-neutral-500">Date</dt><dd class="mt-1 text-neutral-400">{formatDate(order.createdAt)}</dd></div>
+							<div><dt class="text-xs text-neutral-500">Payment method</dt><dd class="mt-1 text-neutral-400">{order.paymentMethod ?? '—'}</dd></div>
+							<div><dt class="text-xs text-neutral-500">Order status</dt><dd class="mt-1 text-neutral-300">{order.orderStatus}</dd></div>
+							<div><dt class="text-xs text-neutral-500">Payment status</dt><dd class="mt-1 text-neutral-400">{order.paymentStatus ?? 'No payment'}</dd></div>
+						</dl>
+					</article>
+				{/each}
+			</div>
+			<div class="hidden overflow-x-auto lg:block">
+				<table class="w-full min-w-[64rem] text-left text-sm">
+					<thead class="font-mono text-xs uppercase text-neutral-500"><tr><th scope="col" class="px-4 py-3">Date</th><th scope="col" class="px-4 py-3">Product</th><th scope="col" class="px-4 py-3">Buyer</th><th scope="col" class="px-4 py-3">Amount</th><th scope="col" class="px-4 py-3">Payment method</th><th scope="col" class="px-4 py-3">Order / payment</th></tr></thead>
 					<tbody class="divide-y divide-neutral-800">
 						{#each data.orders as order (order.orderId)}
 							<tr>

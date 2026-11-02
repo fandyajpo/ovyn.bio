@@ -26,12 +26,14 @@
 			No plans are available yet. Pricing is being finalized.
 		</Card>
 	{:else}
-		<div class="grid gap-4 sm:grid-cols-3">
+		<div class="responsive-grid-container">
+			<div class="adaptive-plans grid gap-4">
 			{#each data.products as product (product.id)}
 				<button
 					type="button"
 					onclick={() => (selected = product.id)}
-					class="rounded-xl border p-5 text-left transition-colors
+					aria-pressed={selected === product.id}
+					class="min-h-32 rounded-xl border p-5 text-left transition-colors
 						{selected === product.id
 						? 'border-lime-300 bg-lime-300/5'
 						: 'border-neutral-800 bg-neutral-900/50 hover:border-neutral-700'}"
@@ -43,11 +45,12 @@
 					<p class="mt-3 font-mono text-lime-300">{formatIdr(product.price)}</p>
 				</button>
 			{/each}
+			</div>
 		</div>
 
-		<form method="POST" action="/billing" class="flex items-center gap-4">
+		<form method="POST" action="/billing" class="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
 			<input type="hidden" name="productId" value={selected ?? ''} />
-			<Button type="submit" disabled={!selected}>Checkout</Button>
+			<Button type="submit" class="w-full sm:w-auto" disabled={!selected}>Checkout</Button>
 			{#if selectedProduct}
 				<p class="text-sm text-neutral-400">
 					Pay {formatIdr(selectedProduct.price)} via bank virtual account (DOKU)

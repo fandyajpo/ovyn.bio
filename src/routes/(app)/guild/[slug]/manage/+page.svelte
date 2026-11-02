@@ -91,14 +91,14 @@
 		{#if candidates.length > 0}
 			<ul class="mt-3 flex flex-col gap-1">
 				{#each candidates as c (c.userId)}
-					<li class="flex items-center justify-between rounded-lg bg-neutral-800/40 px-3 py-2">
-						<span class="text-sm text-neutral-200">
+					<li class="flex flex-col gap-2 rounded-lg bg-neutral-800/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+						<span class="min-w-0 truncate text-sm text-neutral-200">
 							{c.displayName || c.slug} <span class="font-mono text-xs text-neutral-500">@{c.slug}</span>
 						</span>
-						<form method="POST" action="/guild/{data.guild.slug}/manage">
+						<form class="w-full sm:w-auto" method="POST" action="/guild/{data.guild.slug}/manage">
 							<input type="hidden" name="intent" value="invite" />
 							<input type="hidden" name="userId" value={c.userId} />
-							<Button type="submit" variant="secondary">Invite</Button>
+							<Button type="submit" variant="secondary" class="w-full sm:w-auto">Invite</Button>
 						</form>
 					</li>
 				{/each}
@@ -109,7 +109,7 @@
 			<h3 class="mt-5 text-sm font-medium text-neutral-300">Pending invitations</h3>
 			<ul class="mt-2 flex flex-col divide-y divide-neutral-800">
 				{#each data.invitations as inv (inv.invitation.id)}
-					<li class="flex items-center justify-between py-2 text-sm">
+					<li class="flex flex-col items-start gap-2 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
 						<span>
 							@{inv.inviteeSlug}
 							<span class="font-mono text-xs text-neutral-600">expires {formatDate(inv.invitation.expiresAt)}</span>
@@ -130,7 +130,7 @@
 		<h2 class="mb-3 font-medium text-neutral-200">Members</h2>
 		<ul class="flex flex-col divide-y divide-neutral-800">
 			{#each data.members as m (m.slug)}
-				<li class="flex flex-wrap items-center gap-3 py-2">
+				<li class="flex flex-col items-stretch gap-3 py-3 sm:flex-row sm:items-center">
 					<span class="text-sm text-neutral-200">
 						<a href="/{m.slug}" class="hover:text-lime-300">{m.displayName || m.slug}</a>
 						<span class="rounded-full border border-neutral-700 px-2 py-0.5 font-mono text-xs text-neutral-400">
@@ -139,31 +139,31 @@
 					</span>
 
 					{#if data.role === 'owner' && m.role !== 'owner'}
-						<div class="ml-auto flex gap-2">
+						<div class="flex flex-col gap-2 sm:ml-auto sm:flex-row sm:flex-wrap">
 							<form method="POST" action="/guild/{data.guild.slug}/manage">
 								<input type="hidden" name="intent" value="promote" />
 								<input type="hidden" name="userId" value={m.userId} />
 								<input type="hidden" name="role" value={m.role === 'officer' ? 'member' : 'officer'} />
-								<Button type="submit" variant="ghost">
+								<Button type="submit" variant="ghost" class="w-full sm:w-auto">
 									{m.role === 'officer' ? 'Demote' : 'Promote'}
 								</Button>
 							</form>
 							<form method="POST" action="/guild/{data.guild.slug}/manage">
 								<input type="hidden" name="intent" value="transfer" />
 								<input type="hidden" name="userId" value={m.userId} />
-								<Button type="submit" variant="secondary">Make owner</Button>
+								<Button type="submit" variant="secondary" class="w-full sm:w-auto">Make owner</Button>
 							</form>
 							<form method="POST" action="/guild/{data.guild.slug}/manage">
 								<input type="hidden" name="intent" value="remove" />
 								<input type="hidden" name="userId" value={m.userId} />
-								<Button type="submit" variant="danger">Remove</Button>
+								<Button type="submit" variant="danger" class="w-full sm:w-auto">Remove</Button>
 							</form>
 						</div>
 					{:else if data.role === 'officer' && m.role === 'member'}
-						<form class="ml-auto" method="POST" action="/guild/{data.guild.slug}/manage">
+						<form class="w-full sm:ml-auto sm:w-auto" method="POST" action="/guild/{data.guild.slug}/manage">
 							<input type="hidden" name="intent" value="remove" />
 							<input type="hidden" name="userId" value={m.userId} />
-							<Button type="submit" variant="danger">Remove</Button>
+							<Button type="submit" variant="danger" class="w-full sm:w-auto">Remove</Button>
 						</form>
 					{/if}
 				</li>

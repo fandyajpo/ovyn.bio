@@ -32,9 +32,9 @@
 	{#if !data.guild}
 		<Card class="flex flex-col items-center gap-4 p-10 text-center">
 			<p class="text-neutral-400">You're not in a guild yet. OVYN is better with your circle.</p>
-			<div class="flex gap-3">
-				<Button href="/discover" variant="secondary">Discover guilds</Button>
-				<Button href="/guild/create">Create a guild</Button>
+			<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+				<Button href="/discover" variant="secondary" class="w-full sm:w-auto">Discover guilds</Button>
+				<Button href="/guild/create" class="w-full sm:w-auto">Create a guild</Button>
 			</div>
 		</Card>
 	{:else}
@@ -61,9 +61,9 @@
 			<h2 class="mb-3 font-medium text-neutral-200">Members</h2>
 			<ul class="flex flex-col divide-y divide-neutral-800">
 				{#each data.members as m (m.slug)}
-					<li class="flex items-center gap-3 py-2">
+					<li class="flex flex-wrap items-center gap-x-3 gap-y-1 py-3">
 						<Avatar name={m.displayName || m.slug} size="sm" />
-						<a href="/{m.slug}" class="text-sm text-neutral-200 hover:text-lime-300">{m.displayName || m.slug}</a>
+						<a href="/{m.slug}" class="min-w-0 max-w-full truncate text-sm text-neutral-200 hover:text-lime-300">{m.displayName || m.slug}</a>
 						<span class="font-mono text-xs text-neutral-600">joined {formatDate(m.joinedAt)}</span>
 						<span class="ml-auto rounded-full border border-neutral-700 px-2 py-0.5 font-mono text-xs text-neutral-400">
 							{m.role}
