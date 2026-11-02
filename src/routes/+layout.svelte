@@ -12,12 +12,6 @@
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
 	const isAdminPage = $derived(page.route.id?.includes('(app)/admin') ?? false);
 	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage);
-
-	const queryClient = new QueryClient({
-		defaultOptions: {
-			queries: { retry: 1, refetchOnWindowFocus: false }
-		}
-	});
 </script>
 
 <div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'}>
