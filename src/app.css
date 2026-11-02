@@ -200,7 +200,7 @@ html[data-theme='light'] .profile-sheet .ovyn-card {
 	box-shadow: 3px 3px 0 rgb(131 230 255 / 10%);
 }
 
-.faq-item[open] {
+.faq-item.is-open {
 	border-color: rgb(213 255 53 / 35%);
 }
 
@@ -211,14 +211,21 @@ html[data-theme='light'] .profile-sheet .ovyn-card {
 }
 
 .faq-summary {
-	list-style: none;
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	border: 0;
+	background: none;
+	padding: 0;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
 }
 
-.faq-summary::-webkit-details-marker {
-	display: none;
-}
-
-.faq-item[open] .faq-toggle {
+.faq-item.is-open .faq-toggle {
 	transform: rotate(45deg);
 	color: var(--color-pop-pink);
 }
@@ -591,11 +598,11 @@ html[data-theme='light'] ::selection {
 	color: var(--color-on-accent);
 }
 
-html[data-theme='light'] .faq-item[open] {
+html[data-theme='light'] .faq-item.is-open {
 	border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
 }
 
-html[data-theme='light'] .faq-item[open] .faq-toggle {
+html[data-theme='light'] .faq-item.is-open .faq-toggle {
 	color: var(--color-pop-pink);
 }
 
@@ -847,6 +854,11 @@ html[data-theme='light'] .sticker--lilac {
 	color: var(--color-foreground);
 }
 
+.faq-list {
+	display: grid;
+	gap: 0.85rem;
+}
+
 .faq-item {
 	border-color: var(--color-divider);
 	border-radius: 1.1rem;
@@ -855,18 +867,24 @@ html[data-theme='light'] .sticker--lilac {
 	transition: background-color 180ms ease, border-color 180ms ease;
 }
 
-.faq-item[open] {
+.faq-item.is-open {
 	border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
 	background: color-mix(in srgb, var(--color-surface) 84%, transparent);
+}
+
+.faq-panel {
+	overflow: hidden;
+	padding-top: 0.75rem;
 }
 
 .faq-toggle {
 	color: var(--color-accent);
 	font-size: 1.35rem;
-	transition: transform 180ms ease;
+	line-height: 1;
+	transition: transform 220ms ease, color 220ms ease;
 }
 
-.faq-item[open] .faq-toggle { transform: rotate(45deg); }
+.faq-item.is-open .faq-toggle { transform: rotate(45deg); }
 
 .landing-hero { min-height: min(47rem, calc(100svh - 4rem)); }
 .landing-hero h1 { font-family: 'Poppins', system-ui, sans-serif; }
@@ -901,7 +919,6 @@ html[data-theme='light'] .sticker--lilac {
 	border-radius: 2rem;
 	background: linear-gradient(145deg, color-mix(in srgb, var(--color-surface) 82%, transparent), color-mix(in srgb, var(--color-background) 90%, transparent));
 	padding: clamp(1.5rem, 5vw, 2.5rem);
-	box-shadow: 0 30px 90px rgb(0 0 0 / 16%);
 	backdrop-filter: blur(14px);
 }
 
@@ -916,7 +933,7 @@ html[data-theme='light'] .sticker--lilac {
 
 .profile-live { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--color-muted); font-size: 0.63rem; font-weight: 600; letter-spacing: 0.14em; }
 .avatar-orbit { position: absolute; z-index: -1; inset: -0.65rem; border: 1px solid color-mix(in srgb, var(--color-accent) 36%, transparent); border-radius: 50%; }
-.orbit-caption { position: absolute; z-index: 3; border-radius: 999px; background: var(--color-surface-raised); padding: 0.5rem 0.8rem; color: var(--color-muted); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.13em; box-shadow: 0 8px 25px rgb(0 0 0 / 10%); }
+.orbit-caption { position: absolute; z-index: 3; border-radius: 999px; background: var(--color-surface-raised); padding: 0.5rem 0.8rem; color: var(--color-muted); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.13em; }
 .orbit-caption--one { top: 0; right: 0; transform: rotate(5deg); }
 .orbit-caption--two { bottom: 0.3rem; left: 0.3rem; transform: rotate(-5deg); }
 

@@ -3,10 +3,17 @@
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
+	import { slide } from 'svelte/transition';
 
 	let { data }: { data: PageData } = $props();
 	let scrollY = $state(0);
 	const parallaxY = $derived(Math.min(scrollY * 0.12, 110));
+
+	let openFaq = $state<number | null>(null);
+
+	function toggleFaq(index: number) {
+		openFaq = openFaq === index ? null : index;
+	}
 
 	const freeFeatures = [
 		'Background effects',
@@ -194,10 +201,23 @@
 	<div class="faq-list">
 		{#each faqs as item, index (item.question)}
 			<Reveal delay={index * 60}>
-				<details class="faq-item rounded-2xl px-5 py-4">
-					<summary class="faq-summary flex cursor-pointer items-center justify-between gap-4 font-medium text-neutral-100">{item.question}<span class="faq-toggle" aria-hidden="true">+</span></summary>
-					<p class="mt-3 max-w-2xl text-sm leading-6 text-neutral-400">{item.answer}</p>
-				</details>
+				<div class="faq-item px-5 py-4 {openFaq === index ? 'is-open' : ''}">
+					<button
+						type="button"
+						class="faq-summary"
+						aria-expanded={openFaq === index}
+						aria-controls={`faq-panel-${index}`}
+						onclick={() => toggleFaq(index)}
+					>
+						<span class="font-medium text-neutral-100">{item.question}</span>
+						<span class="faq-toggle" aria-hidden="true">+</span>
+					</button>
+					{#if openFaq === index}
+						<div id={`faq-panel-${index}`} class="faq-panel" transition:slide={{ duration: 280 }}>
+							<p class="max-w-2xl text-sm leading-6 text-neutral-400">{item.answer}</p>
+						</div>
+					{/if}
+				</div>
 			</Reveal>
 		{/each}
 	</div>
