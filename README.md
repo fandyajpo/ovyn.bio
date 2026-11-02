@@ -35,6 +35,22 @@ npm run db:migrate     # apply them (uses DATABASE_URL directly)
 npm run dev
 ```
 
+## Starting from a clean database
+
+To wipe every table and rebuild from the migration files:
+
+```bash
+npm run db:reset -- --yes
+npm run db:migrate
+npm run db:seed-shop
+```
+
+`db:reset` is destructive and only runs with the flag. It drops the `public`
+and `drizzle` schemas, plus the legacy `neon_auth` schema when it still exists.
+Discord and Google both sign in through the same `user` and `account` tables,
+so after a reset you only need the OAuth credentials, not any provider-specific
+database setup.
+
 ## Environment variables
 
 Already provisioned for you (see `.env.example`):
@@ -60,6 +76,8 @@ You must add:
   `/admin`. Find your ID with Discord Developer Mode → right-click your profile
   → Copy User ID. Set this only in local `.env` and Vercel server environment
   variables; the server checks it against the authenticated Discord account.
+- `OVYN_ADMIN_EMAILS` - optional comma-separated account emails authorized for
+  `/admin`, for administrators who sign in with Google.
 - `DOKU_PRIVATE_KEY` - the RSA private key DOKU gives you for SNAP B2B token
   requests (`X-SIGNATURE = SHA256withRSA(privateKey, clientID + "|" + timestamp)`)
 - `DOKU_PARTNER_SERVICE_ID` - your 8-digit virtual account company code (BIN)
@@ -95,13 +113,12 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   seeds new profiles, while profile username, display name, bio and uploaded
   avatar are ovyn-owned and remain editable. An uploaded avatar overrides the
   sign-in provider's picture until the user resets it.
-- **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
-  one-time data backfill with `npm run db:backfill` - it copies users and
-  Discord accounts from the managed `neon_auth` schema into the standalone
-  tables with the SAME user ids, so profiles, guild memberships, and orders
-  keep working. It's idempotent (safe to re-run). Do not disable Neon Managed
-  Auth or drop `neon_auth` until sign-in is verified.
-  (Prefer raw SQL? The same statements are in `scripts/backfill-better-auth.sql`.)
+- **Legacy Neon Managed Auth** - `npm run db:backfill` copies users and
+  Discord accounts out of the old managed `neon_auth` schema into the
+  standalone tables with the SAME user ids, so existing profiles, guild
+  memberships, and orders keep working. It is only needed for a database that
+  still holds managed-auth data; a fresh database (see above) skips it. That
+  legacy schema has no Google accounts, so Google users just sign in again.
 - **One guild per user** is enforced three ways: `guild_members.user_id`
   PRIMARY KEY, a `SELECT … FOR UPDATE` lock on the user row inside a
   transaction, and explicit conflict errors with user-facing explanations.
@@ -135,7 +152,8 @@ Whenever the schema changes, run `npm run db:generate`, review the generated mig
 
 ## Monetization administration
 
-Set `OVYN_ADMIN_DISCORD_IDS` to your comma-separated Discord user ID(s) locally
+Set `OVYN_ADMIN_DISCORD_IDS` (and optionally `OVYN_ADMIN_EMAILS` for Google
+accounts) to your comma-separated IDs or addresses locally
 and in Vercel, then sign in with one of those accounts and open `/admin` from
 your account overview. The admin area has its own sidebar and no public navbar
 or footer. It lets you browse the catalog as a table, create and edit cosmetics

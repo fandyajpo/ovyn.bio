@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { and, count, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
-import { OVYN_ADMIN_DISCORD_IDS } from '$app/env/private';
+import { OVYN_ADMIN_DISCORD_IDS, OVYN_ADMIN_EMAILS } from '$app/env/private';
 import { db } from '#lib/server/db';
-import { cosmetics, discordAccounts, orders, payments, products, profiles } from '#lib/server/db/schema';
+import { cosmetics, discordAccounts, orders, payments, products, profiles, user } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import type { AdminCreateProduct, AdminUpdateProduct } from '#lib/schemas/admin';
 
@@ -18,19 +18,35 @@ function configuredAdminDiscordIds(): Set<string> {
 	);
 }
 
-/** Admin access is based on the server-verified Discord ID, never client data. */
+function configuredAdminEmails(): Set<string> {
+	return new Set(
+		(OVYN_ADMIN_EMAILS ?? '')
+			.split(',')
+			.map((email) => email.trim().toLowerCase())
+			.filter((email) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))
+	);
+}
+
+/**
+ * Admin access comes from the server-verified Discord ID or account email, so
+ * Discord and Google sign-in both work. Client input is never trusted.
+ */
 export async function isPlatformAdmin(userId: string | null): Promise<boolean> {
 	if (!userId) return false;
 	const allowedIds = configuredAdminDiscordIds();
-	if (allowedIds.size === 0) return false;
+	const allowedEmails = configuredAdminEmails();
+	if (allowedIds.size === 0 && allowedEmails.size === 0) return false;
 
 	const [account] = await db
-		.select({ discordId: discordAccounts.discordId })
-		.from(discordAccounts)
-		.where(eq(discordAccounts.userId, userId))
+		.select({ discordId: discordAccounts.discordId, email: user.email })
+		.from(user)
+		.leftJoin(discordAccounts, eq(discordAccounts.userId, user.id))
+		.where(eq(user.id, userId))
 		.limit(1);
 
-	return Boolean(account && allowedIds.has(account.discordId));
+	if (!account) return false;
+	if (account.discordId && allowedIds.has(account.discordId)) return true;
+	return Boolean(account.email && allowedEmails.has(account.email.toLowerCase()));
 }
 
 export async function getAdminOverview() {

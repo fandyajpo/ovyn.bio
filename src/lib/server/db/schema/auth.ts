@@ -6,14 +6,13 @@ import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
  * app-specific tables here; they belong in ./app.ts.
  * `status` is an additional field declared in the auth config.
  *
- * Migration note: these tables are backfilled from Neon Auth's managed
- * `neon_auth` schema with the SAME user ids, so existing profiles, guild
- * memberships, and orders keep working untouched.
+ * Discord and Google both sign in through the same rows: one `user` row plus
+ * one `account` row per provider, so a person can link either or both.
  */
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
 	name: text('name').notNull(),
-	/** Nullable: Discord accounts without an email get a synthetic placeholder. */
+	/** Discord accounts may not share an email, so this can be a placeholder. */
 	email: text('email').unique(),
 	emailVerified: boolean('email_verified').notNull().default(false),
 	image: text('image'),
@@ -39,8 +38,8 @@ export const account = pgTable(
 	'account',
 	{
 		id: text('id').primaryKey(),
-		accountId: text('account_id').notNull(), // Discord user ID
-		providerId: text('provider_id').notNull(), // "discord"
+		accountId: text('account_id').notNull(), // provider user id
+		providerId: text('provider_id').notNull(), // "discord" or "google"
 		userId: text('user_id')
 			.notNull()
 			.references(() => user.id, { onDelete: 'cascade' }),

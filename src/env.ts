@@ -21,6 +21,7 @@ export const variables = defineEnvVars({
 	GOOGLE_CLIENT_ID: { schema: z.string().optional() },
 	GOOGLE_CLIENT_SECRET: { schema: z.string().optional() },
 	OVYN_ADMIN_DISCORD_IDS: { schema: z.string().optional() },
+	OVYN_ADMIN_EMAILS: { schema: z.string().optional() },
 
 	// Neon Object Storage (S3-compatible)
 	AWS_ENDPOINT_URL_S3: { schema: z.string().optional() },
