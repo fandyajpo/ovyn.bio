@@ -60,7 +60,7 @@ const productFields = {
 export const adminCreateProductSchema = z
 	.object({
 		...productFields,
-		category: z.enum(['plan', 'cosmetic', 'profile_spotlight', 'guild_spotlight'])
+		category: z.enum(['plan', 'cosmetic'])
 	})
 	.superRefine((product, context) => {
 		if (product.category === 'cosmetic') {
@@ -74,18 +74,11 @@ export const adminCreateProductSchema = z
 				context.addIssue({ code: 'custom', path: ['pointsPrice'], message: 'A free cosmetic needs a points price (use 0 for free)' });
 			}
 		} else if (product.category === 'plan') {
-			if (product.durationDays !== 30) {
-				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Premium access lasts exactly 30 days' });
+			if (product.durationDays !== null) {
+				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Premium is lifetime access; leave duration blank' });
 			}
-			if (product.price < 1) {
-				context.addIssue({ code: 'custom', path: ['price'], message: 'Premium plans must have a positive price' });
-			}
-		} else {
-			if (!product.durationDays) {
-				context.addIssue({ code: 'custom', path: ['durationDays'], message: 'Spotlights need a duration from 1 to 365 days' });
-			}
-			if (product.price < 1) {
-				context.addIssue({ code: 'custom', path: ['price'], message: 'Spotlight products must have a positive price' });
+			if (product.price !== 100_000) {
+				context.addIssue({ code: 'custom', path: ['price'], message: 'Premium lifetime access costs Rp 100.000' });
 			}
 		}
 	});

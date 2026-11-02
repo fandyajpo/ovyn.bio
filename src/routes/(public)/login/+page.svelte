@@ -2,23 +2,19 @@
 	import { goto } from '$app/navigation';
 	import { signIn } from '#lib/auth-client';
 	import Button from '#lib/components/ui/Button.svelte';
+	import type { PageData } from './$types';
 
-	let { form }: { form?: { error?: string } } = $props();
-
-	let loading = $state(false);
+	let { data, form }: { data: PageData; form?: { error?: string } } = $props();
+	let loadingProvider = $state<'discord' | 'google' | null>(null);
 	let error = $state<string | null>(null);
-
 	const initialError = $derived(form?.error ?? null);
 
-	async function login() {
-		loading = true;
+	async function login(provider: 'discord' | 'google') {
+		loadingProvider = provider;
 		error = null;
-		const { error: err } = await signIn.social({
-			provider: 'discord',
-			callbackURL: '/account'
-		});
+		const { error: err } = await signIn.social({ provider, callbackURL: '/account' });
 		if (err) {
-			loading = false;
+			loadingProvider = null;
 			error = err.message ?? 'Sign-in failed. Please try again.';
 			return;
 		}
@@ -30,17 +26,27 @@
 	<title>Sign in — OVYN</title>
 </svelte:head>
 
-<div class="mx-auto flex max-w-md flex-col items-center gap-6 py-20 text-center">
-	<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Sign in to OVYN</h1>
-	<p class="text-neutral-400">One account, one identity. Sign in with Discord to continue.</p>
+<div class="mx-auto flex min-h-[65svh] max-w-md flex-col items-center justify-center gap-6 py-16 text-center">
+	<p class="landing-eyebrow justify-center">YOUR SPACE IS WAITING</p>
+	<div>
+		<h1 class="text-3xl font-semibold tracking-tight">Welcome to OVYN</h1>
+		<p class="mt-3 text-neutral-400">Sign in and make a corner of the internet your own.</p>
+	</div>
 
-	<Button onclick={login} loading={loading} class="w-full">Continue with Discord</Button>
+	<div class="flex w-full flex-col gap-3">
+		<Button onclick={() => login('discord')} loading={loadingProvider === 'discord'} disabled={loadingProvider !== null && loadingProvider !== 'discord'} class="w-full">Continue with Discord</Button>
+		{#if data.googleEnabled}
+			<Button onclick={() => login('google')} loading={loadingProvider === 'google'} disabled={loadingProvider !== null && loadingProvider !== 'google'} variant="secondary" class="w-full">Continue with Google</Button>
+		{:else}
+			<Button disabled variant="secondary" class="w-full">Google sign-in not configured yet</Button>
+		{/if}
+	</div>
 
 	{#if error || initialError}
 		<p class="text-sm text-red-400" role="alert">{error ?? initialError}</p>
 	{/if}
 
-	<p class="text-xs text-neutral-600">
-		We only request your Discord identity (identify scope). Your email stays yours.
+	<p class="max-w-sm text-xs leading-6 text-neutral-500">
+		Sign-in is only used to protect your account. Your OVYN profile identity stays yours to customize.
 	</p>
 </div>

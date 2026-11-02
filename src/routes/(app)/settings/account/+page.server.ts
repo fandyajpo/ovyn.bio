@@ -12,5 +12,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 		.where(eq(discordAccounts.userId, locals.user.id))
 		.limit(1);
 
-	return { discord: discord ?? null };
+	return {
+		discord: discord ?? null,
+		userName: locals.user.name,
+		userImage: locals.user.image
+	};
 };

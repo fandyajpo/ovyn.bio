@@ -20,6 +20,8 @@ export const RESERVED_SLUGS = new Set([
 	'invitations',
 	'webhooks',
 	'uploads',
+	'shop',
+	'spotlight',
 	'media',
 	'static',
 	'_app',

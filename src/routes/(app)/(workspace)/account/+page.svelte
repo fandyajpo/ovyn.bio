@@ -62,9 +62,9 @@
 			</div>
 			<p class="font-[family-name:var(--font-display)] text-2xl font-bold">{data.plan.tier === 'premium' ? 'Premium' : 'Free'}</p>
 			{#if data.plan.tier === 'premium'}
-				<p class="text-sm text-neutral-400">Access until {data.plan.premiumUntil ? formatDate(data.plan.premiumUntil) : '—'} · {data.plan.daysRemaining} days remaining.</p>
+				<p class="text-sm text-neutral-400">{data.plan.isLifetime ? 'Lifetime Premium access.' : `Legacy access until ${data.plan.premiumUntil ? formatDate(data.plan.premiumUntil) : '—'} · ${data.plan.daysRemaining} days remaining.`}</p>
 			{:else}
-				<p class="text-sm text-neutral-400">All current features remain available on Free. Premium benefits will be announced later.</p>
+				<p class="text-sm text-neutral-400">Free includes your profile, analytics and social links. Premium is a one-time lifetime upgrade.</p>
 			{/if}
 			<Button href="/upgrade" variant="secondary" class="mt-auto w-fit">Plans &amp; upgrade</Button>
 		</Card>

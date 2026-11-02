@@ -6,6 +6,7 @@ import { getGuildById, getMembership } from '#lib/server/services/guilds';
 import { getEquippedForProfile } from '#lib/server/services/cosmetics';
 import { recordProfileView } from '#lib/server/services/engagement';
 import { presignDownload } from '#lib/server/storage';
+import { getUserPlan } from '#lib/server/services/billing';
 
 export const load: PageServerLoad = async ({ params, locals }) => {
 	const row = await getProfileBySlug(params.username);
@@ -38,6 +39,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 			links: [],
 			guild: null,
 			cosmetics: { frameUrl: null, wallpaperUrl: null, badgeUrl: null },
+			isPremium: false,
 			viewerTracked: false
 		};
 	}
@@ -46,10 +48,11 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 	if (locals.user) await recordProfileView(row.profile.userId, locals.user.id);
 
 	// Equipped cosmetics + identity files resolve in parallel.
-	const [cosmetics, membership, links] = await Promise.all([
+	const [cosmetics, membership, links, plan] = await Promise.all([
 		getEquippedForProfile(row.profile.slug),
 		getMembership(row.profile.userId),
-		listProfileLinks(row.profile.userId)
+		listProfileLinks(row.profile.userId),
+		getUserPlan(row.profile.userId)
 	]);
 
 	const [frameUrl, wallpaperUrl, badgeUrl, avatarUrl, bannerUrl, audioUrl, cursorUrl] = await Promise.all([
@@ -59,10 +62,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		// Avatar: uploaded OVYN avatar wins, else the synced Discord avatar.
 		row.profile.avatarKey
 			? presignDownload(row.profile.avatarKey)
-			: row.discord?.avatarUrl ?? null,
+			: row.discord?.avatarUrl ?? row.authUser.image ?? null,
 		row.profile.bannerKey ? presignDownload(row.profile.bannerKey) : null,
 		row.profile.audioKey ? presignDownload(row.profile.audioKey) : null,
-		row.profile.cursorKey ? presignDownload(row.profile.cursorKey) : null
+		row.profile.cursorKey && plan.tier === 'premium' ? presignDownload(row.profile.cursorKey) : null
 	]);
 
 	const guild = membership ? await getGuildById(membership.guild.id) : null;
@@ -80,6 +83,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 		links,
 		guild,
 		cosmetics: { frameUrl, wallpaperUrl, badgeUrl },
+		isPremium: plan.tier === 'premium',
 		viewerTracked: Boolean(locals.user && !isOwner)
 	};
 };

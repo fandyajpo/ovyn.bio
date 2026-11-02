@@ -5,20 +5,22 @@ import { getDiscordAccountByUserId, getProfileByUserId, setProfileAudioKey, setP
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 import { presignDownload } from '#lib/server/storage';
+import { getUserPlan } from '#lib/server/services/billing';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
-	const [profile, discord] = await Promise.all([
+	const [profile, discord, plan] = await Promise.all([
 		getProfileByUserId(locals.user.id),
-		getDiscordAccountByUserId(locals.user.id)
+		getDiscordAccountByUserId(locals.user.id),
+		getUserPlan(locals.user.id)
 	]);
 	const [bannerUrl, avatarUrl, audioUrl, cursorUrl] = await Promise.all([
 		profile.bannerKey ? presignDownload(profile.bannerKey) : null,
-		profile.avatarKey ? presignDownload(profile.avatarKey) : discord?.avatarUrl ?? null,
+		profile.avatarKey ? presignDownload(profile.avatarKey) : discord?.avatarUrl ?? locals.user.image ?? null,
 		profile.audioKey ? presignDownload(profile.audioKey) : null,
-		profile.cursorKey ? presignDownload(profile.cursorKey) : null
+		profile.cursorKey && plan.tier === 'premium' ? presignDownload(profile.cursorKey) : null
 	]);
-	return { profile, avatarUrl, bannerUrl, audioUrl, cursorUrl };
+	return { profile, avatarUrl, bannerUrl, audioUrl, cursorUrl, plan };
 };
 
 export const actions: Actions = {
@@ -27,11 +29,11 @@ export const actions: Actions = {
 		try {
 			rateLimit(`profile-avatar:${locals.user.id}`, 10, 60_000);
 			await setProfileAvatar(locals.user.id, null);
-			return { ok: 'Discord picture restored.' };
+			return { ok: 'Account picture restored.' };
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
-			return fail(500, { error: 'Could not restore your Discord avatar' });
+			return fail(500, { error: 'Could not restore your account picture' });
 		}
 	},
 

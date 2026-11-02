@@ -52,6 +52,10 @@ You must add:
   Portal. In your Discord app → OAuth2 → Redirects, add:
   - `http://localhost:5173/api/auth/callback/discord` (dev)
   - `https://ovyn.bio/api/auth/callback/discord` (production)
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — optional Google OAuth credentials
+  from Google Cloud Console. Add these authorized redirect URIs:
+  - `http://localhost:5173/api/auth/callback/google` (dev)
+  - `https://ovyn.bio/api/auth/callback/google` (production)
 - `OVYN_ADMIN_DISCORD_IDS` — comma-separated Discord user IDs authorized for
   `/admin`. Find your ID with Discord Developer Mode → right-click your profile
   → Copy User ID. Set this only in local `.env` and Vercel server environment
@@ -65,23 +69,24 @@ You must add:
 
 OVYN can be installed from supported browsers as a standalone app. Its service worker caches versioned build and static assets, shows an offline fallback for navigation, and avoids caching personalized server-rendered pages.
 
-The UI bundles Vercel Geist locally: Sans for interface text, Serif for section headings, Mono for metadata, and Pixel for OVYN branding, page titles and sticker labels. Profile wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom profile audio is user-initiated (never autoplayed); custom cursor images are PNG/WebP uploads.
+The interface uses Poppins with a soft, low-contrast palette and spacious layouts. Profile wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom profile audio is user-initiated (never autoplayed); custom cursor images are PNG/WebP uploads.
 
 Account settings let each device manage browser notification permission and event-category preferences, with a local test notification. The service worker can receive and filter push payloads, but remote push subscriptions and server delivery are not wired yet; VAPID support remains follow-up work.
 
 ## Key architecture notes
 
-- **Auth** is standalone Better Auth (`src/lib/server/auth`) with Discord
-  OAuth as the only sign-in method (`identify` scope, no email/password).
-  It stores users/sessions/OAuth accounts in our own `user`, `session`,
-  `account`, `verification` tables via the Drizzle adapter, runs the catch-all
+- **Auth** is standalone Better Auth (`src/lib/server/auth`) with Discord and
+  Google OAuth sign-in (no email/password). Discord requests identity only;
+  Google OAuth credentials are optional until configured. It stores
+  users/sessions/OAuth accounts in our own `user`, `session`, `account`,
+  `verification` tables via the Drizzle adapter, runs the catch-all
   `/api/auth/[...all]` route, and populates `locals.user` in the server hook.
-  Discord accounts without an email get a stable `<discord-id>@discord.ovyn.bio`
-  placeholder via `mapProfileToUser`. Duplicate accounts for the same Discord
-  ID are prevented by the unique `(provider, accountId)` pairing. Discord identity
+  Discord accounts without an email get a stable OAuth placeholder via
+  `mapProfileToUser`. Duplicate accounts for the same Discord ID are prevented
+  by the unique `(provider, accountId)` pairing. Discord identity
   seeds new profiles, while profile username, display name, bio and uploaded
   avatar are OVYN-owned and remain editable. An uploaded avatar overrides the
-  Discord picture until the user resets it.
+  sign-in provider's picture until the user resets it.
 - **Coming from Neon Managed Auth?** After `npm run db:migrate`, run the
   one-time data backfill with `npm run db:backfill` — it copies users and
   Discord accounts from the managed `neon_auth` schema into the standalone
@@ -112,8 +117,7 @@ Account settings let each device manage browser notification permission and even
 - **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.
 - **Profile analytics** — counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
-- **Featured placement** — `profile_spotlight` and `guild_spotlight` products purchase time-limited placement. A user can feature only their own public profile; only active guild owners can feature their guild. The seed script uses sample prices; review them before enabling payments.
-- **Plans** — Free is the default and includes all current features. A successful Premium plan payment grants 30 days; repeat purchases extend active access and must be made manually. Access is derived server-side from successful payment records. Premium-only benefits are intentionally not enabled yet.
+- **Plans** — Free is the default. Premium is a one-time Rp 100.000 purchase for lifetime access, with no auto-renewal. Access is derived server-side from successful payment records; legacy time-limited plans remain supported for existing orders.
 - **Workspace** — signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Admin and guild permissions remain enforced server-side.
 - **Profile links and templates** — public links are scheme-validated before display. Templates contain preset themes only, are private by default, and enter the community gallery only when their owner shares them.
 - **Referral rewards** — each account has a stable referral code. A new account is attributed on sign-in; both users receive 100 points after the referred user completes their first daily check-in. Attribution is one-time per account.
@@ -124,11 +128,10 @@ Whenever the schema changes, run `npm run db:generate`, review the generated mig
 
 Set `OVYN_ADMIN_DISCORD_IDS` to your comma-separated Discord user ID(s) locally
 and in Vercel, then sign in with one of those accounts and open `/admin`. The
-admin area lets you create/edit cosmetics, spotlights and Premium plans, set
+admin area lets you create/edit cosmetics and Premium plans, set
 prices, points costs, drop limits/end dates, upload cosmetic art, and review
-recent orders/revenue. Cosmetics, spotlights and 30-day Premium plans can be activated;
-new products remain inactive until published. Plan products must have a positive
-price and a 30-day term. Products are deactivated rather than deleted so purchase
+recent orders/revenue. Cosmetics and lifetime Premium plans can be activated;
+new products remain inactive until published. Premium plans are fixed at Rp 100.000 for lifetime access. Products are deactivated rather than deleted so purchase
 history and ownership remain intact. DOKU refunds are not managed here yet.
 
 ## DOKU integration points
@@ -142,4 +145,4 @@ history and ownership remain intact. DOKU refunds are not managed here yet.
 
 - Payment cancellation calls (DOKU delete VA) and refund flows
 - `npm run check` / `npm run build` must be run locally — no CI configured yet
-- Review starter cosmetic/spotlight prices and reward values before production
+- Review starter cosmetic prices and reward values before production

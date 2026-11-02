@@ -83,7 +83,7 @@
 	<div>
 		<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">Profile settings</h1>
 		<p class="mt-1 text-neutral-400">
-			Sign in with Discord, then make your OVYN profile your own.
+			Sign in with Discord or Google, then make your OVYN profile your own.
 		</p>
 	</div>
 
@@ -102,7 +102,7 @@
 				<p class="font-mono text-xs text-neutral-600">discord: {data.discord.username}</p>
 			{/if}
 			<a href="/account/settings" class="mt-1 inline-block text-xs text-neutral-500 hover:text-neutral-300">
-				Discord sign-in · Account settings
+				Sign-in details · Account settings
 			</a>
 		</div>
 	</section>
@@ -159,13 +159,13 @@
 		<div class="flex items-center gap-4">
 			<Avatar name={displayName} src={data.avatarUrl} size="lg" />
 			<div>
-				<p class="mb-1 text-sm text-neutral-300">Use your Discord picture or upload a custom one.</p>
+				<p class="mb-1 text-sm text-neutral-300">Use your sign-in account picture or upload a custom one.</p>
 				<p class="mb-2 text-xs text-neutral-500">JPG, PNG or WebP · max 1 MB</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<UploadButton kind="avatar" existingKey={data.profile.avatarKey} label="Upload picture" />
 					{#if data.profile.avatarKey}
 						<form method="POST" action="/settings/profile?/avatarReset">
-							<button type="submit" class="rounded-xl border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:bg-neutral-800">Use Discord picture</button>
+							<button type="submit" class="rounded-xl border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:bg-neutral-800">Use account picture</button>
 						</form>
 					{/if}
 				</div>

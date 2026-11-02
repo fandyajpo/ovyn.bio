@@ -140,12 +140,9 @@ export async function createCatalogProduct(input: AdminCreateProduct): Promise<v
 		if (input.price === 0 && input.pointsPrice === null) {
 			throw new ValidationError('A free cosmetic needs a points price (use 0 for free)');
 		}
-	} else if (input.category === 'plan') {
-		if (input.price < 1) throw new ValidationError('Premium plans must have a positive price');
-		if (input.durationDays !== 30) throw new ValidationError('Premium access lasts exactly 30 days');
 	} else {
-		if (input.price < 1) throw new ValidationError('Spotlight products must have a positive price');
-		if (!input.durationDays) throw new ValidationError('Spotlights need a duration from 1 to 365 days');
+		if (input.price !== 100_000) throw new ValidationError('Premium lifetime access costs Rp 100.000');
+		if (input.durationDays !== null) throw new ValidationError('Premium is lifetime access; leave duration blank');
 	}
 
 	try {
@@ -202,8 +199,13 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 					.limit(1);
 				if (!cosmetic) throw new ConflictError('The cosmetic record is missing');
 			} else if (product.category === 'plan') {
-				if (input.price < 1) throw new ValidationError('Premium plans must have a positive price');
-				if (input.durationDays !== 30) throw new ValidationError('Premium access lasts exactly 30 days');
+				if (product.durationDays === 30) {
+					if (input.durationDays !== 30 || input.price < 1) {
+						throw new ValidationError('Keep legacy 30-day plans unchanged or deactivate them');
+					}
+				} else if (input.price !== 100_000 || input.durationDays !== null) {
+					throw new ValidationError('Premium lifetime access costs Rp 100.000 with no expiry');
+				}
 			} else {
 				if (!input.durationDays) {
 					throw new ValidationError('Spotlights need a duration from 1 to 365 days');

@@ -5,13 +5,13 @@
 	const topics = [
 		{
 			title: 'Your account and profile',
-				body: 'Discord is your sign-in. Your OVYN display name, unique username, bio and avatar are editable independently of Discord.',
+				body: 'Sign in with Discord or Google. Your OVYN display name, unique username, bio and avatar are editable independently of your sign-in identity.',
 				link: '/account/settings',
 				label: 'Account settings'
 		},
 		{
 			title: 'Customize your page',
-				body: 'Choose a visual theme, update your background, add optional audio and set a custom cursor for desktop visitors.',
+				body: 'Choose colors and a background, add optional audio, and unlock custom cursor effects and profile layouts with Premium.'
 				link: '/customize',
 				label: 'Open customization'
 		},
@@ -23,7 +23,7 @@
 		},
 		{
 			title: 'Plans and payments',
-				body: 'All current features are on Free. Premium access lasts 30 days after a successful payment and must be renewed manually.',
+				body: 'Free is available forever. Premium is a one-time Rp 100.000 payment for lifetime access, with no renewals.',
 				link: '/upgrade',
 				label: 'View plans'
 		}

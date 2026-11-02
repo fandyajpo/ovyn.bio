@@ -45,17 +45,9 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
 }
 
 /**
- * Sync identity from Discord (backend-to-backend — never from the client)
- * and make sure the user has a profile with a unique slug.
- * Runs inside Better Auth's session-create hook, so failures must not
- * block sign-in.
- *
- * Sync policy:
- *  - `discord_accounts` always mirrors the current Discord identity.
- *  - New profiles are seeded from Discord once; existing OVYN profile details
- *    remain user-owned and are never overwritten by sign-in.
- *  - Avatar: users with no uploaded avatar always show the live Discord
- *    avatar (resolved via fallback at read time).
+ * Sync Discord identity when available and ensure every OAuth user has a
+ * profile with a unique slug. Runs inside Better Auth's session-create hook,
+ * so failures must not block sign-in. OVYN profile details stay user-owned.
  */
 export async function provisionUser(userId: string): Promise<void> {
 	const [acc] = await db
@@ -64,7 +56,29 @@ export async function provisionUser(userId: string): Promise<void> {
 		.where(and(eq(account.userId, userId), eq(account.providerId, 'discord')))
 		.limit(1);
 
-	if (!acc?.accessToken) return;
+	if (!acc?.accessToken) {
+		const [authUser] = await db
+			.select({ name: user.name })
+			.from(user)
+			.where(eq(user.id, userId))
+			.limit(1);
+		if (!authUser) return;
+
+		await db.transaction(async (tx) => {
+			await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+			const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1);
+			if (profile) return;
+			await tx
+				.insert(profiles)
+				.values({
+					userId,
+					slug: await availableSlug(tx, authUser.name || 'ovyn'),
+					displayName: authUser.name || 'OVYN member'
+				})
+				.onConflictDoNothing({ target: profiles.userId });
+		});
+		return;
+	}
 
 	let discordUser: DiscordUser;
 	try {
@@ -235,9 +249,10 @@ export async function setProfileTheme(userId: string, theme: string) {
 
 export async function getProfileBySlug(slug: string) {
 	const [row] = await db
-		.select({ profile: profiles, discord: discordAccounts })
+		.select({ profile: profiles, discord: discordAccounts, authUser: user })
 		.from(profiles)
 		.leftJoin(discordAccounts, eq(discordAccounts.userId, profiles.userId))
+		.innerJoin(user, eq(user.id, profiles.userId))
 		.where(eq(profiles.slug, slug))
 		.limit(1);
 	return row ?? null;

@@ -9,7 +9,7 @@
 
 	const categories = [
 		{ key: 'guild', label: 'Guild invitations and membership changes' },
-		{ key: 'profile', label: 'Profile visits and spotlight activity' },
+		{ key: 'profile', label: 'Profile views and analytics' },
 		{ key: 'shop', label: 'Shop purchases and payment updates' },
 		{ key: 'referral', label: 'Referral and rewards activity' },
 		{ key: 'announcements', label: 'General OVYN announcements' }
@@ -149,7 +149,7 @@
 
 	<div class="mt-5 grid gap-2 sm:grid-cols-2">
 		{#each categories as category (category.key)}
-			<label class="flex min-h-12 items-center gap-3 rounded-xl border border-neutral-800 bg-neutral-950/30 px-3 py-2 text-sm text-neutral-300">
+			<label class="flex min-h-12 items-center gap-3 rounded-xl border border-neutral-800/60 bg-neutral-950/15 px-3 py-2 text-sm text-neutral-300 transition-colors hover:bg-neutral-900/35">
 				<input
 					type="checkbox"
 					checked={preferences[category.key]}

@@ -25,7 +25,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		profile.avatarKey ? presignDownload(profile.avatarKey) : null
 	]);
 
-	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl ?? discord?.avatarUrl ?? null };
+	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl ?? discord?.avatarUrl ?? locals.user.image ?? null };
 };
 
 export const actions: Actions = {

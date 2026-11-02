@@ -1,13 +1,11 @@
 <script lang="ts">
 	import Avatar from '#lib/components/ui/Avatar.svelte';
-	import Card from '#lib/components/ui/Card.svelte';
 	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
 	import { formatDate } from '#lib/utils';
 
 	let { data } = $props();
 
 	const p = $derived.by(() => data.profile);
-	// The OVYN display name wins; Discord identity is only a fallback.
 	const displayName = $derived.by(() => {
 		const profile = data.profile;
 		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;
@@ -18,101 +16,257 @@
 
 <svelte:head>
 	<title>{displayName} (@{p.slug}) — OVYN</title>
+	<meta name="description" content={p.bio || `${displayName}'s space on OVYN.`} />
+	<meta property="og:title" content={`${displayName} (@${p.slug}) — OVYN`} />
+	<meta property="og:description" content={p.bio || `Find ${displayName} on OVYN.`} />
+	<meta property="og:type" content="profile" />
 </svelte:head>
 
 {#if data.private}
-	<div class="mx-auto flex max-w-md flex-col items-center gap-4 py-24 text-center text-neutral-400">
-		<span class="sticker sticker--pink">PRIVATE CORNER</span>
-		<p>This profile is private.</p>
-	</div>
+	<main class="profile-private-state">
+		<div class="private-orbit" aria-hidden="true"></div>
+		<p class="profile-overline">OVYN / PRIVATE SPACE</p>
+		<h1>This corner is private.</h1>
+		<p>The owner has chosen to keep this page to themselves.</p>
+	</main>
 {:else}
 	<article
-		class="profile-sheet relative isolate mx-auto flex max-w-2xl flex-col gap-6 overflow-hidden rounded-[2rem] border border-white/10 bg-neutral-950/75 p-4 sm:p-7"
+		class="profile-canvas"
 		data-profile-theme={p.theme}
 		style={data.cursorUrl ? `cursor: url('${data.cursorUrl}') 0 0, auto` : undefined}
 	>
-		<div class="pointer-events-none absolute right-5 top-5 z-10 rotate-3" aria-hidden="true"><span class="sticker sticker--lilac">YOUR SPACE</span></div>
 		{#if data.cosmetics?.wallpaperUrl}
-			<img
-				src={data.cosmetics.wallpaperUrl}
-				alt=""
-				class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover opacity-20"
-			/>
+			<img src={data.cosmetics.wallpaperUrl} alt="" class="profile-wallpaper" />
 		{/if}
-
-		{#if data.bannerUrl}
-			{#if bannerIsVideo}
-				<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="h-40 w-full rounded-2xl border border-white/10 object-cover">
-					<source src={data.bannerUrl} type={bannerVideoType} />
-				</video>
-			{:else}
-				<img src={data.bannerUrl} alt="" class="h-40 w-full rounded-2xl border border-white/10 object-cover" />
-			{/if}
-		{:else if !data.cosmetics?.wallpaperUrl}
-			<div class="profile-banner-doodle relative h-28 w-full overflow-hidden rounded-2xl border border-white/10">
-				<span class="absolute -right-4 -top-8 size-32 rounded-full border border-lime-300/20"></span>
-				<span class="absolute bottom-3 left-4 font-mono text-[10px] uppercase tracking-[0.25em] text-neutral-500">made of you / ovyn</span>
-			</div>
-		{:else}
-			<div class="h-8"></div>
-		{/if}
-
-		<div class="flex items-start gap-4">
-			<div class="relative">
-				<Avatar name={displayName} src={data.avatarUrl} size="xl" />
-				{#if data.cosmetics?.frameUrl}
-					<img
-						src={data.cosmetics.frameUrl}
-						alt="Avatar frame"
-						class="pointer-events-none absolute -inset-2 size-[calc(100%+16px)] object-contain"
-					/>
-				{/if}
-			</div>
-			<div class="min-w-0">
-				<h1 class="flex items-center gap-2 truncate font-[family-name:var(--font-display)] text-2xl font-bold">
-					{displayName}
-					{#if data.cosmetics?.badgeUrl}
-						<ProfileBadge label="OVYN profile badge" src={data.cosmetics.badgeUrl} />
+		<div class="profile-atmosphere" aria-hidden="true"></div>
+		<div class="profile-canvas-inner">
+			<header class="profile-intro">
+				{#if data.bannerUrl}
+					{#if bannerIsVideo}
+						<video autoplay loop muted playsinline preload="metadata" aria-hidden="true" tabindex="-1" class="profile-cover">
+							<source src={data.bannerUrl} type={bannerVideoType} />
+						</video>
+					{:else}
+						<img src={data.bannerUrl} alt="" class="profile-cover" />
 					{/if}
-				</h1>
-				<p class="mt-1 font-mono text-sm text-lime-300">@{p.slug}</p>
-				{#if data.discord}
-					<p class="mt-2 inline-flex"><span class="sticker sticker--blue">DISCORD / {data.discord.username}</span></p>
 				{/if}
-			</div>
+				<div class="profile-identity">
+					<div class="profile-avatar-wrap">
+						<Avatar name={displayName} src={data.avatarUrl} size="xl" />
+						{#if data.cosmetics?.frameUrl}<img src={data.cosmetics.frameUrl} alt="" class="profile-avatar-frame" />{/if}
+					</div>
+					<div class="profile-identity-copy">
+						<p class="profile-overline">OVYN / PERSONAL SPACE</p>
+						<h1>{displayName}{#if data.cosmetics?.badgeUrl}<ProfileBadge label="OVYN profile badge" src={data.cosmetics.badgeUrl} />{/if}{#if data.isPremium}<span class="premium-profile-mark" aria-label="OVYN Premium member">✦</span>{/if}</h1>
+						<p class="profile-handle">@{p.slug}</p>
+						{#if data.discord}<p class="profile-discord">Discord · {data.discord.username}</p>{/if}
+					</div>
+				</div>
+			</header>
+
+			{#if p.bio}
+				<section class="profile-about" aria-label="About {displayName}">
+					<p>{p.bio}</p>
+				</section>
+			{/if}
+
+			{#if data.audioUrl}
+				<audio controls preload="none" src={data.audioUrl} class="profile-audio" aria-label="{displayName}'s profile audio"></audio>
+			{/if}
+
+			{#if data.links.length > 0}
+				<nav aria-label="{displayName}'s links" class="profile-links">
+					{#each data.links as link (link.id)}
+						<a href={link.url} target="_blank" rel="noopener noreferrer nofollow">{link.label}<span aria-hidden="true">↗</span></a>
+					{/each}
+				</nav>
+			{/if}
+
+			{#if data.guild}
+				<section class="profile-circle" aria-label="Community">
+					<p class="profile-overline">THEIR CIRCLE</p>
+					<a href="/guild/{data.guild.slug}">{data.guild.name}<span aria-hidden="true">↗</span></a>
+				</section>
+			{/if}
+
+			<footer class="profile-signoff">
+				<p>Here since {formatDate(p.createdAt)}</p>
+				<span>OVYN · YOUR IDENTITY, OUT IN THE WORLD</span>
+			</footer>
+			{#if data.viewerTracked}<p class="profile-view-note">Signed-in visits may appear in this profile's analytics.</p>{/if}
 		</div>
-
-		{#if p.bio}
-			<p class="profile-bio collage-card collage-card--blue rounded-2xl bg-[#151a1c]/90 p-4 text-base leading-7 text-neutral-200">{p.bio}</p>
-		{/if}
-
-		{#if data.audioUrl}
-			<audio controls preload="none" src={data.audioUrl} class="w-full" aria-label="{displayName}'s profile audio"></audio>
-		{/if}
-
-		{#if data.links.length > 0}
-			<nav aria-label="{displayName}'s links" class="flex flex-wrap gap-2">
-				{#each data.links as link (link.id)}
-					<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="rounded-full border border-white/10 bg-neutral-900/80 px-3 py-2 text-sm text-neutral-200 transition hover:border-lime-300/50 hover:text-lime-300">{link.label}</a>
-				{/each}
-			</nav>
-		{/if}
-
-		{#if data.guild}
-			<Card class="collage-card rounded-2xl bg-[#1b1d19]/90 p-4">
-				<p class="mb-2 inline-flex"><span class="sticker sticker--lilac">YOUR CIRCLE</span></p>
-				<p class="font-mono text-xs text-neutral-500 uppercase tracking-wider">Current guild</p>
-				<a href="/guild/{data.guild.slug}" class="mt-1 text-lg font-semibold text-lime-300 hover:underline">
-					{data.guild.name}
-				</a>
-			</Card>
-		{:else}
-			<p class="text-sm text-neutral-500">Not part of a guild yet.</p>
-		{/if}
-
-		<p class="font-mono text-xs uppercase tracking-widest text-neutral-600">Member since {formatDate(p.createdAt)}</p>
-		{#if data.viewerTracked}
-			<p class="rounded-full border border-white/10 bg-neutral-900/70 px-3 py-2 text-xs text-neutral-500">Signed-in visits may appear in this profile's analytics.</p>
-		{/if}
 	</article>
 {/if}
+
+<style>
+	.profile-canvas {
+		position: relative;
+		isolation: isolate;
+		min-height: 100svh;
+		overflow: hidden;
+		background: var(--color-background);
+		color: var(--color-foreground);
+	}
+
+	.profile-wallpaper,
+	.profile-atmosphere {
+		position: absolute;
+		z-index: -1;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.profile-wallpaper {
+		position: fixed;
+		object-fit: cover;
+		opacity: 0.18;
+		filter: saturate(0.72);
+	}
+
+	.profile-atmosphere {
+		background:
+			radial-gradient(52rem 40rem at 12% 16%, color-mix(in srgb, var(--color-pop-lilac) 16%, transparent), transparent 68%),
+			radial-gradient(42rem 30rem at 90% 28%, color-mix(in srgb, var(--color-pop-pink) 10%, transparent), transparent 70%),
+			linear-gradient(180deg, color-mix(in srgb, var(--color-background) 48%, transparent), var(--color-background) 88%);
+	}
+
+	.profile-canvas-inner {
+		width: min(100%, 76rem);
+		min-height: 100svh;
+		margin-inline: auto;
+		padding: clamp(1.5rem, 6vw, 5.5rem) clamp(1.25rem, 7vw, 7rem) 2.5rem;
+	}
+
+	.profile-intro {
+		display: flex;
+		flex-direction: column;
+		gap: clamp(1.75rem, 5vw, 3.5rem);
+	}
+
+	.profile-cover {
+		width: 100%;
+		max-height: 25rem;
+		aspect-ratio: 2.7 / 1;
+		object-fit: cover;
+		border-radius: 1.5rem;
+		mask-image: linear-gradient(180deg, #000 58%, transparent 100%);
+	}
+
+	.profile-identity {
+		display: flex;
+		align-items: center;
+		gap: clamp(1.25rem, 4vw, 2.5rem);
+	}
+
+	.profile-avatar-wrap {
+		position: relative;
+		flex: 0 0 auto;
+		filter: drop-shadow(0 12px 32px rgb(0 0 0 / 18%));
+	}
+
+	.profile-avatar-frame {
+		position: absolute;
+		inset: -0.6rem;
+		width: calc(100% + 1.2rem);
+		height: calc(100% + 1.2rem);
+		object-fit: contain;
+		pointer-events: none;
+	}
+
+	.profile-identity-copy { min-width: 0; }
+	.profile-overline {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		color: var(--color-muted);
+		font-size: 0.68rem;
+		font-weight: 600;
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+	}
+
+	.profile-identity-copy h1 {
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		margin-top: 0.45rem;
+		font-size: clamp(2rem, 6vw, 4rem);
+		font-weight: 600;
+		letter-spacing: -0.055em;
+		line-height: 1.08;
+	}
+
+	.profile-handle { margin-top: 0.5rem; color: var(--color-accent); font-size: 1rem; }
+	.premium-profile-mark { display: inline-grid; width: 1.5rem; height: 1.5rem; place-items: center; border-radius: 50%; background: var(--color-accent-soft); color: var(--color-accent); font-size: 0.8rem; vertical-align: middle; }
+	.profile-discord { margin-top: 0.5rem; color: var(--color-muted); font-size: 0.8rem; }
+	.profile-about { max-width: 54rem; margin-top: clamp(2.5rem, 8vw, 6rem); }
+	.profile-about p { color: color-mix(in srgb, var(--color-foreground) 82%, var(--color-muted)); font-size: clamp(1.1rem, 2.7vw, 1.65rem); line-height: 1.75; white-space: pre-wrap; }
+	.profile-audio { width: min(100%, 28rem); margin-top: 2rem; }
+
+	.profile-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.6rem 1.6rem;
+		margin-top: 2rem;
+	}
+
+	.profile-links a,
+	.profile-circle a {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding-block: 0.55rem;
+		color: var(--color-foreground);
+		font-size: 0.95rem;
+		text-decoration: none;
+		transition: color 180ms ease, transform 180ms ease;
+	}
+
+	.profile-links a span,
+	.profile-circle a span { color: var(--color-accent); }
+	.profile-links a:hover,
+	.profile-circle a:hover { color: var(--color-accent); transform: translateY(-2px); }
+	.profile-circle { margin-top: 3rem; }
+	.profile-circle a { margin-top: 0.35rem; font-size: 1.25rem; font-weight: 500; }
+
+	.profile-signoff {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.8rem 2rem;
+		margin-top: clamp(4rem, 10vw, 8rem);
+		color: var(--color-muted);
+		font-size: 0.72rem;
+	}
+	.profile-signoff span { letter-spacing: 0.12em; }
+	.profile-view-note { margin-top: 1rem; color: var(--color-muted); font-size: 0.7rem; }
+
+	.profile-private-state {
+		position: relative;
+		display: grid;
+		min-height: 100svh;
+		place-content: center;
+		justify-items: center;
+		gap: 1rem;
+		overflow: hidden;
+		padding: 2rem;
+		text-align: center;
+	}
+	.profile-private-state h1 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.05em; }
+	.profile-private-state > p:last-child { color: var(--color-muted); }
+	.private-orbit { position: absolute; width: min(80vw, 32rem); aspect-ratio: 1; border: 1px solid var(--color-divider); border-radius: 50%; opacity: 0.4; }
+
+	[data-profile-theme='midnight'] .profile-atmosphere { filter: hue-rotate(18deg); }
+	[data-profile-theme='bubblegum'] .profile-atmosphere { filter: hue-rotate(-20deg); }
+	[data-profile-theme='ocean'] .profile-atmosphere { filter: hue-rotate(48deg); }
+	[data-profile-theme='forest'] .profile-atmosphere { filter: hue-rotate(82deg); }
+
+	@media (max-width: 40rem) {
+		.profile-canvas-inner { padding-inline: 1.25rem; }
+		.profile-identity { align-items: flex-start; }
+		.profile-identity-copy h1 { flex-wrap: wrap; }
+		.profile-cover { aspect-ratio: 1.7 / 1; border-radius: 1rem; }
+		.profile-signoff span { width: 100%; }
+	}
+</style>

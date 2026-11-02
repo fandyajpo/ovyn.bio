@@ -28,7 +28,7 @@
 			Hey, {data.profile.displayName || data.profile.slug}
 		</h1>
 		<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-			<Button href="/spotlight" variant="ghost" class="w-full sm:w-auto">Get featured</Button>
+			<Button href="/shop" variant="ghost" class="w-full sm:w-auto">Explore the shop</Button>
 			<Button href="/customize" variant="secondary" class="w-full sm:w-auto">Customize page</Button>
 		</div>
 	</div>

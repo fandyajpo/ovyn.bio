@@ -1,7 +1,7 @@
 import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 
-/** Remember referral attribution, then send visitors through Discord sign-in. */
+/** Remember referral attribution, then send visitors through OAuth sign-in. */
 export const GET: RequestHandler = async ({ params, cookies, url }) => {
 	cookies.set('ovyn_referral', params.code, {
 		path: '/',

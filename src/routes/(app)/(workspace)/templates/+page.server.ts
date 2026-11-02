@@ -9,14 +9,16 @@ import { createProfileTemplate, applyProfileTemplate, deleteProfileTemplate, lis
 import { getProfileByUserId } from '#lib/server/services/profiles';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
+import { getUserPlan } from '#lib/server/services/billing';
 
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
-	const [profile, templates] = await Promise.all([
+	const [profile, templates, plan] = await Promise.all([
 		getProfileByUserId(locals.user.id),
-		listProfileTemplates(locals.user.id)
+		listProfileTemplates(locals.user.id),
+		getUserPlan(locals.user.id)
 	]);
-	return { profile, templates };
+	return { profile, templates, plan };
 };
 
 export const actions: Actions = {
@@ -32,6 +34,9 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: parsed.error.issues[0]?.message ?? 'Check the template details' });
 
 		try {
+			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
+				return fail(403, { error: 'Saving profile layouts is a Premium feature' });
+			}
 			rateLimit(`profile-templates:${locals.user.id}`, 20, 60_000);
 			await createProfileTemplate(locals.user.id, parsed.data);
 			return { ok: 'Template saved.' };
@@ -49,6 +54,9 @@ export const actions: Actions = {
 		if (!parsed.success) return fail(422, { error: 'Invalid template' });
 
 		try {
+			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
+				return fail(403, { error: 'Applying profile layouts is a Premium feature' });
+			}
 			rateLimit(`profile-template-apply:${locals.user.id}`, 30, 60_000);
 			await applyProfileTemplate(locals.user.id, parsed.data.id);
 			return { ok: 'Template applied to your page.' };

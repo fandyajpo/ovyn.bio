@@ -5,6 +5,7 @@ import { getMembership, updateGuild } from '#lib/server/services/guilds';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 import { isPlatformAdmin } from '#lib/server/services/admin';
+import { getUserPlan } from '#lib/server/services/billing';
 
 /** Step 1 of the upload flow: validate + hand out a presigned PUT URL. */
 export const POST: RequestHandler = async ({ request, locals }) => {
@@ -26,6 +27,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		}
 
 		const kind: UploadKind = body.kind;
+		if (kind === 'cursor' && (await getUserPlan(locals.user.id)).tier !== 'premium') {
+			return Response.json({ error: 'Custom cursor effects are a Premium feature' }, { status: 403 });
+		}
 		const { key, uploadUrl } = await presignUpload(locals.user.id, kind, body.contentType, body.sizeBytes);
 		return Response.json({ key, uploadUrl });
 	} catch (err) {
@@ -58,6 +62,9 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 		} else if (kind === 'audio') {
 			await setProfileAudioKey(locals.user.id, key);
 		} else if (kind === 'cursor') {
+			if ((await getUserPlan(locals.user.id)).tier !== 'premium') {
+				return Response.json({ error: 'Custom cursor effects are a Premium feature' }, { status: 403 });
+			}
 			await setProfileCursorKey(locals.user.id, key);
 		} else {
 			const membership = await getMembership(locals.user.id);

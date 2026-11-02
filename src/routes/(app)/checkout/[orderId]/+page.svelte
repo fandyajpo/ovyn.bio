@@ -92,11 +92,15 @@
 			</p>
 		{:else if status === 'paid'}
 			{#if data.product.category === 'plan'}
-				<p class="text-lime-300">Payment received — your 30-day Premium access is active. Renew manually from Plans &amp; billing; it will not auto-renew.</p>
+				{#if data.product.durationDays === null}
+					<p class="text-lime-300">Payment received — your Premium lifetime access is active.</p>
+				{:else}
+					<p class="text-lime-300">Payment received — your {data.product.durationDays}-day legacy Premium access is active.</p>
+				{/if}
 			{:else if data.product.category === 'cosmetic'}
 				<p class="text-lime-300">Payment received — your cosmetic has been added to your account.</p>
 			{:else}
-				<p class="text-lime-300">Payment received — your spotlight is active.</p>
+				<p class="text-lime-300">Payment received — your order is complete.</p>
 			{/if}
 		{:else if status === 'expired'}
 			<p class="text-neutral-400">This payment code expired. Start again from Plans &amp; upgrade.</p>

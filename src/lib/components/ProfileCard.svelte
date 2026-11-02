@@ -22,7 +22,7 @@
 	<a href="/{slug}" class="group block p-5 transition-colors hover:bg-white/[0.02]">
 		<div class="mb-5 flex items-center justify-between gap-3">
 			<span class="font-mono text-[10px] uppercase tracking-[0.18em] text-neutral-500">OVYN / MEMBER CARD</span>
-			<span class="sticker sticker--pink">SPOTLIGHT</span>
+			<span class="sticker sticker--pink">OVYN MEMBER</span>
 		</div>
 		<div class="flex items-center gap-4">
 			<div class="relative shrink-0">

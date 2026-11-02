@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, sql } from 'drizzle-orm';
+import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import {
 	cosmetics,
@@ -49,8 +49,8 @@ export async function createCheckout(userId: string, productId: string, target?:
 		.limit(1);
 
 	if (!product) throw new NotFoundError('Product not found or not available');
-	if (product.category === 'plan' && (product.price < 1 || product.durationDays !== 30)) {
-		throw new ValidationError('Premium plans must be priced and provide exactly 30 days of access');
+	if (product.category === 'plan' && (product.price !== 100_000 || product.durationDays !== null)) {
+		throw new ValidationError('Premium is a one-time Rp 100.000 lifetime plan');
 	}
 
 	const expectedSpotlightType =
@@ -447,18 +447,23 @@ export async function getUserPlan(userId: string) {
 	purchases.sort((a, b) => (a.paidAt ?? a.updatedAt).getTime() - (b.paidAt ?? b.updatedAt).getTime());
 
 	let accessUntil = 0;
+	let isLifetime = false;
 	for (const purchase of purchases) {
-		if (purchase.durationDays !== 30) continue;
+		if (purchase.durationDays === null) {
+			isLifetime = true;
+			continue;
+		}
+		if (purchase.durationDays < 1) continue;
 		const paidAt = (purchase.paidAt ?? purchase.updatedAt).getTime();
-		accessUntil = Math.max(paidAt, accessUntil) + 30 * 24 * 60 * 60 * 1000;
+		accessUntil = Math.max(paidAt, accessUntil) + purchase.durationDays * 24 * 60 * 60 * 1000;
 	}
 
-	const premiumUntil = accessUntil ? new Date(accessUntil) : null;
-	const isPremium = accessUntil > Date.now();
+	const isPremium = isLifetime || accessUntil > Date.now();
 	return {
 		tier: isPremium ? 'premium' as const : 'free' as const,
-		premiumUntil,
-		daysRemaining: isPremium ? Math.ceil((accessUntil - Date.now()) / (24 * 60 * 60 * 1000)) : 0
+		isLifetime,
+		premiumUntil: isLifetime || !accessUntil ? null : new Date(accessUntil),
+		daysRemaining: isPremium && !isLifetime ? Math.ceil((accessUntil - Date.now()) / (24 * 60 * 60 * 1000)) : 0
 	};
 }
 
@@ -466,7 +471,7 @@ export async function listActiveProducts() {
 	return db
 		.select()
 		.from(products)
-		.where(and(eq(products.active, true), eq(products.category, 'plan'), eq(products.durationDays, 30), gt(products.price, 0)))
+		.where(and(eq(products.active, true), eq(products.category, 'plan'), isNull(products.durationDays), eq(products.price, 100_000), gt(products.price, 0)))
 		.orderBy(desc(products.price));
 }
 

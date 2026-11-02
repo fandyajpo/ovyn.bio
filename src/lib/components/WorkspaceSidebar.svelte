@@ -98,6 +98,9 @@
 		.workspace-sidebar {
 			position: sticky;
 			top: 5.5rem;
+			max-height: calc(100dvh - 6.5rem);
+			overflow-y: auto;
+			overscroll-behavior: contain;
 			align-self: start;
 		}
 	}

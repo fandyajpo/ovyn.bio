@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		getProfileAnalytics(userId),
 		getUserPlan(userId)
 	]);
-	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : discord?.avatarUrl ?? null;
+	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : discord?.avatarUrl ?? locals.user.image ?? null;
 
 	return { profile, avatarUrl, owned, analytics, plan };
 };

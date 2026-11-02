@@ -20,10 +20,8 @@
 	let { data, form }: { data: PageData; form?: CatalogForm } = $props();
 
 	const productTypeOptions = [
-		{ value: 'plan', label: 'Premium plan' },
-		{ value: 'cosmetic', label: 'Cosmetic' },
-		{ value: 'profile_spotlight', label: 'Profile spotlight' },
-		{ value: 'guild_spotlight', label: 'Guild spotlight' }
+		{ value: 'plan', label: 'Premium lifetime plan' },
+		{ value: 'cosmetic', label: 'Cosmetic' }
 	];
 	const cosmeticKindOptions = [
 		{ value: 'frame', label: 'Avatar frame' },
@@ -62,7 +60,7 @@
 
 	<Card class="p-5 sm:p-6">
 		<h2 class="font-[family-name:var(--font-display)] text-xl font-semibold">Add a product</h2>
-		<p class="mt-1 text-sm text-neutral-500">New listings start inactive unless you check Publish. Premium plan purchases grant 30 days and renew manually through DOKU.</p>
+		<p class="mt-1 text-sm text-neutral-500">New listings start inactive unless you check Publish. Premium is a one-time Rp 100.000 payment for lifetime access.</p>
 		<form method="POST" action="?/create" class="mt-5 grid gap-4 sm:grid-cols-2">
 			<Select
 				name="category"
@@ -74,7 +72,7 @@
 			/>
 			<Input name="name" label="Name" value={createValues.name ?? ''} required minlength={2} maxlength={100} error={createErrors.name} />
 			<Input name="price" label="Price (IDR)" type="number" value={createValues.price ?? ''} min={0} step={1} required error={createErrors.price} />
-			<Input name="durationDays" label="Duration in days" type="number" value={createValues.durationDays ?? ''} min={1} max={365} hint="Premium plans must be 30 days; spotlight terms can be 1–365 days." error={createErrors.durationDays} />
+			<Input name="durationDays" label="Duration in days" type="number" value={createValues.durationDays ?? ''} min={1} max={365} hint="For a Premium lifetime plan, leave this blank. Enter Rp 100.000 as its price." error={createErrors.durationDays} />
 			<Input name="description" label="Description" value={createValues.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" />
 			<div class="rounded-xl border border-neutral-800 p-4 sm:col-span-2">
 				<p class="mb-3 text-sm font-medium text-neutral-200">Cosmetic details (cosmetic products only)</p>
@@ -115,11 +113,11 @@
 					{#if row.product.category === 'plan'}
 						<form method="POST" action="?/update" class="grid gap-4 sm:grid-cols-2">
 							<input type="hidden" name="id" value={row.product.id} />
-							<input type="hidden" name="durationDays" value="30" />
+							<input type="hidden" name="durationDays" value={row.product.durationDays ?? ''} />
 							<Input name="name" label="Plan name" value={values?.name ?? row.product.name} required minlength={2} maxlength={100} error={errors.name} />
-							<Input name="price" label="Price (IDR per 30 days)" type="number" value={values?.price ?? String(row.product.price)} min={1} step={1} required error={errors.price} />
+							<Input name="price" label={row.product.durationDays === 30 ? 'Legacy price (IDR)' : 'Lifetime price (IDR)'} type="number" value={values?.price ?? String(row.product.price)} min={1} step={1} required readonly={row.product.durationDays !== 30} error={errors.price} />
 							<Input name="description" label="Description" value={values?.description ?? row.product.description ?? ''} textarea maxlength={1000} class="sm:col-span-2" error={errors.description} />
-							<p class="text-sm text-neutral-500 sm:col-span-2">Premium lasts 30 days from payment. Members renew manually; current features remain available on Free.</p>
+							<p class="text-sm text-neutral-500 sm:col-span-2">New Premium purchases are lifetime access for Rp 100.000. Existing 30-day products remain legacy and cannot be sold through the new plans page.</p>
 							<Checkbox name="active" label="Available for purchase" checked={values ? values.active === 'on' : row.product.active} class="sm:col-span-2" />
 							<div class="sm:col-span-2"><Button type="submit">Save plan</Button></div>
 						</form>

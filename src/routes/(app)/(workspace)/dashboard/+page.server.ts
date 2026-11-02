@@ -37,7 +37,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		getProfileAnalytics(user.id),
 		getReferralSummary(user.id)
 	]);
-	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : discord[0]?.avatarUrl ?? null;
+	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : discord[0]?.avatarUrl ?? user.image ?? null;
 
 	return {
 		profile,

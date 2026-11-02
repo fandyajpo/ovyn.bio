@@ -3,6 +3,7 @@
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import { fade, fly } from 'svelte/transition';
 	import { toast } from './ui/toasts.svelte.ts';
 
 	let { user, isAdmin, isLanding }: { user: { name: string; image: string | null } | null; isAdmin: boolean; isLanding: boolean } = $props();
@@ -15,12 +16,14 @@
 	let mobileMenuPanel = $state<HTMLElement | undefined>(undefined);
 
 	const links = $derived([
-		...(isLanding ? [{ href: '#features', label: 'Features', icon: '✦', tone: 'blue' }] : []),
+		...(isLanding ? [
+			{ href: '#features', label: 'Features', icon: '✦', tone: 'blue' },
+			{ href: '#plans', label: 'Plans', icon: '＋', tone: 'lilac' }
+		] : []),
 		{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' },
 		...(user
 			? [
 					{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
-					{ href: '/spotlight', label: 'Spotlight', icon: '↗', tone: 'lilac' },
 					{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' },
 					{ href: '/account', label: 'My space', icon: '⌂', tone: 'lime' }
 				]
@@ -105,7 +108,7 @@
 				</button>
 
 				{#if accountMenuOpen}
-					<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border py-1 shadow-xl">
+					<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border py-1 shadow-xl" transition:fly={{ y: -6, duration: 150 }}>
 						<a href="/account" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Account overview</a>
 						<a href="/customize" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Customize page</a>
 						<a href="/upgrade" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Plans &amp; upgrade</a>
@@ -122,9 +125,9 @@
 </header>
 
 {#if mobileMenuOpen}
-	<div class="mobile-menu-overlay">
+	<div class="mobile-menu-overlay" transition:fade={{ duration: 180 }}>
 		<button type="button" class="mobile-menu-backdrop" onclick={closeMenus} aria-label="Close navigation menu"></button>
-		<nav id="mobile-primary-menu" class="mobile-menu-panel" bind:this={mobileMenuPanel} aria-label="Primary navigation">
+		<nav id="mobile-primary-menu" class="mobile-menu-panel" bind:this={mobileMenuPanel} aria-label="Primary navigation" transition:fly={{ y: -10, duration: 190 }}>
 			<div class="mobile-menu-heading">
 				<div>
 					<span class="sticker sticker--pink">OVYN / YOUR CORNER</span>
@@ -276,7 +279,6 @@
 			radial-gradient(ellipse at 100% 0%, color-mix(in srgb, var(--color-pop-blue) 12%, transparent), transparent 54%),
 			color-mix(in srgb, var(--color-background) 88%, transparent);
 		backdrop-filter: blur(18px);
-		animation: mobile-menu-in 220ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
 	}
 
 	.mobile-menu-backdrop {
@@ -421,16 +423,10 @@
 	}
 
 	.mobile-account-links button { color: var(--color-pop-pink); }
-	.account-menu { animation: menu-in 150ms ease-out both; }
-
-	@keyframes menu-in {
-		from { opacity: 0; transform: translateY(-0.35rem); }
-		to { opacity: 1; transform: translateY(0); }
-	}
-
-	@keyframes mobile-menu-in {
-		from { opacity: 0; transform: translateY(-0.7rem); }
-		to { opacity: 1; transform: translateY(0); }
+	.account-menu {
+		border-color: var(--color-divider);
+		background: var(--color-menu-glass);
+		box-shadow: 0 18px 42px rgb(0 0 0 / 18%);
 	}
 
 	@media (min-width: 64rem) {

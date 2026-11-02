@@ -4,6 +4,7 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
+	import Switch from '#lib/components/ui/Switch.svelte';
 	import { PROFILE_THEME_OPTIONS } from '#lib/schemas/profile';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
@@ -26,20 +27,24 @@
 	{#if form?.error}<p class="text-sm text-red-400" role="alert">{form.error}</p>{/if}
 	{#if form?.ok}<p class="text-sm text-lime-300" role="status">{form.ok}</p>{/if}
 
-	<Card class="p-5">
-		<h2 class="font-medium text-neutral-100">Create a template from your current style</h2>
-		<form method="POST" action="?/create" class="mt-4 grid gap-4 sm:grid-cols-2">
-			<Input name="name" label="Template name" required minlength={2} maxlength={40} placeholder="Midnight sticker pack" />
-			<Input name="description" label="Description" maxlength={160} placeholder="A little note about this look" />
-			<Select name="theme" label="Theme to save" options={themeOptions} value={data.profile.theme} required />
-			<label class="flex min-h-11 items-center gap-3 text-sm text-neutral-300 sm:col-span-2">
-				<input type="checkbox" name="isPublic" value="on" class="size-4 accent-lime-300" />
-				Share publicly in the community gallery
-			</label>
-			<div class="sm:col-span-2"><Button type="submit">Save template</Button></div>
-		</form>
-		<p class="mt-3 text-xs text-neutral-500">Public templates include only a preset theme and text. They never expose your uploads, private account data or links.</p>
-	</Card>
+	{#if data.plan.tier === 'premium'}
+		<Card class="p-5">
+			<h2 class="font-medium text-neutral-100">Save a profile layout</h2>
+			<form method="POST" action="?/create" class="mt-4 grid gap-4 sm:grid-cols-2">
+				<Input name="name" label="Template name" required minlength={2} maxlength={40} placeholder="Midnight sticker pack" />
+				<Input name="description" label="Description" maxlength={160} placeholder="A little note about this look" />
+				<Select name="theme" label="Theme to save" options={themeOptions} value={data.profile.theme} required />
+				<Switch name="isPublic" label="Share in the community gallery" description="Public templates contain only preset styling and text." class="sm:col-span-2" />
+				<div class="sm:col-span-2"><Button type="submit">Save template</Button></div>
+			</form>
+			<p class="mt-3 text-xs text-neutral-500">Templates never expose your uploads, private account data or links.</p>
+		</Card>
+	{:else}
+		<Card class="flex flex-wrap items-center justify-between gap-4 p-5">
+			<div><h2 class="font-medium text-neutral-100">Profile layouts are part of Premium</h2><p class="mt-1 text-sm text-neutral-400">Upgrade once for lifetime layout customization and templates.</p></div>
+			<Button href="/upgrade">Explore Premium</Button>
+		</Card>
+	{/if}
 
 	{#if myTemplates.length > 0}
 		<section class="flex flex-col gap-3">
@@ -93,7 +98,11 @@
 						<p class="text-xs text-neutral-500">by {item.ownerName || item.ownerSlug || 'OVYN member'} · {item.template.theme}</p>
 						{#if item.template.description}<p class="mt-1 text-sm text-neutral-400">{item.template.description}</p>{/if}
 						</div>
-						<form method="POST" action="?/apply" class="mt-auto"><input type="hidden" name="id" value={item.template.id} /><Button type="submit" variant="secondary">Use this template</Button></form>
+						{#if data.plan.tier === 'premium'}
+							<form method="POST" action="?/apply" class="mt-auto"><input type="hidden" name="id" value={item.template.id} /><Button type="submit" variant="secondary">Use this template</Button></form>
+						{:else}
+							<a href="/upgrade" class="mt-auto text-sm text-lime-300 hover:underline">Premium to apply this layout ↗</a>
+						{/if}
 					</Card>
 				{/each}
 			</div>

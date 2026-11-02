@@ -32,14 +32,14 @@
 			<Avatar name={data.profile.displayName || data.profile.slug} src={data.avatarUrl} size="lg" />
 			<div>
 				<h2 class="font-medium text-neutral-100">Profile avatar</h2>
-				<p class="mt-1 text-xs text-neutral-500">Choose a custom image or restore your Discord picture.</p>
+				<p class="mt-1 text-xs text-neutral-500">Choose a custom image or restore your sign-in account picture.</p>
 			</div>
 		</div>
 		<div class="flex flex-wrap gap-2">
 			<UploadButton kind="avatar" existingKey={data.profile.avatarKey} label="Upload avatar" />
 			{#if data.profile.avatarKey}
 				<form method="POST" action="?/avatarReset">
-					<Button type="submit" variant="ghost">Use Discord picture</Button>
+					<Button type="submit" variant="ghost">Use account picture</Button>
 				</form>
 			{/if}
 		</div>
@@ -103,12 +103,16 @@
 		</div>
 		{#if data.cursorUrl}<img src={data.cursorUrl} alt="Current custom cursor preview" class="size-12 object-contain" />{/if}
 		<p class="text-xs text-neutral-500">PNG or WebP · max 256 KB</p>
-		<div class="flex flex-wrap gap-2">
-			<UploadButton kind="cursor" existingKey={data.profile.cursorKey} label="Upload cursor" />
-			{#if data.profile.cursorKey}
-				<form method="POST" action="?/clearCursor"><Button type="submit" variant="ghost">Remove cursor</Button></form>
-			{/if}
-		</div>
+		{#if data.plan.tier === 'premium'}
+			<div class="flex flex-wrap gap-2">
+				<UploadButton kind="cursor" existingKey={data.profile.cursorKey} label="Upload cursor" />
+				{#if data.profile.cursorKey}
+					<form method="POST" action="?/clearCursor"><Button type="submit" variant="ghost">Remove cursor</Button></form>
+				{/if}
+			</div>
+		{:else}
+			<a href="/upgrade" class="text-sm text-lime-300 hover:underline">Unlock cursor effects with Premium ↗</a>
+		{/if}
 	</Card>
 
 	<a href="/{data.profile.slug}" class="text-sm text-lime-300 hover:underline">Preview my public page ↗</a>
