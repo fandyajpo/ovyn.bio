@@ -2,3 +2,14 @@ allowBuilds:
   esbuild@0.18.20: true
   esbuild@0.25.12: true
   esbuild@0.28.2: true
+minimumReleaseAgeExclude:
+  - '@better-auth/core@1.7.15'
+  - '@better-auth/drizzle-adapter@1.7.15'
+  - '@better-auth/kysely-adapter@1.7.15'
+  - '@better-auth/memory-adapter@1.7.15'
+  - '@better-auth/mongo-adapter@1.7.15'
+  - '@better-auth/prisma-adapter@1.7.15'
+  - '@better-auth/telemetry@1.7.15'
+  - '@tanstack/query-core@5.105.1'
+  - '@tanstack/svelte-query@6.3.7'
+  - better-auth@1.7.15
