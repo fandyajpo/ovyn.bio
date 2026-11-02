@@ -64,7 +64,7 @@
 			<Reveal delay={215}>
 				<div class="flex flex-wrap gap-3">
 					{#if data.user}
-						<Button href="/dashboard">Open your space</Button>
+						<Button href="/account">Open your space</Button>
 						<Button href="/discover" variant="secondary">Find your circle</Button>
 					{:else}
 						<Button href="/login">Claim your corner</Button>
@@ -119,7 +119,7 @@
 
 <section id="features" class="grid gap-4 py-12 md:grid-cols-3 sm:py-16">
 	<Reveal delay={0} class="h-full">
-		<a href={data.user ? '/settings/profile' : '/login'} class="collage-card collage-card--pink group block h-full rounded-[1.6rem] bg-[#20191c] p-6 sm:p-7">
+		<a href={data.user ? '/customize' : '/login'} class="collage-card collage-card--pink group block h-full rounded-[1.6rem] bg-[#20191c] p-6 sm:p-7">
 			<div class="flex items-center justify-between"><span class="font-mono text-xs text-neutral-500">01 / IDENTITY</span><span class="sticker sticker--pink">MAKE IT YOU</span></div>
 			<h2 class="mt-8 font-[family-name:var(--font-display)] text-2xl font-bold">A page with<br />your fingerprints.</h2>
 			<p class="mt-3 text-sm leading-6 text-neutral-400">Discord sign-in, a profile you can customize, a wallpaper, and cosmetics that feel like your own corner.</p>
@@ -199,7 +199,7 @@
 			<h2 class="font-[family-name:var(--font-display)] text-4xl font-bold tracking-tight sm:text-5xl">Make this place yours.</h2>
 			<p class="max-w-xl text-neutral-400">Claim your identity, find your circle, and start collecting the details that feel like you.</p>
 			<div class="flex flex-wrap justify-center gap-3">
-				{#if data.user}<Button href="/dashboard">Go to your space</Button><Button href="/discover" variant="secondary">Meet guilds</Button>{:else}<Button href="/login">Claim your corner</Button><Button href="/discover" variant="secondary">Explore first</Button>{/if}
+				{#if data.user}<Button href="/account">Go to your space</Button><Button href="/discover" variant="secondary">Meet guilds</Button>{:else}<Button href="/login">Claim your corner</Button><Button href="/discover" variant="secondary">Explore first</Button>{/if}
 			</div>
 		</div>
 	</section>

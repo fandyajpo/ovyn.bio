@@ -11,7 +11,7 @@ import {
 } from '#lib/server/services/profiles';
 import { isValidSlug } from '#lib/server/utils/slug';
 import { listOwnedByKind, setEquippedCosmetic, type CosmeticKind } from '#lib/server/services/cosmetics';
-import { presignDownload } from '#lib/server/storage';
+import { assertOwnObjectKey, presignDownload } from '#lib/server/storage';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
@@ -115,6 +115,7 @@ export const actions: Actions = {
 
 		try {
 			rateLimit(`wallpaper:${user.id}`, 10, 60_000);
+			assertOwnObjectKey(user.id, 'banner', key);
 			await setProfileBanner(user.id, key);
 			return { ok: true };
 		} catch (err) {

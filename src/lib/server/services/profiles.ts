@@ -203,6 +203,36 @@ export async function setProfileBanner(userId: string, bannerKey: string) {
 	return updated;
 }
 
+export async function setProfileAudioKey(userId: string, audioKey: string | null) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ audioKey, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
+export async function setProfileCursorKey(userId: string, cursorKey: string | null) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ cursorKey, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
+export async function setProfileTheme(userId: string, theme: string) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ theme, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
 export async function getProfileBySlug(slug: string) {
 	const [row] = await db
 		.select({ profile: profiles, discord: discordAccounts })

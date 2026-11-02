@@ -22,7 +22,7 @@
 					{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
 					{ href: '/spotlight', label: 'Spotlight', icon: '↗', tone: 'lilac' },
 					{ href: '/guild', label: 'My guild', icon: '◉', tone: 'blue' },
-					{ href: '/dashboard', label: 'Dashboard', icon: '⌂', tone: 'lime' }
+					{ href: '/account', label: 'My space', icon: '⌂', tone: 'lime' }
 				]
 			: []),
 		...(isAdmin ? [{ href: '/admin', label: 'Admin', icon: '⚙', tone: 'pink' }] : []),
@@ -106,8 +106,9 @@
 
 				{#if accountMenuOpen}
 					<div id="account-menu" bind:this={accountMenu} role="group" aria-label="Account links" class="account-menu absolute right-0 z-20 mt-2 w-56 overflow-hidden rounded-xl border py-1 shadow-xl">
-						<a href="/settings/profile" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Profile settings</a>
-						<a href="/billing" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Billing</a>
+						<a href="/account" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Account overview</a>
+						<a href="/customize" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Customize page</a>
+						<a href="/upgrade" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800">Plans &amp; upgrade</a>
 						{#if isAdmin}<a href="/admin" onclick={closeMenus} class="block min-h-11 px-4 py-3 text-sm text-lime-300 transition-colors hover:bg-neutral-800">Monetization admin</a>{/if}
 						<hr class="my-1 border-neutral-800" />
 						<button type="button" onclick={logout} class="block min-h-11 w-full px-4 py-3 text-left text-sm text-red-400 transition-colors hover:bg-neutral-800">Sign out</button>
@@ -147,8 +148,9 @@
 				<section class="mobile-menu-account" aria-label="Account shortcuts">
 					<p class="mobile-menu-caption">Your account</p>
 					<div class="mobile-account-links">
-						<a href="/settings/profile" onclick={closeMenus}>Profile settings</a>
-						<a href="/billing" onclick={closeMenus}>Billing</a>
+						<a href="/account" onclick={closeMenus}>Account overview</a>
+						<a href="/customize" onclick={closeMenus}>Customize</a>
+						<a href="/upgrade" onclick={closeMenus}>Upgrade</a>
 						<button type="button" onclick={logout}>Sign out</button>
 					</div>
 				</section>

@@ -71,6 +71,8 @@ export const profiles = pgTable(
 		bio: text('bio'),
 		avatarKey: text('avatar_key'),
 		bannerKey: text('banner_key'),
+		audioKey: text('audio_key'),
+		cursorKey: text('cursor_key'),
 		theme: text('theme').notNull().default('default'),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
 		equippedFrameId: uuid('equipped_frame_id').references(() => cosmetics.id, { onDelete: 'set null' }),
@@ -80,6 +82,39 @@ export const profiles = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [index('profiles_slug_idx').on(t.slug)]
+);
+
+/** Social and custom links displayed on a public profile. */
+export const profileLinks = pgTable(
+	'profile_links',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		provider: text('provider').notNull(),
+		label: text('label').notNull(),
+		url: text('url').notNull(),
+		sortOrder: integer('sort_order').notNull().default(0),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [index('profile_links_user_sort_idx').on(t.userId, t.sortOrder)]
+);
+
+export const profileTemplates = pgTable(
+	'profile_templates',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		ownerUserId: text('owner_user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+		name: text('name').notNull(),
+		description: text('description'),
+		theme: text('theme').notNull().default('default'),
+		isPublic: boolean('is_public').notNull().default(false),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [
+		index('profile_templates_owner_created_idx').on(t.ownerUserId, t.createdAt),
+		index('profile_templates_public_created_idx').on(t.isPublic, t.createdAt)
+	]
 );
 
 /** Signed-in profile analytics; deduplicated to one visitor per UTC date. */

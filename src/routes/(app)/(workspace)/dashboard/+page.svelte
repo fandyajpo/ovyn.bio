@@ -29,7 +29,7 @@
 		</h1>
 		<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
 			<Button href="/spotlight" variant="ghost" class="w-full sm:w-auto">Get featured</Button>
-			<Button href="/settings/profile" variant="secondary" class="w-full sm:w-auto">Customize page</Button>
+			<Button href="/customize" variant="secondary" class="w-full sm:w-auto">Customize page</Button>
 		</div>
 	</div>
 
@@ -72,7 +72,7 @@
 				</a>
 			{:else}
 				<p class="mt-3 text-sm text-neutral-400">No pending payments.</p>
-				<Button href="/billing" variant="secondary" class="mt-3">Plans &amp; billing</Button>
+				<Button href="/upgrade" variant="secondary" class="mt-3">Plans &amp; billing</Button>
 			{/if}
 		</Card>
 		</div>
@@ -101,7 +101,7 @@
 			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile views · 30 days</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.analytics.views} views</p>
 			<p class="mt-1 text-sm text-neutral-400">{data.analytics.uniqueVisitors} unique signed-in visitors</p>
-			<a href="/settings/analytics" class="mt-3 inline-block text-sm text-lime-300 hover:underline">View analytics</a>
+			<a href="/account/analytics" class="mt-3 inline-block text-sm text-lime-300 hover:underline">View analytics</a>
 		</Card>
 
 		<Card class="p-5">

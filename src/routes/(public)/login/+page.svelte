@@ -15,14 +15,14 @@
 		error = null;
 		const { error: err } = await signIn.social({
 			provider: 'discord',
-			callbackURL: '/dashboard'
+			callbackURL: '/account'
 		});
 		if (err) {
 			loading = false;
 			error = err.message ?? 'Sign-in failed. Please try again.';
 			return;
 		}
-		await goto('/dashboard');
+		await goto('/account');
 	}
 </script>
 

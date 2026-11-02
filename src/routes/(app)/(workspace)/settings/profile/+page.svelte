@@ -101,7 +101,7 @@
 			{#if data.discord}
 				<p class="font-mono text-xs text-neutral-600">discord: {data.discord.username}</p>
 			{/if}
-			<a href="/settings/account" class="mt-1 inline-block text-xs text-neutral-500 hover:text-neutral-300">
+			<a href="/account/settings" class="mt-1 inline-block text-xs text-neutral-500 hover:text-neutral-300">
 				Discord sign-in · Account settings
 			</a>
 		</div>

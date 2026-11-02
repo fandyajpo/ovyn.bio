@@ -297,6 +297,40 @@ body {
 	box-shadow: 7px 7px 0 rgb(255 120 168 / 15%);
 }
 
+.profile-sheet[data-profile-theme='midnight'],
+.template-preview[data-profile-theme='midnight'] {
+	border-color: rgb(131 230 255 / 38%);
+	background-color: #0d1528;
+	box-shadow: 7px 7px 0 rgb(131 230 255 / 18%);
+}
+
+.profile-sheet[data-profile-theme='bubblegum'],
+.template-preview[data-profile-theme='bubblegum'] {
+	border-color: rgb(255 120 168 / 42%);
+	background-color: #261520;
+	box-shadow: 7px 7px 0 rgb(255 120 168 / 18%);
+}
+
+.profile-sheet[data-profile-theme='ocean'],
+.template-preview[data-profile-theme='ocean'] {
+	border-color: rgb(87 214 202 / 42%);
+	background-color: #0e2226;
+	box-shadow: 7px 7px 0 rgb(87 214 202 / 18%);
+}
+
+.profile-sheet[data-profile-theme='forest'],
+.template-preview[data-profile-theme='forest'] {
+	border-color: rgb(165 224 130 / 38%);
+	background-color: #152219;
+	box-shadow: 7px 7px 0 rgb(165 224 130 / 17%);
+}
+
+.template-preview {
+	min-height: 9rem;
+	border: 1px solid rgb(255 255 255 / 12%);
+	background: #151714;
+}
+
 .profile-banner-doodle {
 	background:
 		radial-gradient(circle at 82% 25%, rgb(131 230 255 / 18%), transparent 30%),
