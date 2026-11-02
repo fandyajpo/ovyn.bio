@@ -94,8 +94,9 @@ You must add:
   equip/unequip owned cosmetics in profile settings; public profiles render
   frames around the avatar, wallpapers behind the header, and badges next to
   the name. Seed the starter catalog once with `npm run db:seed-shop`; its SVG
-  artwork is bundled in `static/cosmetics/`. Use `/admin/catalog` to manage
-  listings and upload replacement artwork to Neon Object Storage.
+  artwork is bundled in `static/cosmetics/`. The shop previews each item on a
+  sample profile. Use `/admin/catalog` to manage listings and upload replacement
+  artwork to Neon Object Storage.
 
 - **Limited drops** — cosmetics may have a stock cap and closing date. Stock is reserved during checkout and points redemption; expired 24-hour checkouts stop reserving units. Starter data includes one sample limited cosmetic.
 - **Daily check-ins & rewards** — one UTC check-in per day awards 10 points, with a 50-point bonus on each 7-day streak. Points can redeem cosmetics when a catalog item has a points price. These values are starter defaults.

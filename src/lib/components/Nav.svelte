@@ -38,7 +38,7 @@
 		</a>
 
 		<div class="flex min-w-0 items-center gap-1 sm:gap-4">
-			<div class="flex max-w-[48vw] items-center gap-1 overflow-x-auto whitespace-nowrap sm:max-w-none sm:gap-4 sm:overflow-visible">
+			<div class="scrollbar-hide flex max-w-[48vw] items-center gap-1 overflow-x-auto whitespace-nowrap sm:max-w-none sm:gap-4 sm:overflow-visible">
 				{#each links as link (link.href)}
 					<a
 						href={link.href}

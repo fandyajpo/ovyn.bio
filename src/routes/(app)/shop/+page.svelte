@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
+	import CosmeticPreview from '#lib/components/CosmeticPreview.svelte';
 	import { formatIdr } from '#lib/utils';
 
 	let { data, form }: { data: PageData; form?: { error?: string } } = $props();
@@ -34,19 +35,13 @@
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each data.items as item (item.id)}
 				<Card class="collage-card flex h-full flex-col gap-3 p-5">
-					<div
-						class="relative flex h-32 items-center justify-center overflow-hidden rounded-2xl bg-neutral-800/60"
-					>
-						{#if item.stockLimit !== null || item.dropEndsAt}<span class="sticker sticker--pink absolute left-3 top-3 z-10">LIMITED DROP</span>{/if}
-						{#if item.assetUrl}
-							<img src={item.assetUrl} alt={item.name} class="max-h-full max-w-full object-contain" />
-						{:else}
-							<span
-								class="size-10 rounded-full border-2"
-								style="border-color: {item.accentColor ?? '#D5FF35'}"
-							></span>
-						{/if}
-					</div>
+					<CosmeticPreview
+						kind={item.kind}
+						name={item.name}
+						assetUrl={item.assetUrl}
+						accentColor={item.accentColor}
+						limited={item.stockLimit !== null || Boolean(item.dropEndsAt)}
+					/>
 
 					<div class="flex-1">
 						<p class="font-medium text-neutral-100">{item.name}</p>

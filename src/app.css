@@ -18,6 +18,47 @@
 
 :root {
 	color-scheme: dark;
+	scroll-behavior: smooth;
+	scrollbar-width: none;
+}
+
+* {
+	scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+	width: 0;
+	height: 0;
+	display: none;
+}
+
+.faq-item {
+	border: 1px solid rgb(255 255 255 / 10%);
+	background: rgb(27 29 25 / 78%);
+	box-shadow: 3px 3px 0 rgb(131 230 255 / 10%);
+}
+
+.faq-item[open] {
+	border-color: rgb(213 255 53 / 35%);
+}
+
+.cta-panel {
+	background:
+		radial-gradient(ellipse at 50% 0%, rgb(255 120 168 / 12%), transparent 55%),
+		linear-gradient(145deg, #191b17, #141512);
+}
+
+.faq-summary {
+	list-style: none;
+}
+
+.faq-summary::-webkit-details-marker {
+	display: none;
+}
+
+.faq-item[open] .faq-toggle {
+	transform: rotate(45deg);
+	color: var(--color-pop-pink);
 }
 
 body {
