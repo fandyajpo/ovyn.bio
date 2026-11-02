@@ -10,6 +10,7 @@
 	let { data, children }: { data: LayoutData; children: any } = $props();
 	const isLanding = $derived(page.url.pathname === '/');
 	const isProfilePage = $derived(page.route.id?.endsWith('/[username]') ?? false);
+	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
 
 	const queryClient = new QueryClient({
 		defaultOptions: {
@@ -25,7 +26,7 @@
 </svelte:head>
 
 <QueryClientProvider client={queryClient}>
-	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'}>
+	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		{#if !isProfilePage}<Nav user={data.user} isAdmin={data.isAdmin} />{/if}
 

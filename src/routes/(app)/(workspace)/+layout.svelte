@@ -6,6 +6,11 @@
 </script>
 
 <div class="workspace-shell grid gap-5 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-7">
-	<WorkspaceSidebar profileSlug={data.profileSlug} planTier={data.currentPlan.tier} />
+	<WorkspaceSidebar
+		profileSlug={data.profileSlug}
+		planTier={data.currentPlan.tier}
+		userName={data.userName}
+		userImage={data.userImage}
+	/>
 	<div class="min-w-0">{@render children()}</div>
 </div>

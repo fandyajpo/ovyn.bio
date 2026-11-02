@@ -1033,3 +1033,16 @@ html[data-theme='light'] body {
 @media (max-width: 39.999rem) {
 	html[data-theme='light'] body { background-attachment: scroll; }
 }
+
+
+
+@media (max-width: 63.999rem) {
+	.app-frame[data-workspace-page='true'] .site-header,
+	.app-frame[data-workspace-page='true'] .app-footer {
+		display: none !important;
+	}
+
+	.app-frame[data-workspace-page='true'] .page-content {
+		padding-top: calc(4.5rem + env(safe-area-inset-top));
+	}
+}

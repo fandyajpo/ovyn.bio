@@ -9,5 +9,10 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 		getProfileByUserId(locals.user.id),
 		getUserPlan(locals.user.id)
 	]);
-	return { profileSlug: profile.slug, currentPlan: plan };
+	return {
+		profileSlug: profile.slug,
+		currentPlan: plan,
+		userName: locals.user.name,
+		userImage: locals.user.image
+	};
 };

@@ -11,7 +11,7 @@
 		},
 		{
 			title: 'Customize your page',
-				body: 'Choose colors and a background, add optional audio, and unlock custom cursor effects and profile layouts with Premium.',
+				body: 'Personalize colors and backgrounds, add optional audio, and unlock custom layouts and cursor effects with Premium.',
 				link: '/customize',
 				label: 'Open customization'
 		},
