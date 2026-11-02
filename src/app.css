@@ -1330,13 +1330,29 @@ html[data-theme='light'] body {
 	font-size: clamp(0.95rem, 2.4vw, 1.3rem);
 }
 
-.landing-end-link em {
+.landing-end-name {
+	display: inline-grid;
+}
+
+/* The names share a cell so the width never jumps while they cycle. */
+.landing-end-name > span {
+	grid-area: 1 / 1;
 	color: var(--color-accent);
-	font-style: normal;
+	opacity: 0;
+	transform: translateY(0.4em);
+	transition: opacity 460ms ease, transform 560ms cubic-bezier(0.22, 0.9, 0.24, 1);
+	pointer-events: none;
+}
+
+.landing-end-name > span.is-active {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.landing-line-text { transition: none; }
+	.landing-end-name > span { transition: none; }
 	.landing-magnetic { transform: none; transition: none; }
 }
 

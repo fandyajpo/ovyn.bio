@@ -33,20 +33,69 @@
 
 	// The landing is a small playground: the headline cycles, you can type your
 	// own name into the demo, and the primary button leans toward the cursor.
-	const headlines = ['impossible to ignore.', 'one link away.', 'unmistakably yours.'];
+	const headlines = ['impossible to ignore.', 'one link, all of you.', 'unmistakably yours.'];
 
 	let headlineIndex = $state(0);
 	const headline = $derived(headlines[headlineIndex] ?? headlines[0] ?? '');
 	let pageName = $state('');
 	let magnetEl = $state<HTMLSpanElement | undefined>(undefined);
 
-	const handle = $derived(
-		(pageName.trim() || 'your name')
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, '-')
-			.replace(/^-+|-+$/g, '')
-			.slice(0, 24) || 'your-name'
-	);
+	// The closing section shows a fresh made-up name every couple of seconds.
+	const NAME_ADJECTIVES = [
+		'quiet',
+		'soft',
+		'late',
+		'low',
+		'lucky',
+		'neon',
+		'tiny',
+		'wild',
+		'velvet',
+		'side',
+		'sunset',
+		'mellow'
+	];
+	const NAME_NOUNS = [
+		'kai',
+		'luna',
+		'moth',
+		'comet',
+		'pixel',
+		'fern',
+		'echo',
+		'opus',
+		'bird',
+		'static',
+		'studio',
+		'wave'
+	];
+
+	function randomHandle(): string {
+		const adjective = NAME_ADJECTIVES[Math.floor(Math.random() * NAME_ADJECTIVES.length)] ?? 'soft';
+		const noun = NAME_NOUNS[Math.floor(Math.random() * NAME_NOUNS.length)] ?? 'wave';
+		return `${adjective}-${noun}`;
+	}
+
+	type SampleHandle = { id: number; name: string };
+
+	let handleSeq = 0;
+
+	// The first name is fixed so the prerendered HTML matches the first paint.
+	let handles = $state<SampleHandle[]>([{ id: 0, name: 'quiet-wave' }]);
+	const activeHandle = $derived(handles[handles.length - 1]?.id ?? 0);
+
+	onMount(() => {
+		const nextHandle = () => {
+			handleSeq += 1;
+			handles = [...handles.slice(-1), { id: handleSeq, name: randomHandle() }];
+		};
+
+		handles = [{ id: ++handleSeq, name: randomHandle() }];
+
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+		const timer = setInterval(nextHandle, 2000);
+		return () => clearInterval(timer);
+	});
 
 	onMount(() => {
 		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -347,7 +396,12 @@
 			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
 			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
 			<p class="landing-end-link" data-reveal-item style="--reveal-order: 3">
-				<span>ovyn.me/</span><em>{handle}</em>
+				<span>ovyn.me/</span>
+				<span class="landing-end-name">
+					{#each handles as item (item.id)}
+						<span class:is-active={item.id === activeHandle} aria-hidden={item.id === activeHandle ? undefined : 'true'}>{item.name}</span>
+					{/each}
+				</span>
 			</p>
 			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 4">
 				<Button href="/login">Continue with Discord or Google</Button>
