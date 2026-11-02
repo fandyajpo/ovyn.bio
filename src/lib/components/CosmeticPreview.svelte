@@ -22,7 +22,7 @@
 		{#if assetUrl}
 			<img src={assetUrl} alt="" class="absolute inset-0 size-full object-cover" />
 		{:else}
-			<div class="absolute inset-0 opacity-50" style={`background: radial-gradient(circle at 75% 25%, ${resolvedAccent}, transparent 45%), #151714`}></div>
+			<div class="absolute inset-0 opacity-50" style={`background: radial-gradient(circle at 75% 25%, ${resolvedAccent}, transparent 45%), var(--color-preview-stage)`}></div>
 		{/if}
 		<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-transparent"></div>
 		<span class="sticker sticker--dark absolute left-3 top-3">WALLPAPER ON</span>

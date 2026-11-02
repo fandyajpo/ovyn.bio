@@ -9,11 +9,13 @@
 	--color-muted: #92958a;
 	--color-accent: #d5ff35;
 	--color-accent-soft: rgb(213 255 53 / 12%);
+	--color-on-accent: #111210;
 	--color-pop-pink: #ff78a8;
 	--color-pop-blue: #83e6ff;
 	--color-pop-lilac: #c4a5ff;
 	--color-divider: rgb(255 255 255 / 12%);
 	--color-surface-raised: #242720;
+	--color-preview-stage: #151714;
 	--color-nav-glass: rgb(17 18 16 / 94%);
 	--color-menu-glass: rgb(20 21 18 / 97%);
 
@@ -29,45 +31,50 @@
 
 html[data-theme='light'] {
 	color-scheme: light;
-	--color-background: #f5f3ec;
-	--color-surface: #fffefa;
-	--color-surface-raised: #eeede5;
-	--color-foreground: #1b1c18;
-	--color-muted: #66695f;
-	--color-divider: rgb(27 28 24 / 14%);
-	--color-nav-glass: rgb(250 249 244 / 95%);
-	--color-menu-glass: rgb(255 254 250 / 98%);
-	--color-accent-soft: rgb(82 106 14 / 9%);
-	--color-pop-pink: #d95480;
-	--color-pop-blue: #368da1;
-	--color-pop-lilac: #9574c6;
-	--color-neutral-50: #f8f7f1;
-	--color-neutral-100: #1b1c18;
-	--color-neutral-200: #292b25;
-	--color-neutral-300: #3b3d36;
-	--color-neutral-400: #55584f;
-	--color-neutral-500: #6b6e64;
-	--color-neutral-600: #82857b;
-	--color-neutral-700: #d0d1c8;
-	--color-neutral-800: #e2e2d9;
-	--color-neutral-900: #f0efe8;
-	--color-neutral-950: #faf9f4;
+	--color-background: #fff6e9;
+	--color-surface: #fffdf8;
+	--color-surface-raised: #f3e6d2;
+	--color-preview-stage: #f3e6d2;
+	--color-foreground: #28233d;
+	--color-muted: #70677a;
+	--color-accent: #e7b953;
+	--color-accent-soft: rgb(231 185 83 / 18%);
+	--color-on-accent: #28233d;
+	--color-divider: rgb(55 40 67 / 15%);
+	--color-nav-glass: rgb(255 246 233 / 96%);
+	--color-menu-glass: rgb(255 253 248 / 98%);
+	--color-pop-pink: #ee8397;
+	--color-pop-blue: #71c0bd;
+	--color-pop-lilac: #b8a1d7;
+	--color-lime-300: #e7b953;
+	--color-lime-200: #f1d38f;
+	--color-neutral-50: #fffaf2;
+	--color-neutral-100: #28233d;
+	--color-neutral-200: #342d49;
+	--color-neutral-300: #47405c;
+	--color-neutral-400: #5d566f;
+	--color-neutral-500: #746c81;
+	--color-neutral-600: #8b8297;
+	--color-neutral-700: #d0c4b3;
+	--color-neutral-800: #e5d9c7;
+	--color-neutral-900: #f3e8d6;
+	--color-neutral-950: #fffaf2;
 }
 
 html[data-theme='light'] body {
 	background-image:
-		radial-gradient(55rem 28rem at 8% -6%, rgb(213 255 53 / 13%), transparent 62%),
-		radial-gradient(42rem 32rem at 100% 12%, rgb(255 120 168 / 10%), transparent 64%),
-		radial-gradient(rgb(20 22 17 / 7%) 0.7px, transparent 0.7px);
+		radial-gradient(55rem 28rem at 8% -6%, rgb(231 185 83 / 17%), transparent 62%),
+		radial-gradient(42rem 32rem at 100% 12%, rgb(238 131 151 / 12%), transparent 64%),
+		radial-gradient(rgb(40 35 61 / 6%) 0.7px, transparent 0.7px);
 }
 
 html[data-theme='light'] .text-neutral-950 {
-	color: #181914;
+	color: #28233d;
 }
 
 html[data-theme='light'] .text-lime-300,
 html[data-theme='light'] .text-lime-200 {
-	color: #526a0e;
+	color: #805812;
 }
 
 html[data-theme='light'] .text-red-400,
@@ -80,33 +87,62 @@ html[data-theme='light'] .text-amber-200 {
 	color: #795108;
 }
 
-html[data-theme='light'] .text-pop-pink { color: #9f2e58; }
-html[data-theme='light'] .text-pop-blue { color: #1d6578; }
-html[data-theme='light'] .text-pop-lilac { color: #5a3a8b; }
+html[data-theme='light'] .text-pop-pink { color: #a23e58; }
+html[data-theme='light'] .text-pop-blue { color: #226d6a; }
+html[data-theme='light'] .text-pop-lilac { color: #654b8e; }
+
+html[data-theme='light'] .sticker {
+	border-color: var(--color-on-accent);
+	color: var(--color-on-accent);
+	box-shadow: 3px 3px 0 rgb(40 35 61 / 18%);
+}
+
+html[data-theme='light'] .sticker--dark {
+	border-color: var(--color-divider);
+	background: var(--color-surface-raised);
+	color: var(--color-foreground);
+}
+
+html[data-theme='light'] .mobile-menu-icon {
+	color: var(--color-on-accent);
+}
 
 html[data-theme='light'] .ovyn-card {
 	border-color: var(--color-divider);
-	box-shadow: 3px 3px 0 rgb(52 62 32 / 12%);
+	box-shadow: 3px 3px 0 rgb(137 94 37 / 14%);
 }
 
 html[data-theme='light'] .faq-item {
 	border-color: var(--color-divider);
-	background: rgb(255 254 250 / 85%);
+	background: rgb(255 253 248 / 90%);
 }
 
-html[data-theme='light'] .profile-sheet,
-html[data-theme='light'] .hero-stage {
-	background-image: none;
+html[data-theme='light'] .cta-panel {
+	background:
+		radial-gradient(ellipse at 50% 0%, rgb(238 131 151 / 17%), transparent 55%),
+		linear-gradient(145deg, #fffdf8, #fff1d8);
+}
+
+html[data-theme='light'] .profile-sheet {
 	background-color: var(--color-surface);
+	border-color: var(--color-divider);
+	color: var(--color-foreground);
+}
+
+html[data-theme='light'] .hero-stage {
+	background:
+		radial-gradient(ellipse at 78% 25%, rgb(113 192 189 / 20%), transparent 45%),
+		radial-gradient(ellipse at 12% 100%, rgb(238 131 151 / 12%), transparent 42%),
+		linear-gradient(145deg, #fffdf8, #fff3df);
 	border-color: var(--color-divider);
 	color: var(--color-foreground);
 }
 
 html[data-theme='light'] .profile-banner-doodle {
 	background:
-		radial-gradient(circle at 82% 25%, rgb(38 118 138 / 14%), transparent 30%),
-		radial-gradient(circle at 18% 100%, rgb(139 166 32 / 12%), transparent 35%),
-		#eeede5;
+		radial-gradient(circle at 82% 25%, rgb(113 192 189 / 20%), transparent 30%),
+		radial-gradient(circle at 18% 100%, rgb(231 185 83 / 18%), transparent 35%),
+		#f3e6d2;
 	border-color: var(--color-divider);
 }
 
@@ -468,4 +504,42 @@ body {
 		border-color: color-mix(in srgb, var(--color-pop-pink) 52%, transparent);
 		background: color-mix(in srgb, var(--color-pop-pink) 12%, var(--color-surface-raised));
 	}
+}
+
+
+
+html[data-theme='light'] ::selection {
+	color: var(--color-on-accent);
+}
+
+html[data-theme='light'] .faq-item[open] {
+	border-color: color-mix(in srgb, var(--color-accent) 58%, transparent);
+}
+
+html[data-theme='light'] .faq-item[open] .faq-toggle {
+	color: #a23e58;
+}
+
+html[data-theme='light'] .skeleton {
+	background: var(--color-surface-raised);
+}
+
+html[data-theme='light'] [class*='bg-[#151d20'],
+html[data-theme='light'] [class*='bg-[#151a1c'],
+html[data-theme='light'] [class*='bg-[#151714'] {
+	background-color: color-mix(in srgb, var(--color-surface) 88%, var(--color-pop-blue));
+}
+
+html[data-theme='light'] [class*='bg-[#1a1c18'],
+html[data-theme='light'] [class*='bg-[#20191c'] {
+	background-color: color-mix(in srgb, var(--color-surface) 88%, var(--color-pop-pink));
+}
+
+html[data-theme='light'] [class*='bg-[#1b1d17'],
+html[data-theme='light'] [class*='bg-[#1b1d19'] {
+	background-color: color-mix(in srgb, var(--color-surface) 90%, var(--color-accent));
+}
+
+html[data-theme='light'] [class*='bg-black/30'] {
+	background-color: color-mix(in srgb, var(--color-surface) 84%, var(--color-foreground));
 }
