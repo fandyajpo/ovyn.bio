@@ -46,7 +46,7 @@
 					<span class="demo-chip demo-chip--blue">Spotify</span>
 					<span class="demo-chip demo-chip--lilac">Instagram</span>
 				</div>
-			</article>
+			</aside>
 
 			<div class="demo-layer demo-float demo-float--grid" style="--i: 2; --to: translate3d(0, 0, -90px) rotateY(9deg); --from: translate3d(-150%, 26px, -220px) rotateY(24deg);">
 				<span class="demo-float-title">grid</span>
