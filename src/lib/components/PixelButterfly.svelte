@@ -1,50 +1,97 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 
-	type Cell = { x: number; y: number; color: string };
+	type Cell = { x: number; y: number; w: number; h: number; fill: string };
 
-	// A small monarch, drawn on a 16 x 13 pixel grid so the wings stay crisp.
-	const MATRIX = [
-		'.....k....k.....',
-		'....k......k....',
-		'...kkkk..kkkk...',
-		'..koookbbkoook..',
-		'.kowookbbkoowok.',
-		'.kooookbbkooook.',
-		'.kooookbbkooook.',
-		'...kookbbkook...',
-		'..kko..bb..okk..',
-		'.kooo..bb..oook.',
-		'.koo...bb...ook.',
-		'..ko...bb...ok..',
-		'..kk...bb...kk..'
+	// A monarch at 24 x 20 pixels, so the wings carry veins, bands and spots.
+	const K = '#1d1208';
+	const D = '#c2581d';
+	const O = '#ff8a3d';
+	const L = '#ffb877';
+	const C = '#ffe7b8';
+	const W = '#fff9ea';
+	const B = '#2c190d';
+	const BM = '#4a2b17';
+
+	const UPPER: Array<[number, number, number]> = [
+		[4, 7, 10],
+		[5, 6, 11],
+		[6, 4, 11],
+		[7, 2, 11],
+		[8, 1, 11],
+		[9, 1, 11],
+		[10, 1, 11],
+		[11, 2, 10],
+		[12, 3, 9]
 	];
 
-	const HIGHLIGHT = '#ffb877';
-	const COLORS: Record<string, string> = {
-		k: '#22150d',
-		o: '#ff8a3d',
-		l: HIGHLIGHT,
-		w: '#ffe7b8',
-		b: '#2d1c10'
-	};
+	const LOWER: Array<[number, number, number]> = [
+		[13, 4, 9],
+		[14, 5, 9],
+		[15, 6, 8],
+		[16, 7, 8]
+	];
 
-	const CELLS: Cell[] = MATRIX.flatMap((row, y) =>
-		[...row].map((cell, x) => ({ x, y, cell }))
-	)
-		.filter((pixel) => COLORS[pixel.cell] !== undefined)
-		.map((pixel) => ({
-			x: pixel.x,
-			y: pixel.y,
-			color:
-				pixel.cell === 'o' && (pixel.x + pixel.y) % 7 === 0
-					? HIGHLIGHT
-					: (COLORS[pixel.cell] ?? HIGHLIGHT)
-		}));
+	function wingBase(spans: Array<[number, number, number]>): Cell[] {
+		const rects: Cell[] = [];
+		for (const [y, x1, x2] of spans) {
+			rects.push({ x: x1 - 1, y, w: x2 - x1 + 3, h: 1, fill: K });
+		}
+		for (const [y, x1, x2] of spans) {
+			rects.push({ x: x1, y, w: x2 - x1 + 1, h: 1, fill: O });
+		}
+		return rects;
+	}
 
-	const LEFT_WING = CELLS.filter((cell) => cell.x < 7);
-	const RIGHT_WING = CELLS.filter((cell) => cell.x > 8);
-	const BODY = CELLS.filter((cell) => cell.x >= 7 && cell.x <= 8);
+	const WING_DETAIL: Cell[] = [
+		// upper wing: veins, a darker band and pale flashes near the tips
+		{ x: 6, y: 6, w: 1, h: 5, fill: K },
+		{ x: 9, y: 7, w: 1, h: 4, fill: K },
+		{ x: 2, y: 9, w: 1, h: 2, fill: K },
+		{ x: 4, y: 10, w: 6, h: 1, fill: D },
+		{ x: 5, y: 11, w: 5, h: 1, fill: D },
+		{ x: 3, y: 8, w: 2, h: 1, fill: L },
+		{ x: 6, y: 5, w: 2, h: 1, fill: L },
+		{ x: 8, y: 6, w: 1, h: 1, fill: C },
+		{ x: 4, y: 7, w: 1, h: 1, fill: C },
+		{ x: 1, y: 8, w: 1, h: 1, fill: W },
+		{ x: 1, y: 10, w: 1, h: 1, fill: W },
+		{ x: 2, y: 11, w: 1, h: 1, fill: W },
+		// lower wing
+		{ x: 6, y: 13, w: 2, h: 1, fill: D },
+		{ x: 5, y: 14, w: 4, h: 1, fill: D },
+		{ x: 6, y: 13, w: 1, h: 2, fill: K },
+		{ x: 7, y: 13, w: 1, h: 2, fill: K },
+		{ x: 6, y: 14, w: 1, h: 1, fill: C },
+		{ x: 6, y: 15, w: 1, h: 1, fill: W },
+		{ x: 8, y: 15, w: 1, h: 1, fill: W }
+	];
+
+	const BODY: Cell[] = [
+		{ x: 9, y: 1, w: 1, h: 1, fill: K },
+		{ x: 10, y: 0, w: 1, h: 1, fill: K },
+		{ x: 13, y: 0, w: 1, h: 1, fill: K },
+		{ x: 14, y: 1, w: 1, h: 1, fill: K },
+		{ x: 10, y: 2, w: 4, h: 1, fill: K },
+		{ x: 10, y: 3, w: 4, h: 2, fill: B },
+		{ x: 10, y: 3, w: 1, h: 1, fill: W },
+		{ x: 13, y: 3, w: 1, h: 1, fill: W },
+		{ x: 10, y: 5, w: 4, h: 1, fill: K },
+		{ x: 11, y: 5, w: 2, h: 4, fill: K },
+		{ x: 11, y: 5, w: 2, h: 3, fill: BM },
+		{ x: 11, y: 8, w: 2, h: 8, fill: K },
+		{ x: 11, y: 8, w: 2, h: 7, fill: B },
+		{ x: 11, y: 10, w: 2, h: 1, fill: BM },
+		{ x: 11, y: 12, w: 2, h: 1, fill: BM },
+		{ x: 11, y: 14, w: 2, h: 1, fill: BM }
+	];
+
+	function mirror(rects: Cell[]): Cell[] {
+		return rects.map((rect) => ({ ...rect, x: 23 - rect.x - rect.w + 1 }));
+	}
+
+	const LEFT_WING: Cell[] = [...wingBase(UPPER), ...wingBase(LOWER), ...WING_DETAIL];
+	const RIGHT_WING: Cell[] = mirror(LEFT_WING);
 
 	let host = $state<HTMLDivElement | undefined>(undefined);
 	let ready = $state(false);
@@ -136,20 +183,20 @@
 			style={`--x: ${x}px; --y: ${y}px; --tilt: ${tilt}deg; --flip: ${flip ? -1 : 1}; --fly: ${duration}ms`}
 		>
 			<span class="bob">
-				<svg viewBox="0 0 32 26" width="42" height="34" shape-rendering="crispEdges">
+				<svg viewBox="0 0 48 40" width="54" height="45" shape-rendering="crispEdges">
 					<g class="wing wing-left">
-						{#each LEFT_WING as cell (cell.y * 16 + cell.x)}
-							<rect x={cell.x * 2} y={cell.y * 2} width="2" height="2" fill={cell.color} />
+						{#each LEFT_WING as cell, index (index)}
+							<rect x={cell.x * 2} y={cell.y * 2} width={cell.w * 2} height={cell.h * 2} fill={cell.fill} />
 						{/each}
 					</g>
 					<g class="wing wing-right">
-						{#each RIGHT_WING as cell (cell.y * 16 + cell.x)}
-							<rect x={cell.x * 2} y={cell.y * 2} width="2" height="2" fill={cell.color} />
+						{#each RIGHT_WING as cell, index (index)}
+							<rect x={cell.x * 2} y={cell.y * 2} width={cell.w * 2} height={cell.h * 2} fill={cell.fill} />
 						{/each}
 					</g>
 					<g>
-						{#each BODY as cell (cell.y * 16 + cell.x)}
-							<rect x={cell.x * 2} y={cell.y * 2} width="2" height="2" fill={cell.color} />
+						{#each BODY as cell, index (index)}
+							<rect x={cell.x * 2} y={cell.y * 2} width={cell.w * 2} height={cell.h * 2} fill={cell.fill} />
 						{/each}
 					</g>
 				</svg>
@@ -183,7 +230,7 @@
 
 	.wing {
 		transform-box: view-box;
-		transform-origin: 16px 13px;
+		transform-origin: 24px 20px;
 		animation: wing-flap 300ms steps(2, end) infinite alternate;
 	}
 

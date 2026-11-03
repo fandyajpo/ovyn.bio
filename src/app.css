@@ -932,62 +932,34 @@ html[data-theme='light'] .sticker--lilac {
 }
 
 /*
- * Landing gradient theme: one soft aurora runs down the whole page, with a
- * 4px pixel grain over it so the colour reads as a printed, stepped surface
- * instead of a flat wash. Everything is built from theme tokens, so the dark
- * palette glows lime and the cream palette warms into gold, pink and teal.
+ * Page gradient theme: one soft aurora runs down every page, with a 4px pixel
+ * grain over it so the colour reads as a printed, stepped surface instead of a
+ * flat wash. Everything is built from theme tokens, so the dark palette glows
+ * lime and the cream palette warms into gold, pink and teal. Public profiles
+ * keep their own backgrounds, so they opt out.
  */
-.app-frame[data-landing='true'] {
-	--landing-glow-strong: 18%;
-	--landing-glow: 13%;
-	--landing-grain: 4%;
+.app-frame:not([data-profile-page='true']) {
+	--aurora-strong: 16%;
+	--aurora-glow: 11%;
+	--aurora-grain: 3.5%;
 	background-color: var(--color-background);
 	background-image:
-		radial-gradient(ellipse 62% 46% at 8% 0%, color-mix(in srgb, var(--color-accent) var(--landing-glow-strong), transparent), transparent 66%),
-		radial-gradient(ellipse 52% 42% at 96% 10%, color-mix(in srgb, var(--color-pop-pink) var(--landing-glow), transparent), transparent 64%),
-		radial-gradient(ellipse 66% 48% at 84% 82%, color-mix(in srgb, var(--color-pop-blue) var(--landing-glow), transparent), transparent 68%),
-		radial-gradient(ellipse 58% 44% at 10% 96%, color-mix(in srgb, var(--color-pop-lilac) var(--landing-glow), transparent), transparent 68%),
-		repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--color-foreground) var(--landing-grain), transparent) 0% 25%, transparent 0% 50%);
+		radial-gradient(ellipse 62% 46% at 8% 0%, color-mix(in srgb, var(--color-accent) var(--aurora-strong), transparent), transparent 66%),
+		radial-gradient(ellipse 52% 42% at 96% 10%, color-mix(in srgb, var(--color-pop-pink) var(--aurora-glow), transparent), transparent 64%),
+		radial-gradient(ellipse 66% 48% at 84% 82%, color-mix(in srgb, var(--color-pop-blue) var(--aurora-glow), transparent), transparent 68%),
+		radial-gradient(ellipse 58% 44% at 10% 96%, color-mix(in srgb, var(--color-pop-lilac) var(--aurora-glow), transparent), transparent 68%),
+		repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--color-foreground) var(--aurora-grain), transparent) 0% 25%, transparent 0% 50%);
 	background-size: auto, auto, auto, auto, 4px 4px;
 }
 
-.landing-hero {
-	--landing-hero-strong: 15%;
-	--landing-hero-soft: 11%;
-	background-image:
-		radial-gradient(ellipse 46% 54% at 80% 18%, color-mix(in srgb, var(--color-accent) var(--landing-hero-strong), transparent), transparent 62%),
-		radial-gradient(ellipse 40% 48% at 12% 88%, color-mix(in srgb, var(--color-pop-pink) var(--landing-hero-soft), transparent), transparent 66%),
-		radial-gradient(ellipse 48% 56% at 94% 92%, color-mix(in srgb, var(--color-pop-lilac) var(--landing-hero-soft), transparent), transparent 70%),
-		repeating-linear-gradient(0deg, color-mix(in srgb, var(--color-foreground) 2.5%, transparent) 0 1px, transparent 1px 3px);
-}
-
-.app-frame[data-landing='true'] .cta-panel {
-	background:
-		radial-gradient(ellipse 64% 80% at 14% 0%, color-mix(in srgb, var(--color-accent) 16%, transparent), transparent 62%),
-		radial-gradient(ellipse 56% 90% at 88% 100%, color-mix(in srgb, var(--color-pop-lilac) 14%, transparent), transparent 66%),
-		linear-gradient(150deg, color-mix(in srgb, var(--color-surface) 94%, transparent), color-mix(in srgb, var(--color-background) 88%, transparent));
-	border: 1px solid color-mix(in srgb, var(--color-accent) 16%, transparent);
-}
-
-.app-frame[data-landing='true'] .landing-end {
-	background:
-		radial-gradient(ellipse 60% 80% at 50% -10%, color-mix(in srgb, var(--color-pop-lilac) 16%, transparent), transparent 62%),
-		radial-gradient(ellipse 40% 60% at 100% 100%, color-mix(in srgb, var(--color-accent) 12%, transparent), transparent 66%);
-}
-
-html[data-theme='light'] .app-frame[data-landing='true'] {
-	--landing-glow-strong: 26%;
-	--landing-glow: 20%;
-	--landing-grain: 5%;
-}
-
-html[data-theme='light'] .landing-hero {
-	--landing-hero-strong: 24%;
-	--landing-hero-soft: 17.5%;
+html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
+	--aurora-strong: 24%;
+	--aurora-glow: 18%;
+	--aurora-grain: 4.5%;
 }
 
 @media (min-width: 48rem) {
-	.app-frame[data-landing='true'] { background-attachment: fixed; }
+	.app-frame:not([data-profile-page='true']) { background-attachment: fixed; }
 }
 
 .landing-orbit {
@@ -1099,7 +1071,7 @@ html[data-theme='light'] .landing-hero {
 .plan-choice:active { transform: scale(0.99); }
 .plan-current { width: fit-content; margin-top: auto; }
 
-.landing-end { border-radius: 2rem; background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--color-pop-lilac) 13%, transparent), transparent 60%); }
+.landing-end { border-radius: 0; background: none; }
 .landing-end-ring { position: absolute; top: -10rem; left: 50%; width: 26rem; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--color-accent) 17%, transparent); border-radius: 50%; transform: translateX(-50%); }
 
 .upload-dropzone {

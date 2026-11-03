@@ -49,7 +49,7 @@
 					<Reveal>
 						<div class="flex flex-col items-start gap-4">
 							<div class="flex items-center gap-3">
-								<PixelSnail size={38} />
+								<PixelSnail size={48} />
 								<span class="sticker sticker--dark">ovyn / internet personhood</span>
 							</div>
 							<p class="max-w-sm font-[family-name:var(--font-display)] text-xl font-semibold text-neutral-200">Your identity, out in the world.<br /><span class="text-neutral-500">Your people, one link away.</span></p>

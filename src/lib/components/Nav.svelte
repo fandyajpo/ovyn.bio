@@ -106,8 +106,8 @@
 <header class="site-header sticky top-0 z-40">
 	<div class="site-header-inner flex h-16 w-full items-center justify-between px-4">
 		<a href="/" onclick={closeMenus} class="group flex shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
-			<span class="grid size-8 place-items-center rounded-xl bg-lime-300/10 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]">
-				<PixelSnail size={28} />
+			<span class="grid size-10 place-items-center transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]">
+				<PixelSnail size={40} />
 			</span>
 			<span>ovyn<span class="text-lime-300">.</span></span>
 			<span class="sticker sticker--dark hidden xl:inline-flex">your corner</span>
