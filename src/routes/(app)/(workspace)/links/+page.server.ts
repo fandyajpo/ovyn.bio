@@ -1,36 +1,65 @@
 import { fail, redirect } from '@sveltejs/kit';
+import { message, superValidate } from 'sveltekit-superforms';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
-import { profileLinkIdSchema, profileLinkSchema } from '#lib/schemas/profile-links';
-import { addProfileLink, deleteProfileLink, listProfileLinks } from '#lib/server/services/profile-content';
+import { profileLinkIdSchema, profileLinkSchema, profileLinkUpdateSchema } from '#lib/schemas/profile-links';
+import { addProfileLink, deleteProfileLink, listProfileLinks, updateProfileLink } from '#lib/server/services/profile-content';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
+// Defined at module level so the adapter cache is reused between requests.
+const linkFormAdapter = zod4(profileLinkSchema);
+
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
-	return { links: await listProfileLinks(locals.user.id) };
+	const [links, form] = await Promise.all([
+		listProfileLinks(locals.user.id),
+		superValidate({ provider: 'instagram' as const, url: '' }, linkFormAdapter)
+	]);
+	return { links, form };
 };
 
 export const actions: Actions = {
 	add: async ({ request, locals }) => {
 		if (!locals.user) redirect(302, '/login');
+		const form = await superValidate(request, linkFormAdapter);
+		if (!form.valid) return fail(422, { form });
+
+		try {
+			await rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
+			await addProfileLink(locals.user.id, form.data);
+			return message(form, 'Link added.');
+		} catch (err) {
+			if (err instanceof AppError) {
+				message(form, err.message, { status: err.status });
+				return fail(err.status, { form });
+			}
+			console.error(err);
+			message(form, 'Could not add this link', { status: 500 });
+			return fail(500, { form });
+		}
+	},
+
+	update: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
 		const data = await request.formData();
 		const label = data.get('label');
-		const values = {
+		const parsed = profileLinkUpdateSchema.safeParse({
+			id: data.get('id'),
 			provider: data.get('provider'),
 			url: data.get('url'),
 			label: typeof label === 'string' ? label : undefined
-		};
-		const parsed = profileLinkSchema.safeParse(values);
+		});
 		if (!parsed.success) return fail(422, { error: parsed.error.issues[0]?.message ?? 'Check the link details' });
 
 		try {
 			await rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
-			await addProfileLink(locals.user.id, parsed.data);
-			return { ok: 'Link added.' };
+			await updateProfileLink(locals.user.id, parsed.data);
+			return { ok: 'Link updated.' };
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
-			return fail(500, { error: 'Could not add this link' });
+			return fail(500, { error: 'Could not update this link' });
 		}
 	},
 

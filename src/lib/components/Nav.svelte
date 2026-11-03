@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { page } from '$app/state';
+	import { useQueryClient } from '@tanstack/svelte-query';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
 	import { fade, fly } from 'svelte/transition';
@@ -13,6 +14,7 @@
 	// jumps when it does.
 	let viewer = $state<Viewer | null>(null);
 	let sessionChecked = $state(false);
+	const queryClient = useQueryClient();
 
 	onMount(() => {
 		let cancelled = false;
@@ -91,6 +93,8 @@
 		closeMenus();
 		await signOut();
 		viewer = null;
+		// Nothing cached for the signed-in account may survive sign-out.
+		queryClient.clear();
 		toast('info', 'Signed out');
 		location.href = '/';
 	}

@@ -15,7 +15,8 @@
 		hint = null,
 		error = null,
 		class: className,
-		optionIcon = undefined
+		optionIcon = undefined,
+		onchange = undefined
 	}: {
 		name: string;
 		label: string;
@@ -28,6 +29,7 @@
 		error?: string | null;
 		class?: string;
 		optionIcon?: Snippet<[Option]>;
+		onchange?: (value: string) => void;
 	} = $props();
 
 	const id = $props.id();
@@ -75,9 +77,11 @@
 
 	function choose(option: Option) {
 		if (option.disabled) return;
+		const changed = value !== option.value;
 		value = option.value;
 		open = false;
 		trigger?.focus();
+		if (changed) onchange?.(option.value);
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -351,6 +355,34 @@
 	.ovyn-dropdown-option:focus-visible {
 		outline: 2px solid var(--color-accent);
 		outline-offset: 1px;
+	}
+
+	/* Below 40rem the list becomes a sheet pinned to the bottom of the
+	   viewport, so long option lists stay in reach on a phone. */
+	@media (max-width: 40rem) {
+		.ovyn-dropdown-trigger { min-height: 3.05rem; }
+
+		.ovyn-dropdown-panel {
+			position: fixed;
+			z-index: 70;
+			top: auto;
+			right: 0.6rem;
+			bottom: calc(0.6rem + env(safe-area-inset-bottom));
+			left: 0.6rem;
+			max-height: min(58dvh, 20rem);
+			border-radius: 1.25rem;
+			padding: 0.55rem;
+			overscroll-behavior: contain;
+			box-shadow: 0 18px 60px rgb(0 0 0 / 38%);
+			transform: translateY(0.9rem) scale(0.985);
+			transform-origin: bottom center;
+		}
+
+		.ovyn-dropdown-panel:not([aria-hidden='true']) {
+			transform: translateY(0) scale(1);
+		}
+
+		.ovyn-dropdown-option { min-height: 3.05rem; }
 	}
 
 	@media (prefers-reduced-motion: reduce) {

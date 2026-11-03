@@ -97,6 +97,19 @@ export async function addProfileLink(userId: string, input: NewProfileLink) {
 	return created;
 }
 
+export async function updateProfileLink(userId: string, input: ProfileLinkInput & { id: string }) {
+	const canonical = canonicalizeLink(input.provider, input.url);
+	const label = input.provider === 'custom_url' ? input.label?.trim() : input.label?.trim() || canonical.label;
+	if (!label) throw new ValidationError('Add a label for your custom link');
+
+	const [updated] = await db
+		.update(profileLinks)
+		.set({ provider: input.provider, label, url: canonical.url })
+		.where(and(eq(profileLinks.id, input.id), eq(profileLinks.userId, userId)))
+		.returning({ id: profileLinks.id });
+	if (!updated) throw new NotFoundError('Link not found');
+}
+
 export async function deleteProfileLink(userId: string, linkId: string) {
 	const [deleted] = await db
 		.delete(profileLinks)

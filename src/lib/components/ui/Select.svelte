@@ -15,7 +15,8 @@
 		hint = null,
 		error = null,
 		class: className,
-		optionIcon = undefined
+		optionIcon = undefined,
+		onchange = undefined
 	}: {
 		name: string;
 		label: string;
@@ -28,6 +29,7 @@
 		error?: string | null;
 		class?: string;
 		optionIcon?: Snippet<[Option]>;
+		onchange?: (value: string) => void;
 	} = $props();
 </script>
 
@@ -43,4 +45,5 @@
 	{error}
 	class={className}
 	{optionIcon}
+	onchange={(value: string) => onchange?.(value)}
 />

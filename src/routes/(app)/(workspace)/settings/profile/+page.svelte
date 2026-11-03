@@ -1,8 +1,10 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
+	import Select from '#lib/components/ui/Select.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
 
 	let { data, form }: {
@@ -24,6 +26,53 @@
 	let usernameRequest = 0;
 
 	let visibility = $derived(data.profile.visibility);
+
+	type CosmeticKind = 'frame' | 'wallpaper' | 'badge';
+	let equipped = $state<Record<CosmeticKind, string>>({
+		frame: untrack(() => data.profile.equippedFrameId ?? ''),
+		wallpaper: untrack(() => data.profile.equippedWallpaperId ?? ''),
+		badge: untrack(() => data.profile.equippedBadgeId ?? '')
+	});
+	let equipping = $state<CosmeticKind | null>(null);
+	let equipError = $state('');
+
+	const cosmeticGroups = $derived([
+		{ key: 'frame' as const, label: 'Frames', items: data.owned.frames },
+		{ key: 'wallpaper' as const, label: 'Wallpapers', items: data.owned.wallpapers },
+		{ key: 'badge' as const, label: 'Badges', items: data.owned.badges }
+	]);
+
+	function cosmeticOptions(items: { id: string; name: string }[]) {
+		return [
+			{ value: '', label: 'None' },
+			...items.map((item) => ({ value: item.id, label: item.name }))
+		];
+	}
+
+	// After a fresh load the dropdowns follow whatever the profile actually has equipped.
+	$effect(() => {
+		equipped.frame = data.profile.equippedFrameId ?? '';
+		equipped.wallpaper = data.profile.equippedWallpaperId ?? '';
+		equipped.badge = data.profile.equippedBadgeId ?? '';
+	});
+
+	async function equip(kind: CosmeticKind, cosmeticId: string) {
+		equipError = '';
+		equipping = kind;
+		try {
+			const response = await fetch('/settings/profile?/equip', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+				body: new URLSearchParams({ kind, cosmeticId })
+			});
+			if (!response.ok) throw new Error('Equip failed');
+		} catch {
+			equipError = 'Could not update that cosmetic. Try again.';
+		} finally {
+			equipping = null;
+		}
+		await invalidateAll().catch(() => {});
+	}
 
 	function checkUsername(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -174,49 +223,24 @@
 	<section class="rounded-xl border border-neutral-800 p-5">
 		<h2 class="mb-1 font-medium text-neutral-200">Cosmetics</h2>
 		<p class="mb-4 text-sm text-neutral-400">
-			Owned frames, wallpapers and badges. Get more in the <a href="/shop" class="text-lime-300 hover:underline">shop</a>.
+			Owned frames, wallpapers and badges. Choose one from each dropdown, or None to take it off. Get more in the <a href="/shop" class="text-lime-300 hover:underline">shop</a>.
 		</p>
 
-		{#each [
-			{ key: 'frame', label: 'Frames', items: data.owned.frames },
-			{ key: 'wallpaper', label: 'Wallpapers', items: data.owned.wallpapers },
-			{ key: 'badge', label: 'Badges', items: data.owned.badges }
-		] as group (group.key)}
-			<h3 class="mt-3 mb-2 font-mono text-xs text-neutral-500 uppercase">{group.label}</h3>
-			{#if group.items.length === 0}
-				<p class="text-xs text-neutral-600">None owned yet.</p>
-			{:else}
-				<div class="flex flex-wrap gap-2">
-					<form method="POST" action="/settings/profile?/equip">
-						<input type="hidden" name="kind" value={group.key} />
-						<input type="hidden" name="cosmeticId" value="" />
-						<button
-							type="submit"
-							class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-400 transition-colors hover:bg-neutral-800"
-						>
-							None
-						</button>
-					</form>
-					{#each group.items as c (c.id)}
-						<form method="POST" action="/settings/profile?/equip">
-							<input type="hidden" name="kind" value={c.kind} />
-							<input type="hidden" name="cosmeticId" value={c.id} />
-							<button
-								type="submit"
-								class="flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition-colors
-									{data.profile.equippedFrameId === c.id
-									|| data.profile.equippedWallpaperId === c.id
-									|| data.profile.equippedBadgeId === c.id
-									? 'border-lime-300/50 bg-lime-300/10 text-lime-300'
-									: 'border-neutral-700 text-neutral-300 hover:bg-neutral-800'}"
-							>
-								{c.name}
-							</button>
-						</form>
-					{/each}
-				</div>
-			{/if}
-		{/each}
+		<div class="mt-4 flex flex-col gap-4">
+			{#each cosmeticGroups as group (group.key)}
+				<Select
+					name={`cosmetic-${group.key}`}
+					label={group.label}
+					options={cosmeticOptions(group.items)}
+					bind:value={equipped[group.key]}
+					hint={group.items.length === 0 ? 'Nothing owned yet. Pick something up in the shop.' : null}
+					onchange={(value) => equip(group.key, value)}
+				/>
+			{/each}
+		</div>
+
+		{#if equipping}<p class="mt-3 text-xs text-neutral-500">Saving…</p>{/if}
+		{#if equipError}<p class="mt-3 text-sm text-red-400" role="alert">{equipError}</p>{/if}
 	</section>
 
 	<section class="rounded-xl border border-neutral-800 p-5">

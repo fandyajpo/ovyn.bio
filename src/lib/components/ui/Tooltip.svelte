@@ -132,6 +132,29 @@
 		transform: translate(0, -50%);
 	}
 
+	/* On a phone the bubble becomes a small card resting above the bottom
+	   edge, so it never spills off the side of the screen. */
+	@media (max-width: 40rem) {
+		.ovyn-tooltip[data-placement] .ovyn-tooltip-bubble {
+			position: fixed;
+			top: auto;
+			right: 0.6rem;
+			bottom: calc(0.6rem + env(safe-area-inset-bottom));
+			left: 0.6rem;
+			width: auto;
+			max-width: none;
+			border-radius: 1.1rem;
+			padding: 0.8rem 0.95rem;
+			font-size: 0.78rem;
+			transform: translateY(0.7rem);
+		}
+
+		.ovyn-tooltip[data-placement]:hover .ovyn-tooltip-bubble,
+		.ovyn-tooltip[data-placement]:focus-within .ovyn-tooltip-bubble {
+			transform: translateY(0);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.ovyn-tooltip-bubble,
 		.ovyn-tooltip-trigger { transition: none; }

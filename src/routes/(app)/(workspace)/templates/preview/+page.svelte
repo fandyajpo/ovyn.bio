@@ -4,6 +4,7 @@
 	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
 	import { subscribePreview, type PreviewSnapshot } from '#lib/template-preview';
 	import { normalizeTemplateBlocks, type TemplateBlock } from '#lib/schemas/templates';
+	import { formatRelativeTime } from '#lib/utils/date';
 
 	let blocks = $state<TemplateBlock[]>([]);
 	let updatedAt = $state<number | null>(null);
@@ -21,7 +22,7 @@
 		});
 	});
 
-	const updatedLabel = $derived(updatedAt ? new Date(updatedAt).toLocaleTimeString() : '');
+	const updatedLabel = $derived(updatedAt ? formatRelativeTime(updatedAt) : '');
 </script>
 
 <svelte:head>

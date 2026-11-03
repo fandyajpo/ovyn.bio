@@ -59,12 +59,23 @@ export const PROFILE_LINK_PROVIDER_LABELS: Record<ProfileLinkProvider, string> =
 	custom_url: 'Custom URL'
 };
 
+const profileLinkFields = {
+	provider: z.enum(PROFILE_LINK_PROVIDER_IDS),
+	url: z.string().trim().min(1, 'Enter a link or address').max(2048),
+	label: z.string().trim().max(48).default('')
+};
+
 export const profileLinkSchema = z
-	.object({
-		provider: z.enum(PROFILE_LINK_PROVIDER_IDS),
-		url: z.string().trim().min(1, 'Enter a link or address').max(2048),
-		label: z.string().trim().max(48).optional()
-	})
+	.object(profileLinkFields)
+	.superRefine((link, context) => {
+		if (link.provider === 'custom_url' && !link.label) {
+			context.addIssue({ code: 'custom', path: ['label'], message: 'Add a label for your custom link' });
+		}
+	});
+
+/** Editing an added link keeps its id and accepts the same fields. */
+export const profileLinkUpdateSchema = z
+	.object({ id: z.uuid(), ...profileLinkFields })
 	.superRefine((link, context) => {
 		if (link.provider === 'custom_url' && !link.label) {
 			context.addIssue({ code: 'custom', path: ['label'], message: 'Add a label for your custom link' });
@@ -72,5 +83,6 @@ export const profileLinkSchema = z
 	});
 
 export type ProfileLinkInput = z.infer<typeof profileLinkSchema>;
+export type ProfileLinkUpdateInput = z.infer<typeof profileLinkUpdateSchema>;
 
 export const profileLinkIdSchema = z.object({ id: z.uuid() });

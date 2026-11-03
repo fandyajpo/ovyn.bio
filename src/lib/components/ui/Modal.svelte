@@ -86,6 +86,7 @@
 		max-height: min(90dvh, 52rem);
 		margin: 0;
 		overflow: auto;
+		overscroll-behavior: contain;
 		border: 1px solid var(--color-divider);
 		border-radius: 1.5rem;
 		background:
@@ -188,6 +189,17 @@
 			margin: 0.35rem auto 1rem;
 			border-radius: 999px;
 			background: color-mix(in srgb, var(--color-foreground) 22%, transparent);
+		}
+	}
+
+	@media (max-height: 32rem) {
+		.ovyn-overlay { place-items: stretch; padding: 0; }
+
+		.ovyn-modal {
+			width: 100%;
+			max-height: 100dvh;
+			border-radius: 0;
+			border-inline: 0;
 		}
 	}
 

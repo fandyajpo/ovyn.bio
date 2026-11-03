@@ -18,6 +18,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Validation | Zod 4 |
+| Forms & client data | Superforms, TanStack Query 6, TanStack Table 9, date-fns 4 |
 
 Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
 `sveltekit()` plugin options - there is no `svelte.config.js`), imports use the
@@ -110,7 +111,7 @@ Account settings let each device manage browser notification permission and even
 
 ## Interface kit
 
-Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), custom select dropdowns, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. File uploads use a drag and drop dropzone that also works by click and keyboard.
+Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), custom select dropdowns, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. Dropdown panels and tooltips follow the same rule, so on a phone the option list and the hint open as a sheet at the bottom of the screen instead of a bubble near the edge. File uploads use a drag and drop dropzone that also works by click and keyboard.
 
 The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type. Badges, stickers, toasts and status colors all resolve from theme tokens, so they stay legible against both the dark and the light palette.
 
@@ -181,7 +182,27 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 - **Profile analytics** - counts signed-in visits once per visitor per UTC day for the last 30 days. Owners can see recent visitors whose profiles are public; private visitor profiles are not identified. This feature does not store IP addresses or user agents.
 - **Plans** - Free is the default. Premium is Rp 30.000 for 30 days, renewed manually with no automatic charge. Access is derived server-side from successful payment records; an admin override may also grant or force a plan; legacy time-limited plans remain supported for existing orders.
 - **Workspace** - signed-in users get an account sidebar for overview, analytics, badges, settings, customization, links, plans, templates and help. Account and admin areas hide the public navbar and footer on every screen size and link back to the landing page. Platform admins get the `/admin` entry from their account overview, never from the public navigation. Admin and guild permissions remain enforced server-side.
-- **Profile links and templates** - public links are scheme-validated before display. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
+- **Forms, server state and tables** - forms go through Superforms with the
+  shared Zod 4 schemas (`sveltekit-superforms/adapters` `zod4`): the schema is
+  the single source of validation on both sides, errors land per field, and
+  `$submitting`, `$message` and `use:enhance` give one consistent pattern. The
+  new-link form shows it; other actions keep their small `fail` payloads until
+  they are touched. TanStack Query owns client-side server state in
+  `src/lib/queries`: one `QueryClient` per browser tab (and one per server
+  render, so nothing is shared between users), keys built from `queryKeys`, and
+  a 30 second stale window. The checkout page polls payment status through a
+  query that stops once DOKU reports a terminal state, and sign-out clears the
+  cache so no account's data survives the session. TanStack Table is headless
+  only: `src/lib/tables/admin-catalog.ts` declares the features and typed
+  columns, and `/admin/catalog` keeps its own accessible markup, sorting,
+  search and pagination. Plain lists stay Svelte `{#each}` blocks, and route
+  data still comes from `load` and form actions.
+- **Dates** - everything formats through `src/lib/utils/date.ts` (date-fns).
+  Timestamps are stored in UTC; `formatDate`, `formatDay` and
+  `formatRelativeTime` render in the visitor's timezone, while `formatUtcDay`
+  is used where a value is compared or submitted as a calendar day. Invalid or
+  missing values return the caller's fallback instead of `Invalid Date`.
+- **Profile links and templates** - public links are scheme-validated before display, and an added link can be edited (platform, address and custom label) or removed later. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
 - **Onboarding and page help** - a new account finishes a two-step, full-screen
   onboarding (who you are, how you found ovyn) before the workspace opens; the
   answers are stored on the profile and the welcome step animates into the

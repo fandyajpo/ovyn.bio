@@ -8,8 +8,14 @@
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 	import { startThemeSync } from '#lib/theme.svelte.ts';
+	import { QueryClientProvider } from '@tanstack/svelte-query';
+	import { createQueryClient } from '#lib/queries/client';
 
 	let { children }: { children: any } = $props();
+
+	// Created once per browser tab and once per server render, so cached server
+	// state can never be shared between users.
+	const queryClient = createQueryClient();
 
 	// One place keeps the theme in step with every other open tab.
 	onMount(() => {
@@ -23,7 +29,8 @@
 	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage && !isOnboarding);
 </script>
 
-<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
+<QueryClientProvider client={queryClient}>
+	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
 		{#if showsSiteChrome}<Nav />{/if}
 
@@ -63,6 +70,7 @@
 
 	<PageHelp />
 	<Toasts />
+</QueryClientProvider>
 
 <style>
 	.app-frame {

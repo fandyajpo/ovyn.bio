@@ -58,7 +58,7 @@ const PAGES: { match: string; help: PageHelp }[] = [
 		help: {
 			title: 'Links',
 			summary: 'The buttons that appear under your bio, in the order you set.',
-			tips: ['Pick a platform and paste your profile link.', 'Email and crypto addresses are supported.', 'Links are checked before they go public.']
+			tips: ['Pick a platform and paste your profile link.', 'Any link you added can be edited or removed later.', 'Email and crypto addresses are supported.', 'Links are checked before they go public.']
 		}
 	},
 	{
@@ -93,7 +93,8 @@ const PAGES: { match: string; help: PageHelp }[] = [
 			tips: [
 				'Your username is your public link, so pick one you like.',
 				'A private page keeps everything hidden from visitors.',
-				'The picture here is the one shown everywhere on ovyn.'
+				'The picture here is the one shown everywhere on ovyn.',
+				'Frames, wallpapers and badges are chosen from dropdowns.'
 			]
 		}
 	},

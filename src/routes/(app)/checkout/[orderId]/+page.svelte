@@ -1,34 +1,18 @@
 <script lang="ts">
 	import type { PageData } from './$types';
+	import { createQuery } from '@tanstack/svelte-query';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
+	import { paymentStatusQueryOptions } from '#lib/queries/orders';
 	import { copyText, formatDate, formatIdr } from '#lib/utils';
 
 	let { data } = $props();
 
 	let copied = $state(false);
 
-	type Status = { status: 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' };
-
-	let status = $state<Status['status']>(data.order.status);
-
-	// Poll payment status; the endpoint re-syncs from DOKU server-side.
-	$effect(() => {
-		if (status !== 'pending') return;
-
-		const timer = setInterval(async () => {
-			try {
-				const res = await fetch(`/api/payments/${data.order.id}/status`);
-				if (!res.ok) return;
-				const next = (await res.json()) as Status;
-				if (next?.status) status = next.status;
-			} catch {
-				// A failed poll is retried on the next tick.
-			}
-		}, 10_000);
-
-		return () => clearInterval(timer);
-	});
+	// Poll payment status while it can still change; the endpoint re-syncs from DOKU server-side.
+	const statusQuery = createQuery(() => paymentStatusQueryOptions(data.order.id));
+	const status = $derived(statusQuery.data?.status ?? data.order.status);
 
 	async function copyVa() {
 		if (await copyText(data.payment.paymentCode ?? '')) {
@@ -90,6 +74,11 @@
 			<p class="text-xs text-neutral-500">
 				This page updates automatically once your payment is confirmed by DOKU. You can leave and come back anytime at /checkout/{data.order.id}.
 			</p>
+			{#if statusQuery.isError}
+				<p class="text-xs text-amber-300" role="status">
+					Could not refresh the payment status just now. Trying again shortly.
+				</p>
+			{/if}
 		{:else if status === 'paid'}
 			{#if data.product.category === 'plan'}
 				{#if data.product.durationDays === null}

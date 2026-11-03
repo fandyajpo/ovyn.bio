@@ -6,6 +6,7 @@
 	import DropdownSelect from '#lib/components/ui/DropdownSelect.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
+	import { formatUtcDay } from '#lib/utils/date';
 
 	type CatalogProduct = {
 		id: string;
@@ -60,8 +61,7 @@
 	}
 
 	function dateValue(value: Date | string | null | undefined) {
-		if (!value) return '';
-		return new Date(value).toISOString().slice(0, 10);
+		return formatUtcDay(value);
 	}
 </script>
 

@@ -12,12 +12,7 @@ export function formatIdr(amount: number): string {
 	}).format(amount);
 }
 
-export function formatDate(date: Date | string): string {
-	return new Intl.DateTimeFormat('en', {
-		dateStyle: 'medium',
-		timeStyle: 'short'
-	}).format(typeof date === 'string' ? new Date(date) : date);
-}
+export { formatDate, formatDay, formatRelativeTime, formatUtcDay, toDate } from './utils/date';
 
 export async function copyText(text: string): Promise<boolean> {
 	try {

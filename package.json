@@ -39,14 +39,18 @@
 	"dependencies": {
 		"@aws-sdk/client-s3": "^3.820.0",
 		"@aws-sdk/s3-request-presigner": "^3.820.0",
+		"@tanstack/svelte-query": "^6.3.9",
+		"@tanstack/svelte-table": "^9.3.1",
 		"@tiptap/core": "^2.11.5",
 		"@tiptap/extension-link": "^2.11.5",
 		"@tiptap/pm": "^2.11.5",
 		"@tiptap/starter-kit": "^2.11.5",
 		"tiptap-markdown": "^0.8.10",
 		"better-auth": "^1.7.15",
+		"date-fns": "^4.4.0",
 		"drizzle-orm": "^0.45.4",
 		"postgres": "^3.4.7",
+		"sveltekit-superforms": "^3.1.0",
 		"zod": "^4.6.7"
 	},
 	"engines": {

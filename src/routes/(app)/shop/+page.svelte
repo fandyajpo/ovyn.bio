@@ -6,6 +6,7 @@
 	import DropdownSelect from '#lib/components/ui/DropdownSelect.svelte';
 	import CosmeticPreview from '#lib/components/CosmeticPreview.svelte';
 	import { formatIdr } from '#lib/utils';
+	import { formatDay } from '#lib/utils/date';
 
 	let { data, form }: { data: PageData; form?: { error?: string } } = $props();
 
@@ -138,7 +139,7 @@
 						{#if item.stockLimit !== null || item.dropEndsAt}
 							<p class="font-mono text-xs text-amber-300">
 								{#if item.remainingStock !== null}{item.remainingStock} left{/if}
-								{#if item.dropEndsAt} · ends {new Date(item.dropEndsAt).toLocaleDateString()}{/if}
+								{#if item.dropEndsAt} · ends {formatDay(item.dropEndsAt)}{/if}
 							</p>
 						{/if}
 
