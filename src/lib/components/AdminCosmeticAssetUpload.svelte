@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { optimizeImage } from '#lib/image-optimize';
-	import { CLIENT_UPLOAD_LIMITS, formatFileSize } from '#lib/upload-limits';
+	import { uploadMedia } from '#lib/media/client-upload';
 
 	let { initialKey = null, label = 'Upload image', error = null }: { initialKey?: string | null; label?: string; error?: string | null } = $props();
 
@@ -12,34 +11,11 @@
 	async function upload(original: File) {
 		errorMessage = null;
 		uploading = true;
-		const limits = CLIENT_UPLOAD_LIMITS.cosmetic;
 		try {
-			const file = await optimizeImage(original, {
-				maxWidth: limits.maxWidth,
-				maxHeight: limits.maxHeight,
-				maxBytes: limits.maxBytes
-			});
-			if (file.size > limits.maxBytes) {
-				throw new Error(`That image is ${formatFileSize(file.size)}. Keep it under ${formatFileSize(limits.maxBytes)}`);
-			}
-
-			const response = await fetch('/api/uploads', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ kind: 'cosmetic', contentType: file.type, sizeBytes: file.size })
-			});
-			const signed = (await response.json()) as { key?: string; uploadUrl?: string; error?: string };
-			if (!response.ok || !signed.key || !signed.uploadUrl) {
-				throw new Error(signed.error ?? 'Could not prepare the upload');
-			}
-
-			const put = await fetch(signed.uploadUrl, {
-				method: 'PUT',
-				headers: { 'Content-Type': file.type },
-				body: file
-			});
-			if (!put.ok) throw new Error('Upload failed');
-			currentKey = signed.key;
+			// Cosmetic artwork is pixel-art brand material: the pipeline validates
+			// and then stores lossless PNG/WebP byte-for-byte, never resampling it.
+			const { key } = await uploadMedia(original, { kind: 'cosmetic' });
+			currentKey = key;
 		} catch (err) {
 			errorMessage = err instanceof Error ? err.message : 'Upload failed';
 		} finally {

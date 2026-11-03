@@ -21,14 +21,27 @@
 		xl: 'size-24 text-2xl'
 	} as const;
 
+	const pixelSizes = { xs: 24, sm: 32, md: 40, lg: 64, xl: 96 } as const;
+
 	const initial = $derived(name?.trim()?.charAt(0)?.toUpperCase() ?? '?');
+
+	// A broken or unsupported image falls back to the initial instead of
+	// rendering an empty circle.
+	let failed = $state(false);
+	$effect(() => {
+		void src;
+		failed = false;
+	});
 </script>
 
-{#if src}
+{#if src && !failed}
 	<img
 		{src}
 		alt={name}
-		class={cn('rounded-full object-cover bg-neutral-800', sizes[size], className)}
+		width={pixelSizes[size]}
+		height={pixelSizes[size]}
+		onerror={() => (failed = true)}
+		class={cn('rounded-full object-cover bg-neutral-800 select-none', sizes[size], className)}
 	/>
 {:else}
 	<span

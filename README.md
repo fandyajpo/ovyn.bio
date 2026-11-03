@@ -31,7 +31,11 @@ works unchanged on Vercel Functions.
 Tooling runs on [Vite+](https://viteplus.dev) (`vite-plus`), whose core is Vite
 8.3.5. SvelteKit and the Vite plugins import `vite`, so `pnpm-workspace.yaml`
 overrides `vite` with `@voidzero-dev/vite-plus-core`; keep that override on the
-same version as `vite-plus` in `package.json`. The scripts run through the Vite+
+same version as `vite-plus` in `package.json`. The Svelte trio
+(`@sveltejs/kit`, `@sveltejs/vite-plugin-svelte`, `svelte`) is pinned exactly,
+not caret-ranged, because a floating upgrade of any one of them desyncs it from
+the pinned Vite+ core and SvelteKit then fails to start with "No Svelte
+configuration found in vite config". The scripts run through the Vite+
 CLI (`vp`), which ships in the `vite-plus` package itself, so no global install
 is needed: `vp dev`, `vp build`, `vp preview`, `vp lint` and `vp test`.
 `svelte-check` stays in `check` because only it understands Svelte templates,
@@ -295,6 +299,55 @@ managed here yet.
 - Check status: `POST /orders/v1.0/transfer-va/status`
 - Webhook: register `https://ovyn.me/api/webhooks/doku` in DOKU Dashboard →
   Settings → Payment Settings → Webhook
+
+## Media pipeline
+
+All uploads share one pipeline instead of per-page logic:
+
+- `src/lib/media/categories.ts` is the single source of truth for upload kinds,
+  MIME lists, byte limits and file-signature sniffing, imported by both the
+  browser pipeline and the server (previously these limits were duplicated).
+- `src/lib/media/client-upload.ts` is the browser pipeline every upload
+  component uses (`UploadButton`, `AdminCosmeticAssetUpload`): validate the real
+  file signature (magic bytes, never the declared MIME), guard decodes against
+  decompression bombs, optimize per category, then presign, PUT and confirm.
+  Photographs re-encode to WebP; pixel-art cosmetics are stored byte-for-byte
+  when they already fit losslessly, so sprites are never resampled or blurred;
+  an already-optimized WebP is never processed twice; audio and video pass
+  through untouched; EXIF orientation is applied by the decode.
+- **Profile pictures accept every common format**: JPG, PNG, animated and still
+  GIF, animated and still WebP, AVIF (animated `avis` included), sanitized SVG,
+  BMP, TIFF, HEIC/HEIF and ICO. Animated formats are stored byte-for-byte so
+  frames, timing and transparency survive (GIF frame counts and loop durations
+  are parsed from the block structure and capped at 500 frames / 30 s); AVIF and
+  ICO pass through; BMP converts to WebP; TIFF and HEIC that the browser cannot
+  decode locally are rejected with an explanation instead of being stored in a
+  form no browser can render. Avatar SVGs are sanitized twice: a DOM pass in the
+  browser strips scripts, active content, event handlers and external refs, and
+  the upload confirm endpoint runs a second conservative scrub on the stored
+  object before it is referenced. Avatars render through a plain `<img>` with
+  explicit dimensions, `object-fit: cover` cropping and a graceful initials
+  fallback if the image fails to load.
+- The upload confirm endpoint verifies the stored object's signature and content
+  type (a 64-byte ranged GET) before any record references it, and deletes a
+  mismatched object on the spot. Object keys stay unique and immutable, so
+  browser and CDN caches never serve stale media.
+- `src/lib/server/media/cleanup.ts` is the durable cleanup queue: replaced files
+  are queued in Postgres (`media_cleanup_queue`, migration `0011`) and every
+  deletion re-verifies the key against live profile, circle and cosmetic
+  references before removing it. Failed deletions retry on the next run and park
+  as `failed` after five attempts instead of being silently lost. The old
+  fire-and-forget `deleteReplacedObject` now feeds this queue.
+- `GET /api/admin/media` returns the dry-run storage report (totals, bytes by
+  category, largest assets, queue state, unreferenced objects) and
+  `POST /api/admin/media` retries the queue or queues orphaned objects (max 500
+  per call) for verified deletion. Platform admin only.
+
+Deliberately deferred: server-side re-encoding with Sharp. Bytes go directly
+from the browser to storage through a signed PUT, so routing 25 MB files through
+a function just to re-encode them would cost more than it saves, and the client
+pipeline already covers the slots that need optimization. Server-side variants
+(srcset sizes) are also deferred until the renderer needs them.
 
 ## Search engine visibility
 

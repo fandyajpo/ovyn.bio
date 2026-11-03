@@ -486,3 +486,23 @@ export const productsRelations = relations(products, ({ many }) => ({
 export const paymentEventsRelations = relations(paymentEvents, ({ one }) => ({
 	payment: one(payments, { fields: [paymentEvents.paymentId], references: [payments.id] })
 }));
+
+// ---------------------------------------------------------------------------
+// Media storage
+// ---------------------------------------------------------------------------
+
+/**
+ * Durable queue for object deletions that could not be verified inline (storage
+ * hiccup, crash between the database commit and the delete). One row per object
+ * key, unique, so enqueueing is idempotent and retries never double-delete.
+ * Processing re-checks that the key is still unreferenced before deleting.
+ */
+export const mediaCleanupQueue = pgTable('media_cleanup_queue', {
+	id: uuid('id').primaryKey().defaultRandom(),
+	objectKey: text('object_key').notNull().unique(),
+	status: text('status', { enum: ['pending', 'done', 'failed'] }).notNull().default('pending'),
+	attempts: integer('attempts').notNull().default(0),
+	lastError: text('last_error'),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});

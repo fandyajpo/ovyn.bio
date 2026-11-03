@@ -3,8 +3,8 @@
 	import { untrack } from 'svelte';
 	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import { cn } from '#lib/utils';
-	import { optimizeImage } from '#lib/image-optimize';
-	import { CLIENT_UPLOAD_LIMITS, formatFileSize } from '#lib/upload-limits';
+	import { uploadMedia } from '#lib/media/client-upload';
+	import { isAnimatedWebP } from '#lib/media/categories';
 	import ImageCropModal from './ImageCropModal.svelte';
 
 	let {
@@ -40,7 +40,7 @@
 
 	function onPicked(event: Event) {
 		const file = (event.target as HTMLInputElement).files?.[0];
-		if (file) handlePicked(file);
+		if (file && !uploading) void handlePicked(file);
 	}
 
 	function onDragOver(event: DragEvent) {
@@ -56,21 +56,32 @@
 		event.preventDefault();
 		dragging = false;
 		const file = event.dataTransfer?.files[0];
-		if (file && !uploading) handlePicked(file);
+		if (file && !uploading) void handlePicked(file);
 	}
 
-	/** Avatars and covers get positioned by hand before they are stored. */
-	function shouldCrop(file: File) {
-		return (kind === 'avatar' || kind === 'banner') && /^image\/(jpeg|png|webp)$/.test(file.type);
+	/**
+	 * Static rasters get positioned by hand before they are stored. Animated
+	 * formats skip the cropper so their frames survive untouched.
+	 */
+	async function isCropWorthy(file: File) {
+		if (kind !== 'avatar' && kind !== 'banner') return false;
+		if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) return false;
+		if (file.type === 'image/webp') return !isAnimatedWebP(new Uint8Array(await file.slice(0, 32).arrayBuffer()));
+		if (file.type === 'image/avif') {
+			const bytes = new Uint8Array(await file.slice(0, 32).arrayBuffer());
+			const brand = String.fromCharCode(bytes[8] ?? 0, bytes[9] ?? 0, bytes[10] ?? 0, bytes[11] ?? 0);
+			return brand !== 'avis'; // an animated AVIF keeps its frames
+		}
+		return true;
 	}
 
-	function handlePicked(file: File) {
-		if (shouldCrop(file)) {
+	async function handlePicked(file: File) {
+		if (await isCropWorthy(file)) {
 			cropFile = file;
 			cropOpen = true;
 			return;
 		}
-		void uploadFile(file);
+		await uploadFile(file);
 	}
 
 	function onCropped(file: File) {
@@ -90,50 +101,11 @@
 	});
 
 	async function uploadFile(original: File) {
-		const limits = CLIENT_UPLOAD_LIMITS[kind];
 		uploading = true;
 		try {
-			let file = original;
-			if (original.size > 48 * 1024 * 1024) {
-				throw new Error(`That file is too large. Keep it under ${formatFileSize(limits.maxBytes)}`);
-			}
-
-			if ('maxWidth' in limits && original.type.startsWith('image/')) {
-				file = await optimizeImage(original, {
-					maxWidth: limits.maxWidth,
-					maxHeight: limits.maxHeight,
-					maxBytes: limits.maxBytes
-				});
-			}
-
-			if (file.size > limits.maxBytes) {
-				throw new Error(`That file is ${formatFileSize(file.size)}. Keep it under ${formatFileSize(limits.maxBytes)}`);
-			}
-
-			const res = await fetch('/api/uploads', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ kind, scope, contentType: file.type, sizeBytes: file.size })
-			});
-			const json = await res.json();
-			if (!res.ok) throw new Error(json.error ?? 'Upload rejected');
-
-			const put = await fetch(json.uploadUrl, {
-				method: 'PUT',
-				headers: { 'Content-Type': file.type },
-				body: file
-			});
-			if (!put.ok) throw new Error('Upload failed');
-
-			const save = await fetch('/api/uploads', {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ kind, scope, key: json.key })
-			});
-			if (!save.ok) {
-				const result = await save.json().catch(() => null);
-				throw new Error(result?.error ?? 'Could not save the file');
-			}
+			// The shared pipeline validates, optimizes per category and uploads
+			// through a signed PUT; a replaced file is queued for cleanup server-side.
+			const { key } = await uploadMedia(original, { kind, scope });
 
 			toast('success', `${kind} updated`);
 			// Refresh the page data so the new file shows up, without losing
@@ -174,12 +146,14 @@
 	{@attach attachInput}
 	type="file"
 	accept={kind === 'banner' || kind === 'background'
-		? 'image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm'
-		: kind === 'audio'
-			? 'audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm'
-			: kind === 'cursor'
-				? 'image/png,image/webp'
-				: 'image/jpeg,image/png,image/webp'}
+		? 'image/jpeg,image/png,image/webp,image/avif,image/gif,video/mp4,video/webm'
+		: kind === 'avatar'
+			? 'image/jpeg,image/png,image/gif,image/webp,image/avif,image/svg+xml,image/bmp,image/tiff,image/heic,image/heif,image/x-icon'
+			: kind === 'audio'
+				? 'audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm'
+				: kind === 'cursor'
+					? 'image/png,image/webp'
+					: 'image/jpeg,image/png,image/webp'}
 	class="hidden"
 	onchange={onPicked}
 />

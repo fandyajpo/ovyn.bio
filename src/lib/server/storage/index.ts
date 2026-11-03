@@ -2,6 +2,8 @@ import { randomUUID } from 'node:crypto';
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
+	HeadObjectCommand,
+	ListObjectsV2Command,
 	PutObjectCommand,
 	S3Client,
 	S3ServiceException
@@ -15,6 +17,20 @@ import {
 	AWS_SECRET_ACCESS_KEY,
 	S3_BUCKET
 } from '$app/env/private';
+import {
+	KIND_MIME_TYPES,
+	MEDIA_LIMITS,
+	extensionForMime,
+	familyMatchesKind,
+	isAllowedMime,
+	sniffMediaFamily,
+	type UploadKind
+} from '#lib/media/categories';
+
+// The category rules live in the shared media module; these re-exports keep
+// existing import sites stable while there is only ever one source of truth.
+export { IMAGE_MIME_TYPES, CURSOR_MIME_TYPES, AUDIO_MIME_TYPES, BANNER_MIME_TYPES, UPLOAD_KINDS } from '#lib/media/categories';
+export type { UploadKind, UploadMime, MediaFamily } from '#lib/media/categories';
 
 function s3(): S3Client {
 	const endpoint = AWS_ENDPOINT_URL_S3;
@@ -47,55 +63,21 @@ function s3WithBucket(): { client: S3Client; bucket: string } {
 	return cached;
 }
 
-export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;
-export const CURSOR_MIME_TYPES = ['image/png', 'image/webp'] as const;
-export const AUDIO_MIME_TYPES = ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'audio/webm'] as const;
-export const BANNER_MIME_TYPES = [...IMAGE_MIME_TYPES, 'image/gif', 'video/mp4', 'video/webm'] as const;
-export type UploadMime = (typeof BANNER_MIME_TYPES)[number] | (typeof AUDIO_MIME_TYPES)[number];
-export type UploadKind = 'banner' | 'avatar' | 'icon' | 'cosmetic' | 'audio' | 'cursor' | 'background';
-
-type UploadLimit = { maxSize: number; mimeTypes: readonly UploadMime[] };
-
-export const UPLOAD_LIMITS: Record<UploadKind, UploadLimit> = {
-	banner: { maxSize: 25 * 1024 * 1024, mimeTypes: BANNER_MIME_TYPES },
-	avatar: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
-	icon: { maxSize: 1 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
-	cosmetic: { maxSize: 5 * 1024 * 1024, mimeTypes: IMAGE_MIME_TYPES },
-	audio: { maxSize: 10 * 1024 * 1024, mimeTypes: AUDIO_MIME_TYPES },
-	cursor: { maxSize: 256 * 1024, mimeTypes: CURSOR_MIME_TYPES },
-	background: { maxSize: 25 * 1024 * 1024, mimeTypes: BANNER_MIME_TYPES }
-};
-
-const EXT_BY_MIME: Record<UploadMime, string> = {
-	'image/jpeg': 'jpg',
-	'image/png': 'png',
-	'image/webp': 'webp',
-	'image/gif': 'gif',
-	'video/mp4': 'mp4',
-	'video/webm': 'webm',
-	'audio/mpeg': 'mp3',
-	'audio/mp4': 'm4a',
-	'audio/ogg': 'ogg',
-	'audio/wav': 'wav',
-	'audio/webm': 'webm'
-};
-
 export function validateUpload(
 	kind: UploadKind,
 	mimeType: string,
 	sizeBytes: number
 ): { ext: string } {
-	const limits = UPLOAD_LIMITS[kind];
 	const mime = mimeType.toLowerCase();
 
-	if (!limits.mimeTypes.includes(mime as UploadMime)) {
-		throw new AppError(415, `Only ${limits.mimeTypes.join(', ')} files are allowed`);
+	if (!isAllowedMime(kind, mime)) {
+		throw new AppError(415, `Only ${KIND_MIME_TYPES[kind].join(', ')} files are allowed`);
 	}
-	if (sizeBytes <= 0 || sizeBytes > limits.maxSize) {
-		throw new AppError(413, `File must be between 1 byte and ${limits.maxSize} bytes`);
+	if (sizeBytes <= 0 || sizeBytes > MEDIA_LIMITS[kind].maxBytes) {
+		throw new AppError(413, `File must be between 1 byte and ${MEDIA_LIMITS[kind].maxBytes} bytes`);
 	}
 
-	return { ext: EXT_BY_MIME[mime as UploadMime] };
+	return { ext: extensionForMime(mime) };
 }
 
 /** Presigned PUT: the client uploads the bytes directly to object storage. */
@@ -181,19 +163,100 @@ export async function deleteObject(key: string): Promise<void> {
 	}
 }
 
+export type StoredObject = { key: string; sizeBytes: number };
+
+/** Every object under a prefix, paginated. Used by the storage report. */
+export async function listStoredObjects(prefix?: string): Promise<StoredObject[]> {
+	const { client, bucket } = s3WithBucket();
+	const objects: StoredObject[] = [];
+	let continuationToken: string | undefined;
+
+	do {
+		const page = await client.send(
+			new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix, ContinuationToken: continuationToken })
+		);
+		for (const object of page.Contents ?? []) {
+			if (object.Key) objects.push({ key: object.Key, sizeBytes: object.Size ?? 0 });
+		}
+		continuationToken = page.IsTruncated ? page.NextContinuationToken : undefined;
+	} while (continuationToken);
+
+	return objects;
+}
+
+/**
+ * The bytes went straight from the browser to storage, so the declared
+ * content type and the stored file signature are both checked before any
+ * database record is allowed to point at the object.
+ */
+export async function verifyStoredObject(key: string, kind: UploadKind): Promise<boolean> {
+	try {
+		const { client, bucket } = s3WithBucket();
+		const head = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+		if (!isAllowedMime(kind, (head.ContentType ?? '').toLowerCase())) return false;
+
+		const range = await client.send(
+			new GetObjectCommand({ Bucket: bucket, Key: key, Range: 'bytes=0-63' })
+		);
+		const bytes = new Uint8Array((await range.Body?.transformToByteArray()) ?? []);
+		return familyMatchesKind(kind, sniffMediaFamily(bytes));
+	} catch {
+		return false;
+	}
+}
+
 /**
  * Remove a file that a record no longer points at. Seed artwork under `static/`
- * ships with the app and is shared, so it is never deleted here. Failures are
- * logged rather than thrown, because a saved record should not fail just
- * because storage was briefly unavailable.
+ * ships with the app and is shared, so it is never deleted here. Deletion goes
+ * through the durable cleanup queue (imported lazily to avoid a cycle), where
+ * every key is re-verified as unreferenced before it is actually removed and
+ * failures are retried instead of lost.
  */
 export async function deleteReplacedObject(key: string | null | undefined): Promise<void> {
 	if (!key || key.startsWith('static/')) return;
-	try {
-		await deleteObject(key);
-	} catch (err) {
-		console.error('Could not delete replaced file', key, err);
-	}
+
+	const { enqueueMediaCleanup, processMediaCleanupQueue } = await import('#lib/server/media/cleanup');
+	await enqueueMediaCleanup([key]);
+	await processMediaCleanupQueue();
+}
+
+/**
+ * Second sanitize pass for avatar SVGs, defense in depth after the browser's
+ * DOM-based pass: script blocks, active-content elements, event handler
+ * attributes, script/data URLs and foreign objects are stripped. When the
+ * stored markup changes it is re-uploaded to the same key. Returns true when
+ * the object was rewritten.
+ */
+export async function scrubStoredSvg(key: string): Promise<boolean> {
+	const { client, bucket } = s3WithBucket();
+	const head = await client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
+	if (!(head.ContentType ?? '').toLowerCase().includes('svg')) return false;
+
+	const range = await client.send(new GetObjectCommand({ Bucket: bucket, Key: key }));
+	const bytes = new Uint8Array((await range.Body?.transformToByteArray()) ?? []);
+	if (bytes.byteLength > MEDIA_LIMITS['avatar'].maxBytes) return false;
+
+	const original = new TextDecoder().decode(bytes);
+	let cleaned = original
+		.replace(/<script[\s\S]*?<\/script\s*>/gi, '')
+		.replace(/<script[^>]*\/?>/gi, '')
+		.replace(/<foreignObject[\s\S]*?<\/foreignObject\s*>/gi, '')
+		.replace(/\son\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '');
+	cleaned = cleaned.replace(/(href|xlink:href)\s*=\s*("|')\s*(javascript|data)[^"']*\2/gi, '$1="#"');
+	cleaned = cleaned.trim();
+
+	if (cleaned === original || cleaned.length === 0) return false;
+
+	await client.send(
+		new PutObjectCommand({
+			Bucket: bucket,
+			Key: key,
+			ContentType: head.ContentType ?? 'image/svg+xml',
+			CacheControl: 'public, max-age=31536000, immutable',
+			Body: cleaned
+		})
+	);
+	return true;
 }
 
 /** Verify the object belongs to the user (keys are `{kind}s/{userId}/…`) before storing the key. */

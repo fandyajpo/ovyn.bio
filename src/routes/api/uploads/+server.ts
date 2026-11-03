@@ -1,5 +1,5 @@
 import type { RequestHandler } from './$types';
-import { assertOwnObjectKey, presignUpload, type UploadKind } from '#lib/server/storage';
+import { assertOwnObjectKey, deleteObject, presignUpload, scrubStoredSvg, verifyStoredObject, type UploadKind } from '#lib/server/storage';
 import { setProfileAudioKey, setProfileAvatar, setProfileBackgroundKey, setProfileBanner, setProfileCursorKey } from '#lib/server/services/profiles';
 import { getMembership, updateGuild } from '#lib/server/services/guilds';
 import { AppError } from '#lib/server/utils/errors';
@@ -62,6 +62,18 @@ export const PUT: RequestHandler = async ({ request, locals }) => {
 
 	try {
 		assertOwnObjectKey(locals.user.id, kind as UploadKind, key);
+
+		// The bytes came straight from the browser to storage: verify the stored
+		// signature and content type before any record is allowed to reference
+		// them. A mismatched object is an orphan we just received, so it is
+		// deleted on the spot instead of being cleaned up later.
+		if (!(await verifyStoredObject(key, kind as UploadKind))) {
+			await deleteObject(key).catch(() => undefined);
+			return Response.json({ error: 'The uploaded file does not match its type' }, { status: 415 });
+		}
+		// Avatar SVGs get a second sanitize pass server-side, after the browser
+		// already sanitized them once; a non-SVG object is a no-op here.
+		if (kind === 'avatar') await scrubStoredSvg(key).catch(() => undefined);
 
 		if (kind === 'banner' && scope === 'profile') {
 			// The profile wallpaper.
