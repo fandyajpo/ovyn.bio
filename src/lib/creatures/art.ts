@@ -105,6 +105,49 @@ function renderSprite(
 				image.data[offset + 3] = 255;
 			}
 		}
+
+		// A second pass adds volume: a warm rim on the lit side, a cool contact
+		// edge on the shadow side, and a soft inner occlusion band.
+		const filledAt = (px: number, py: number) =>
+			px >= 0 && py >= 0 && px < width && py < height && filled[py * width + px] === 1;
+
+		for (let py = 0; py < height; py += 1) {
+			for (let px = 0; px < width; px += 1) {
+				const index = py * width + px;
+				if (!filled[index]) continue;
+
+				const offset = index * 4;
+				const alpha = image.data[offset + 3] ?? 0;
+				if (alpha < 200) continue;
+
+				const litSide = !filledAt(px - 1, py) || !filledAt(px, py - 1);
+				const darkSide = !filledAt(px + 1, py) || !filledAt(px, py + 1);
+				const innerEdge = !filledAt(px - 2, py) || !filledAt(px, py - 2);
+
+				let amount = 0;
+				let target: Rgb | null = null;
+				if (litSide) {
+					amount = 0.16;
+					target = [252, 236, 198] as const;
+				} else if (darkSide) {
+					amount = 0.12;
+					target = [16, 14, 12] as const;
+				} else if (innerEdge) {
+					amount = 0.05;
+					target = [22, 18, 14] as const;
+				}				if (!target || amount === 0) continue;
+
+				const current: Rgb = [
+					image.data[offset] ?? 0,
+					image.data[offset + 1] ?? 0,
+					image.data[offset + 2] ?? 0
+				];
+				const shaded = mix(current, target, amount);
+				image.data[offset] = shaded[0];
+				image.data[offset + 1] = shaded[1];
+				image.data[offset + 2] = shaded[2];
+			}
+		}
 	}
 
 	context.putImageData(image, 0, 0);

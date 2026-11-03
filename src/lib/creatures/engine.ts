@@ -281,11 +281,24 @@ export function drawCreature(context: CanvasRenderingContext2D, creature: Creatu
 	const scale = creature.profile.scale * creature.setting.size * creature.fit;
 	const bob = Math.sin(creature.bobPhase) * creature.profile.bob * 0.4;
 	const ghostPulse = Math.sin(creature.time * 0.9 + creature.seed) * 0.5 + 0.5;
+	const bounds = creatureBounds(art);
 
+	// Downscaling detailed pixel art needs area averaging; upscaling must stay
+	// crisp, so smoothing is only on when the sprite is actually shrunk.
 	context.save();
+	context.imageSmoothingEnabled = scale < 0.92;
+	context.imageSmoothingQuality = 'high';
 	context.translate(creature.x, creature.y + bob);
 	context.rotate(creature.heading);
 	context.scale(scale, scale);
+
+	// A soft contact shadow grounds the creature without a hard silhouette.
+	const shadowX = Math.max(8, bounds.width * 0.28);
+	const shadowY = Math.max(3, Math.min(bounds.height, bounds.width) * 0.1);
+	context.fillStyle = 'rgba(8, 9, 11, 0.13)';
+	context.beginPath();
+	context.ellipse(0, bounds.maxY * 0.32 + 3, shadowX, shadowY, 0, 0, Math.PI * 2);
+	context.fill();
 
 	if (art.glow) {
 		const halo = context.createRadialGradient(0, 0, 2, 0, 0, 26);

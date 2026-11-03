@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
 	import type { CreatureSetting } from '#lib/schemas/creatures';
+	import { CREATURE_LIMIT } from '#lib/schemas/creatures';
 	import {
 		centerCreature,
 		createCreature,
@@ -53,19 +54,23 @@
 		let visible = false;
 		let last = 0;
 
+		// The preview box is small by design, so its size must not cap the flock;
+		// only a genuinely weak device does.
 		const capacity = () => {
-			const shortest = Math.min(bounds.width, bounds.height);
 			const cores = navigator.hardwareConcurrency ?? 4;
+			if (preview) return cores <= 2 ? 4 : CREATURE_LIMIT;
+
+			const shortest = Math.min(bounds.width, bounds.height);
 			if (shortest < 260) return 2;
 			if (cores <= 4) return 3;
-			return preview ? 4 : 6;
+			return 6;
 		};
 
 		const build = (list: CreatureSetting[]) => {
 			currentList = list;
 			const active = list.filter((item) => item.enabled).slice(0, capacity());
 			const next: Creature[] = [];
-			const columns = Math.min(2, Math.max(1, active.length));
+			const columns = active.length <= 2 ? Math.max(1, active.length) : active.length <= 4 ? 2 : 3;
 			const rows = Math.ceil(active.length / columns);
 
 			for (let index = 0; index < active.length; index += 1) {
@@ -79,12 +84,12 @@
 					// on its own small anchor, all drawn at the same apparent size.
 					const column = index % columns;
 					const row = Math.floor(index / columns);
-					const anchorX = width / 2 + (column - (columns - 1) / 2) * 58;
-					const anchorY = height / 2 + (row - (rows - 1) / 2) * 48;
-					const scale = uniformCreatureScale(creature, 26 * Math.min(1.25, Math.max(0.8, setting.size)));
+					const anchorX = width / 2 + (column - (columns - 1) / 2) * 64;
+					const anchorY = height / 2 + (row - (rows - 1) / 2) * 54;
+					const scale = uniformCreatureScale(creature, 30 * Math.min(1.25, Math.max(0.8, setting.size)));
 					setCreatureScale(creature, scale);
 					centerCreature(creature, anchorX, anchorY, scale);
-					creature.home = { x: anchorX, y: anchorY, radius: 9 };
+					creature.home = { x: anchorX, y: anchorY, radius: 10 };
 					creature.cruise *= 0.4;
 					creature.heading = Math.random() * Math.PI * 2;
 					creature.headingTarget = creature.heading;

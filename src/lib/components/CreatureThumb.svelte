@@ -11,12 +11,12 @@
 
 	let {
 		species,
-		size = 26
+		size = 30
 	}: { species: CreatureSetting['id']; size?: number } = $props();
 
 	// One shared preview box for every species, so the collection reads as a set.
-	const PREVIEW_WIDTH = 68;
-	const PREVIEW_HEIGHT = 46;
+	const PREVIEW_WIDTH = 76;
+	const PREVIEW_HEIGHT = 52;
 
 	let canvas = $state<HTMLCanvasElement | undefined>(undefined);
 
@@ -56,8 +56,8 @@
 <style>
 	.creature-thumb {
 		display: block;
-		width: 4.25rem;
-		height: 2.875rem;
+		width: 4.75rem;
+		height: 3.25rem;
 		flex: 0 0 auto;
 	}
 </style>
