@@ -31,6 +31,7 @@
 		[186, 188, 154]
 	];
 
+	const BODY: Rgb = [132, 136, 100];
 	const BODY_LIGHT: Rgb = [186, 188, 154];
 	const BODY_MID: Rgb = [112, 116, 84];
 	const BODY_DARK: Rgb = [62, 66, 47];
