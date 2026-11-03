@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { onMount, untrack } from 'svelte';
+	import { DragDropProvider } from '@dnd-kit/svelte';
+	import { isSortable } from '@dnd-kit/svelte/sortable';
 	import RichTextEditor from './RichTextEditor.svelte';
 	import TemplateBlocks from './TemplateBlocks.svelte';
+	import BlockDropEnd from './BlockDropEnd.svelte';
+	import PaletteBlockChip from './PaletteBlockChip.svelte';
+	import SortableBlockCard from './SortableBlockCard.svelte';
 	import { createPreviewPublisher, previewKeyFor, type PreviewPublisher } from '#lib/template-preview';
 	import {
-		TEMPLATE_BLOCK_HINTS,
-		TEMPLATE_BLOCK_LABELS,
 		TEMPLATE_BLOCK_TYPES,
 		TEMPLATE_EMBED_PROVIDER_OPTIONS,
 		TEMPLATE_LIST_STYLE_OPTIONS,
@@ -23,9 +26,9 @@
 	// A stored row can miss ids or hold the same block twice, which breaks a
 	// keyed list, so the editor starts from a clean, fully keyed copy.
 	let items = $state<TemplateBlock[]>(untrack(() => normalizeTemplateBlocks(blocks)));
-	let draggingIndex = $state<number | null>(null);
-	let overIndex = $state<number | null>(null);
-	let paletteType = $state<TemplateBlockType | null>(null);
+	// The order to fall back to when a drag is cancelled.
+	let snapshot = $state<TemplateBlock[]>([]);
+	let draggingSort = $state(false);
 
 	let previewSession = $state('');
 	let publisher = $state.raw<PreviewPublisher | null>(null);
@@ -119,15 +122,6 @@
 		items = next;
 	}
 
-	function moveBlockTo(from: number, to: number) {
-		if (from === to) return;
-		const next = [...items];
-		const [moved] = next.splice(from, 1);
-		if (!moved) return;
-		next.splice(from < to ? to - 1 : to, 0, moved);
-		items = next;
-	}
-
 	function addListItem(index: number) {
 		const block = items[index];
 		if (!block) return;
@@ -174,36 +168,20 @@
 		updateBlock(index, { cells: (block.cells ?? []).filter((_, position) => position !== cellIndex) });
 	}
 
-	function resetDrag() {
-		draggingIndex = null;
-		overIndex = null;
-		paletteType = null;
+	// dnd-kit owns both drag sources: reordering a block that already exists and
+	// dragging a block type out of the palette into the page.
+	function beginDrag(sortable: boolean) {
+		draggingSort = sortable;
+		if (sortable) snapshot = items.slice();
 	}
 
-	function onDragStart(event: DragEvent, index: number) {
-		draggingIndex = index;
-		paletteType = null;
-		event.dataTransfer?.setData('text/plain', `block:${index}`);
-		if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
-	}
-
-	function onPaletteDragStart(event: DragEvent, type: TemplateBlockType) {
-		paletteType = type;
-		draggingIndex = null;
-		event.dataTransfer?.setData('text/plain', `new:${type}`);
-		if (event.dataTransfer) event.dataTransfer.effectAllowed = 'copy';
-	}
-
-	function onDragOver(event: DragEvent, index: number) {
-		event.preventDefault();
-		overIndex = index;
-	}
-
-	function onDrop(event: DragEvent, index: number) {
-		event.preventDefault();
-		if (paletteType) addBlock(paletteType, index);
-		else if (draggingIndex !== null) moveBlockTo(draggingIndex, index);
-		resetDrag();
+	function dragOver(from: number, to: number) {
+		if (from === to) return;
+		const next = [...items];
+		const [moved] = next.splice(from, 1);
+		if (!moved) return;
+		next.splice(to, 0, moved);
+		items = next;
 	}
 
 	function textValue(event: Event): string {
@@ -240,51 +218,47 @@
 
 <div class="builder">
 	<div class="builder-canvas">
-		<div class="palette" aria-label="Add a content block">
-			{#each TEMPLATE_BLOCK_TYPES as type (type)}
-				<button
-					type="button"
-					class="palette-chip"
-					draggable="true"
-					ondragstart={(event) => onPaletteDragStart(event, type)}
-					ondragend={resetDrag}
-					onclick={() => addBlock(type)}
-					title={TEMPLATE_BLOCK_HINTS[type]}
-				>
-					<span class="palette-plus" aria-hidden="true">+</span>
-					<span>{TEMPLATE_BLOCK_LABELS[type]}</span>
-				</button>
-			{/each}
-		</div>
-		<p class="palette-hint">Drag a block into the page, or tap one to add it at the end.</p>
+		<DragDropProvider
+			onDragStart={(event) => beginDrag(Boolean(event.operation.source && isSortable(event.operation.source)))}
+			onDragOver={(event) => {
+				const { source, target } = event.operation;
+				if (isSortable(source) && isSortable(target)) dragOver(source.index, target.index);
+			}}
+			onDragEnd={(event) => {
+				const { source, target } = event.operation;
+				if (event.canceled) {
+					if (draggingSort) items = snapshot;
+				} else if (source && !isSortable(source) && target) {
+					const type = source.data.type as TemplateBlockType;
+					if (TEMPLATE_BLOCK_TYPES.includes(type)) {
+						addBlock(type, isSortable(target) ? target.index : items.length);
+					}
+				}
 
-		{#if items.length === 0}
-			<p class="builder-empty">Your layout is empty. Add a heading, some text or a grid to start.</p>
-		{/if}
+				draggingSort = false;
+			}}
+		>
+			<div class="palette" aria-label="Add a content block">
+				{#each TEMPLATE_BLOCK_TYPES as type (type)}
+					<PaletteBlockChip {type} onadd={() => addBlock(type)} />
+				{/each}
+			</div>
+			<p class="palette-hint">Drag a block into the page, or tap one to add it at the end.</p>
 
-		<div class="block-list">
-			{#each items as block, index (block.id)}
-				<article
-					class="block-card {overIndex === index ? 'is-over' : ''}"
-					draggable="true"
-					ondragstart={(event) => onDragStart(event, index)}
-					ondragover={(event) => onDragOver(event, index)}
-					ondragleave={() => { if (overIndex === index) overIndex = null; }}
-					ondrop={(event) => onDrop(event, index)}
-					ondragend={resetDrag}
-				>
-					<header class="block-head">
-						<span class="block-handle" aria-hidden="true">⠿</span>
-						<span class="block-label">{TEMPLATE_BLOCK_LABELS[block.type]}</span>
-						<div class="block-tools">
-							<button type="button" onclick={() => moveBlock(index, -1)} disabled={index === 0} aria-label="Move block up">↑</button>
-							<button type="button" onclick={() => moveBlock(index, 1)} disabled={index === items.length - 1} aria-label="Move block down">↓</button>
-							<button type="button" onclick={() => duplicateBlock(index)}>Duplicate</button>
-							<button type="button" class="block-remove" onclick={() => removeBlock(index)}>Remove</button>
-						</div>
-					</header>
+			{#if items.length === 0}
+				<p class="builder-empty">Your layout is empty. Add a heading, some text or a grid to start.</p>
+			{/if}
 
-					<div class="block-body">
+			<div class="block-list">
+				{#each items as block, index (block.id)}
+					<SortableBlockCard
+						{block}
+						{index}
+						total={items.length}
+						onmove={(direction) => moveBlock(index, direction)}
+						onduplicate={() => duplicateBlock(index)}
+						onremove={() => removeBlock(index)}
+					>
 						{#if block.type === 'heading'}
 							<label class="builder-field">
 								<span>Heading</span>
@@ -428,24 +402,15 @@
 							</div>
 							<button type="button" class="add-row" onclick={() => addGridCell(index)}>+ Add cell</button>
 						{/if}
-					</div>
-				</article>
-			{/each}
-		</div>
+					</SortableBlockCard>
+				{/each}
+			</div>
 
-		<div
-			class="drop-end {overIndex === items.length ? 'is-over' : ''}"
-			role="group"
-			aria-label="Drop here to add at the end"
-			ondragover={(event) => onDragOver(event, items.length)}
-			ondragleave={() => { if (overIndex === items.length) overIndex = null; }}
-			ondrop={(event) => onDrop(event, items.length)}
-		>
-			Drop here to add at the end
-		</div>
+			<BlockDropEnd index={items.length} />
+		</DragDropProvider>
 	</div>
 
-	<aside class="builder-preview" aria-label="Live preview">
+	<aside class="builder-preview elevated-scroll" aria-label="Live preview">
 		<div class="preview-head">
 			<span>Live preview</span>
 			<span class="preview-actions">
@@ -470,32 +435,6 @@
 	.builder-canvas { min-width: 0; }
 	.palette { display: flex; flex-wrap: wrap; gap: 0.45rem; }
 
-	.palette-chip {
-		display: inline-flex;
-		min-height: 2.4rem;
-		align-items: center;
-		gap: 0.4rem;
-		border: 1px dashed color-mix(in srgb, var(--color-foreground) 22%, transparent);
-		border-radius: 999px;
-		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
-		padding: 0.4rem 0.8rem;
-		color: var(--color-foreground);
-		font: inherit;
-		font-size: 0.76rem;
-		font-weight: 600;
-		cursor: grab;
-		transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
-	}
-
-	.palette-chip:hover {
-		border-color: color-mix(in srgb, var(--color-accent) 52%, transparent);
-		background: var(--color-accent-soft);
-		transform: translateY(-1px);
-	}
-
-	.palette-chip:active { cursor: grabbing; transform: scale(0.98); }
-	.palette-plus { color: var(--color-accent); font-size: 0.9rem; }
-
 	.palette-hint {
 		margin-top: 0.55rem;
 		color: var(--color-muted);
@@ -513,59 +452,6 @@
 	}
 
 	.block-list { display: grid; gap: 0.75rem; margin-top: 1.25rem; }
-
-	.block-card {
-		border: 1px solid var(--color-divider);
-		border-radius: 1.15rem;
-		background: color-mix(in srgb, var(--color-surface) 74%, transparent);
-		transition: border-color 160ms ease, box-shadow 180ms ease, transform 200ms ease;
-	}
-
-	.block-card.is-over {
-		border-color: color-mix(in srgb, var(--color-accent) 70%, transparent);
-		box-shadow: 0 0 0 4px var(--color-accent-soft);
-	}
-
-	.block-head {
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		gap: 0.6rem;
-		border-bottom: 1px solid var(--color-divider);
-		padding: 0.6rem 0.8rem;
-	}
-
-	.block-handle { color: var(--color-muted); cursor: grab; letter-spacing: 0.1em; }
-	.block-label { color: var(--color-foreground); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; }
-	.block-tools { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-left: auto; }
-
-	.block-tools button {
-		min-height: 1.9rem;
-		border: 1px solid var(--color-divider);
-		border-radius: 0.55rem;
-		background: transparent;
-		padding: 0.2rem 0.55rem;
-		color: var(--color-muted);
-		font: inherit;
-		font-size: 0.68rem;
-		cursor: pointer;
-		transition: color 140ms ease, border-color 140ms ease, background-color 140ms ease;
-	}
-
-	.block-tools button:hover:not(:disabled) {
-		border-color: color-mix(in srgb, var(--color-accent) 42%, transparent);
-		background: var(--color-accent-soft);
-		color: var(--color-foreground);
-	}
-
-	.block-tools button:disabled { cursor: not-allowed; color: var(--color-muted); }
-	.block-remove:hover { border-color: color-mix(in srgb, var(--color-danger) 50%, transparent); color: var(--color-danger); }
-
-	.block-body {
-		display: grid;
-		gap: 0.7rem;
-		padding: 0.85rem;
-	}
 
 	.block-field,
 	.builder-field { display: grid; gap: 0.3rem; }
@@ -681,24 +567,6 @@
 
 	.block-note { color: var(--color-muted); font-size: 0.78rem; }
 
-	.drop-end {
-		display: grid;
-		min-height: 3.2rem;
-		place-items: center;
-		margin-top: 0.75rem;
-		border: 1px dashed var(--color-divider);
-		border-radius: 1rem;
-		color: var(--color-muted);
-		font-size: 0.72rem;
-		transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
-	}
-
-	.drop-end.is-over {
-		border-color: color-mix(in srgb, var(--color-accent) 62%, transparent);
-		background: var(--color-accent-soft);
-		color: var(--color-accent);
-	}
-
 	.builder-preview {
 		min-width: 0;
 		border: 1px solid var(--color-divider);
@@ -753,13 +621,9 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.palette-chip,
-		.block-card,
-		.block-tools button,
 		.chip-row button,
 		.add-row,
 		.row-remove,
-		.preview-open,
-		.drop-end { transition: none; }
+		.preview-open { transition: none; }
 	}
 </style>

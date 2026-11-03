@@ -18,6 +18,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Validation | Zod 4 |
+| Drag and drop | dnd-kit (`@dnd-kit/svelte`) - sortable link rows and template blocks |
 | Forms & client data | Superforms, TanStack Query 6, TanStack Table 9, date-fns 4 |
 
 Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
@@ -105,7 +106,10 @@ headings, on a soft, low-contrast palette that opens dark and has a cream light
 mode. The theme choice is remembered and follows you across open tabs. A pixel
 snail is the mascot, sitting beside the wordmark in the header and in the
 footer, while the landing hero has a small pixel butterfly that drifts to random
-spots; both stand still for visitors who prefer reduced motion. Every page wears
+spots; both stand still for visitors who prefer reduced motion. The butterfly is
+a canvas simulation: a detailed monarch sprite built from fine generated pixels,
+steered by a small velocity and noise model that cruises, hovers and darts, with
+wing beats that squash into perspective. Every page wears
 a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
 it, so the dark palette glows lime and the cream palette warms into gold, pink
 and teal; public profiles keep their own backgrounds and opt out. Profile
@@ -120,6 +124,8 @@ Account settings let each device manage browser notification permission and even
 Every control is a custom component in `src/lib/components/ui`: input (text, textarea, file, checkbox and radio), custom select dropdowns, checkbox, switch, card, badge, button, tooltip and the responsive overlay. The overlay is a bottom sheet below 40rem and a centered dialog above it. Dropdown panels and tooltips follow the same rule, so on a phone the option list and the hint open as a sheet at the bottom of the screen instead of a bubble near the edge. File uploads use a drag and drop dropzone that also works by click and keyboard.
 
 The controls share one visual language: hairline dividers, soft surface gradients, an accent glow on focus, a gradient underline on active fields and Poppins type. Badges, stickers, toasts and status colors all resolve from theme tokens, so they stay legible against both the dark and the light palette.
+
+Elevation lives in one place: the `--shadow-*` recipes and the `--layer-*` ladder in `app.css`, with `.elevated-scroll` for scroll areas that hold cards. Layout wrappers stay `overflow: visible` so a card's shadow is never sliced; clipping happens only in dedicated inner elements such as image masks, table shells, the mobile drawers and decorative glow wrappers.
 
 Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages linked from the footer and from the sign-in screen.
 
@@ -212,6 +218,20 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   is used where a value is compared or submitted as a calendar day. Invalid or
   missing values return the caller's fallback instead of `Invalid Date`.
 - **Profile links and templates** - public links are scheme-validated before display, and an added link can be edited (platform, address and custom label), reordered by dragging its handle (the arrow keys work too) or removed later. Templates are page layouts built from draggable content blocks (heading, text, blog post, quote, image, divider) with a markdown editor and a live preview; blocks are private by default, and a template enters the community gallery only when its owner shares it. Applying a template copies its theme and blocks onto the owner's page, where the blocks render publicly. Markdown is escaped before rendering, and image links must be HTTPS.
+- **Drag and drop** - every reorderable list runs on `@dnd-kit/svelte` instead
+  of hand-rolled pointer maths. Each sortable row or block is its own component
+  calling `createSortable` with `id` and `index` as getters, so its identity
+  survives reorders, and the `DragDropProvider` that wraps the list owns the
+  state change. The grip is an `attachHandle`, which keeps a card's buttons and
+  inputs out of the drag and still lets a keyboard start the drag; the link
+  handle also keeps its arrow-key shortcut. `onDragOver` reorders the Svelte
+  state so the move is visible while dragging, and only `onDragEnd` persists it:
+  profile links post the new id order to the `reorder` action, template blocks
+  flow into the hidden input and the live preview. The block palette is a
+  `createDraggable` source, so a type can be dragged into the page or tapped to
+  add it at the end, and a disabled sortable parked at the list's length makes
+  the end drop zone a real insertion point. A cancelled drag restores the order
+  it started from.
 - **Onboarding and page help** - a new account finishes a two-step, full-screen
   onboarding (who you are, how you found ovyn) before the workspace opens; the
   answers are stored on the profile and the welcome step animates into the

@@ -2,12 +2,15 @@
 	import { untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
 	import { superForm } from 'sveltekit-superforms';
+	import { DragDropProvider } from '@dnd-kit/svelte';
+	import { isSortable } from '@dnd-kit/svelte/sortable';
 	import type { PageData } from './$types';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import LinkProviderIcon from '#lib/components/LinkProviderIcon.svelte';
+	import SortableLinkRow from '#lib/components/SortableLinkRow.svelte';
 	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import {
 		PROFILE_LINK_PROVIDER_IDS,
@@ -69,11 +72,12 @@
 		if (form?.ok) editing = null;
 	});
 
-	// Drag to reorder: the ids below are the displayed order, saved as sortOrder.
+	// dnd-kit owns the drag: the ids below are the displayed order, and the whole
+	// list is saved as sortOrder once a drag ends.
 	let order = $state<string[]>(untrack(() => data.links.map((link) => link.id)));
-	let dragId = $state<string | null>(null);
+	let snapshot = $state<string[]>([]);
+	let dragging = $state(false);
 	let saving = $state(false);
-	let listEl = $state<HTMLDivElement | undefined>(undefined);
 
 	const orderedLinks = $derived(
 		order
@@ -92,45 +96,14 @@
 	// Follow the server's order again after a save, a removal or a new link.
 	$effect(() => {
 		const ids = data.links.map((link) => link.id);
-		if (dragId || saving) return;
+		if (dragging || saving) return;
 		untrack(() => {
 			if (ids.join('|') !== order.join('|')) order = ids;
 		});
 	});
 
-	function moveItem(id: string, delta: number) {
-		const from = order.indexOf(id);
-		const to = from + delta;
-		if (from < 0 || to < 0 || to >= order.length) return false;
-		const next = order.slice();
-		const [moved] = next.splice(from, 1);
-		if (!moved) return false;
-		next.splice(to, 0, moved);
-		order = next;
-		return true;
-	}
-
-	function onHandlePointerDown(event: PointerEvent, id: string) {
-		if (event.button !== 0) return;
-		const handle = event.currentTarget as HTMLElement;
-		handle.setPointerCapture?.(event.pointerId);
-		dragId = id;
-	}
-
-	function onHandlePointerMove(event: PointerEvent) {
-		const dragged = dragId;
-		if (!dragged || !listEl) return;
-		const target = Array.from(listEl.querySelectorAll<HTMLElement>('[data-order-id]')).find((card) => {
-			const rect = card.getBoundingClientRect();
-			return event.clientY >= rect.top && event.clientY <= rect.bottom;
-		});
-		const targetId = target?.dataset.orderId;
-		if (!targetId || targetId === dragged) return;
-
-		const from = order.indexOf(dragged);
-		const to = order.indexOf(targetId);
-		if (from < 0 || to < 0 || from === to) return;
-
+	function reorder(from: number, to: number) {
+		if (from === to) return;
 		const next = order.slice();
 		const [moved] = next.splice(from, 1);
 		if (!moved) return;
@@ -138,22 +111,25 @@
 		order = next;
 	}
 
-	function endDrag(event: PointerEvent) {
-		if (!dragId) return;
-		const handle = event.currentTarget as HTMLElement;
-		if (handle.hasPointerCapture(event.pointerId)) handle.releasePointerCapture(event.pointerId);
-		dragId = null;
-		if (orderChanged()) void saveOrder();
+	function beginDrag() {
+		snapshot = order.slice();
+		dragging = true;
 	}
 
-	function onHandleKeydown(event: KeyboardEvent, id: string) {
-		if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
-		event.preventDefault();
-		if (!moveItem(id, event.key === 'ArrowUp' ? -1 : 1)) return;
-		void saveOrder();
-		requestAnimationFrame(() => {
-			listEl?.querySelector<HTMLElement>(`[data-handle="${id}"]`)?.focus();
-		});
+	function finishDrag(canceled: boolean) {
+		if (canceled) order = snapshot.slice();
+		dragging = false;
+		if (!canceled && orderChanged()) void saveOrder();
+	}
+
+	// The handle still moves its link with the arrow keys, for anyone without a
+	// pointer, and stays quiet while dnd-kit is already dragging.
+	function moveByOne(id: string, direction: -1 | 1) {
+		if (dragging) return;
+		const from = order.indexOf(id);
+		if (from < 0) return;
+		reorder(from, from + direction);
+		if (orderChanged()) void saveOrder();
 	}
 
 	async function saveOrder() {
@@ -246,55 +222,43 @@
 		{#if data.links.length === 0}
 			<Card class="p-6 text-sm text-neutral-500">Your page is link-free for now. Add the places people can find you.</Card>
 		{:else}
-			<div bind:this={listEl} class="flex flex-col gap-3">
-				{#each orderedLinks as link (link.id)}
-					<div class="link-row" class:is-dragging={dragId === link.id} data-order-id={link.id}>
-						<Card class="min-w-0 p-4">
-							<div class="flex items-start gap-3">
-								<button
-									type="button"
-									class="drag-handle"
-									data-handle={link.id}
-									aria-label={`Reorder ${link.label}`}
-									onpointerdown={(event) => onHandlePointerDown(event, link.id)}
-									onpointermove={onHandlePointerMove}
-									onpointerup={endDrag}
-									onpointercancel={endDrag}
-									onlostpointercapture={endDrag}
-									onkeydown={(event) => onHandleKeydown(event, link.id)}
-								>
-									<svg viewBox="0 0 16 24" aria-hidden="true" width="10" height="16">
-										<circle cx="5" cy="5" r="1.4" fill="currentColor" />
-										<circle cx="11" cy="5" r="1.4" fill="currentColor" />
-										<circle cx="5" cy="12" r="1.4" fill="currentColor" />
-										<circle cx="11" cy="12" r="1.4" fill="currentColor" />
-										<circle cx="5" cy="19" r="1.4" fill="currentColor" />
-										<circle cx="11" cy="19" r="1.4" fill="currentColor" />
-									</svg>
-								</button>
-
-								<div class="flex min-w-0 flex-1 items-start justify-between gap-3">
-									<div class="flex min-w-0 items-center gap-3">
-										<LinkProviderIcon provider={link.provider} />
-										<div class="min-w-0">
-											<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{providerLabel(link.provider)}</p>
-											<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="mt-1 block truncate font-medium text-lime-300 hover:underline">{link.label}</a>
-										</div>
+			<DragDropProvider
+				onDragStart={() => beginDrag()}
+				onDragOver={(event) => {
+					const { source, target } = event.operation;
+					if (isSortable(source) && isSortable(target)) reorder(source.index, target.index);
+				}}
+				onDragEnd={(event) => finishDrag(event.canceled)}
+			>
+				<div class="flex flex-col gap-3">
+					{#each orderedLinks as link, index (link.id)}
+						<SortableLinkRow
+							id={link.id}
+							{index}
+							label={link.label}
+							onarrow={(direction) => moveByOne(link.id, direction)}
+						>
+							<div class="flex min-w-0 flex-1 items-start justify-between gap-3">
+								<div class="flex min-w-0 items-center gap-3">
+									<LinkProviderIcon provider={link.provider} />
+									<div class="min-w-0">
+										<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{providerLabel(link.provider)}</p>
+										<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="mt-1 block truncate font-medium text-lime-300 hover:underline">{link.label}</a>
 									</div>
-									<div class="flex shrink-0 items-center gap-2">
-										<button
-											type="button"
-											onclick={() => startEdit(link)}
-											class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:border-lime-300/50 hover:text-lime-300"
-											aria-label="Edit {link.label}"
-										>
-											Edit
-										</button>
-										<form method="POST" action="?/remove">
-											<input type="hidden" name="id" value={link.id} />
-											<button type="submit" class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-400 transition hover:border-red-400/50 hover:text-red-300" aria-label="Remove {link.label}">Remove</button>
-										</form>
-									</div>
+								</div>
+								<div class="flex shrink-0 items-center gap-2">
+									<button
+										type="button"
+										onclick={() => startEdit(link)}
+										class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:border-lime-300/50 hover:text-lime-300"
+										aria-label="Edit {link.label}"
+									>
+										Edit
+									</button>
+									<form method="POST" action="?/remove">
+										<input type="hidden" name="id" value={link.id} />
+										<button type="submit" class="rounded-lg border border-neutral-700 px-3 py-2 text-xs text-neutral-400 transition hover:border-red-400/50 hover:text-red-300" aria-label="Remove {link.label}">Remove</button>
+									</form>
 								</div>
 							</div>
 
@@ -323,51 +287,10 @@
 									</div>
 								</form>
 							{/if}
-						</Card>
-					</div>
-				{/each}
-			</div>
+						</SortableLinkRow>
+					{/each}
+				</div>
+			</DragDropProvider>
 		{/if}
 	</section>
 </div>
-
-<style>
-	.link-row { transition: transform 160ms ease; }
-	.link-row.is-dragging { transform: scale(1.01); }
-
-	.link-row.is-dragging :global(.ovyn-surface) {
-		border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-		box-shadow: 0 18px 40px rgb(0 0 0 / 16%);
-	}
-
-	.drag-handle {
-		display: grid;
-		width: 2.4rem;
-		height: 2.75rem;
-		flex: 0 0 auto;
-		place-items: center;
-		border: 1px solid var(--color-divider);
-		border-radius: 0.7rem;
-		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
-		color: var(--color-muted);
-		cursor: grab;
-		touch-action: none;
-		transition: color 160ms ease, border-color 160ms ease, background-color 160ms ease;
-	}
-
-	.drag-handle:hover {
-		border-color: color-mix(in srgb, var(--color-accent) 40%, transparent);
-		color: var(--color-foreground);
-	}
-
-	.drag-handle:active { cursor: grabbing; }
-
-	.drag-handle:focus-visible {
-		outline: 2px solid color-mix(in srgb, var(--color-accent) 60%, transparent);
-		outline-offset: 2px;
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.link-row { transition: none; }
-	}
-</style>
