@@ -163,11 +163,36 @@
 			saving = false;
 		}
 	}
+
+	// The crop stage is a custom pointer-and-keyboard widget, so its listeners are
+	// bound by an action rather than as DOM attributes.
+	function cropStage(node: HTMLElement) {
+		const pointerDown = (event: PointerEvent) => onPointerDown(event);
+		const pointerMove = (event: PointerEvent) => onPointerMove(event);
+		const pointerUp = (event: PointerEvent) => onPointerUp(event);
+		const keydown = (event: KeyboardEvent) => onKeydown(event);
+
+		node.addEventListener('pointerdown', pointerDown);
+		node.addEventListener('pointermove', pointerMove);
+		node.addEventListener('pointerup', pointerUp);
+		node.addEventListener('pointercancel', pointerUp);
+		node.addEventListener('keydown', keydown);
+
+		return {
+			destroy() {
+				node.removeEventListener('pointerdown', pointerDown);
+				node.removeEventListener('pointermove', pointerMove);
+				node.removeEventListener('pointerup', pointerUp);
+				node.removeEventListener('pointercancel', pointerUp);
+				node.removeEventListener('keydown', keydown);
+			}
+		};
+	}
 </script>
 
 <Modal bind:open {title} description="Drag the photo to position it, then zoom in or out. Arrow keys nudge, plus and minus zoom.">
 	<div class="flex flex-col gap-4">
-		<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 		<div
 			class="crop-stage"
 			class:is-dragging={dragging}
@@ -177,11 +202,7 @@
 			role="application"
 			tabindex="0"
 			aria-label="Crop area. Drag to move the image, arrow keys to nudge, plus and minus to zoom."
-			onpointerdown={onPointerDown}
-			onpointermove={onPointerMove}
-			onpointerup={onPointerUp}
-			onpointercancel={onPointerUp}
-			onkeydown={onKeydown}
+			use:cropStage
 		>
 			{#if imageUrl}
 				<img

@@ -11,9 +11,13 @@
 	// The chip is both a shortcut (tap to add at the end) and a drag source the
 	// block list accepts while the drag is in flight.
 	const draggable = createDraggable<{ type: TemplateBlockType }>({
-		id: `block-type:${type}`,
+		get id() {
+			return `block-type:${type}`;
+		},
 		type: 'block-type',
-		data: { type }
+		get data() {
+			return { type };
+		}
 	});
 </script>
 

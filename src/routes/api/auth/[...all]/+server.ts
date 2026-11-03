@@ -1,4 +1,3 @@
-import type { RequestHandler } from './$types';
 import { auth } from '#lib/server/auth';
 
 /**
