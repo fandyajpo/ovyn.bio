@@ -4,6 +4,7 @@ import {
 	familyMatchesKind,
 	isAllowedMime,
 	isAnimatedWebP,
+	scanGifAnimation,
 	sniffMediaFamily,
 	type UploadKind
 } from './categories';
@@ -109,9 +110,11 @@ async function prepareGenericImage(file: File, options: MediaUploadOptions): Pro
 	if (file.type === 'image/gif') return file;
 
 	const limits = MEDIA_LIMITS[options.kind];
-	const bitmap = await decodeImage(file);
+	// `maxDimension` is null only for audio slots, which never decode here.
+	const maxDimension = limits.maxDimension ?? DECODE_BOMB_PIXELS;
+	const bitmap = await decodeImage(file, options.kind);
 	try {
-		if (bitmap.width > limits.maxDimension || bitmap.height > limits.maxDimension || bitmap.width * bitmap.height > DECODE_BOMB_PIXELS) {
+		if (bitmap.width > maxDimension || bitmap.height > maxDimension || bitmap.width * bitmap.height > DECODE_BOMB_PIXELS) {
 			throw new Error(`That image is too large (${bitmap.width}×${bitmap.height}).`);
 		}
 	} finally {
@@ -241,4 +244,4 @@ async function sanitizeSvgAvatar(file: File): Promise<File> {
 	});
 }
 
-export { formatFileSize, extensionForMime };
+export { extensionForMime } from './categories';

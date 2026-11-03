@@ -1,4 +1,4 @@
-import { eq, inArray, lt, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, lt, or, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { cosmetics, guilds, mediaCleanupQueue, profiles } from '#lib/server/db/schema';
 import { deleteObject, listStoredObjects } from '#lib/server/storage';
