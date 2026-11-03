@@ -41,7 +41,7 @@
 				url: profileUrl
 			}
 		});
-		return `<script type="application/ld+json">${payload}</script>`;
+		return `<script type="application/ld+json">${payload}<\/script>`;
 	});
 </script>
 
