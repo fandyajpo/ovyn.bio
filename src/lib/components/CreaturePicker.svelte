@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import CreatureLayer from '#lib/components/CreatureLayer.svelte';
@@ -14,7 +15,7 @@
 
 	let { initial }: { initial: CreatureSetting[] } = $props();
 
-	let list = $state<CreatureSetting[]>(initial.map((item) => ({ ...item })));
+	let list = $state<CreatureSetting[]>(untrack(() => initial.map((item) => ({ ...item }))));
 
 	const shown = $derived(list.filter((item) => item.enabled));
 	const payload = $derived(JSON.stringify({ version: 1, list }));
@@ -45,7 +46,7 @@
 	}
 </script>
 
-<Card class="flex flex-col gap-5 p-5">
+<Card class="flex min-w-0 flex-col gap-5 p-5">
 	<div>
 		<h2 class="font-medium text-neutral-100">Living creatures</h2>
 		<p class="mt-1 text-sm text-neutral-400">
@@ -66,27 +67,29 @@
 		<ul class="flex flex-col gap-3">
 			{#each list as creature, index (creature.id)}
 				<li class="creature-row">
-					<div class="flex items-center gap-3">
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-2">
 						<CreatureThumb species={creature.id} />
-						<div class="min-w-0 flex-1">
-							<p class="font-medium text-neutral-100">{creatureName(creature.id)}</p>
-							<p class="text-xs text-neutral-500">{copy[creature.id] ?? ''}</p>
+						<div class="min-w-0 flex-1 basis-40">
+							<p class="truncate font-medium text-neutral-100">{creatureName(creature.id)}</p>
+							<p class="truncate text-xs text-neutral-500">{copy[creature.id] ?? ''}</p>
 						</div>
-						<label class="flex items-center gap-2 text-xs text-neutral-300">
-							<input
-								type="checkbox"
-								checked={creature.enabled}
-								onchange={(event) => update(index, { enabled: event.currentTarget.checked })}
-							/>
-							Shown
-						</label>
-						<button
-							type="button"
-							class="rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 transition hover:border-red-400/50 hover:text-red-300"
-							onclick={() => remove(index)}
-						>
-							Remove
-						</button>
+						<div class="ml-auto flex shrink-0 items-center gap-2">
+							<label class="flex items-center gap-2 text-xs text-neutral-300">
+								<input
+									type="checkbox"
+									checked={creature.enabled}
+									onchange={(event) => update(index, { enabled: event.currentTarget.checked })}
+								/>
+								Shown
+							</label>
+							<button
+								type="button"
+								class="rounded-lg border border-neutral-700 px-3 py-1.5 text-xs text-neutral-300 transition hover:border-red-400/50 hover:text-red-300"
+								onclick={() => remove(index)}
+							>
+								Remove
+							</button>
+						</div>
 					</div>
 
 					<div class="mt-3 grid gap-3 sm:grid-cols-3">
@@ -133,7 +136,7 @@
 
 	<div>
 		<p class="font-medium text-neutral-200">Add a creature</p>
-		<div class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3">
 			{#each CREATURE_CATALOG as entry (entry.id)}
 				{@const added = list.some((item) => item.id === entry.id)}
 				<button
@@ -143,11 +146,11 @@
 					onclick={() => add(entry.id)}
 				>
 					<CreatureThumb species={entry.id} />
-					<span class="min-w-0">
-						<span class="block text-sm font-medium text-neutral-100">{entry.name}</span>
-						<span class="block text-[10px] uppercase tracking-wider text-neutral-500">{added ? 'Added' : entry.group}</span>
+					<span class="min-w-0 flex-1 overflow-hidden">
+						<span class="block truncate text-sm font-medium text-neutral-100">{entry.name}</span>
+						<span class="block truncate text-[10px] uppercase tracking-wider text-neutral-500">{added ? 'Added' : entry.group}</span>
 					</span>
-					<span class="ml-auto text-lg text-neutral-500" aria-hidden="true">{added ? '✓' : '+'}</span>
+					<span class="shrink-0 text-lg text-neutral-500" aria-hidden="true">{added ? '✓' : '+'}</span>
 				</button>
 			{/each}
 		</div>
@@ -163,7 +166,7 @@
 <style>
 	.creature-stage {
 		position: relative;
-		height: 15rem;
+		height: clamp(11rem, 34vw, 16rem);
 		overflow: hidden;
 		border: 1px solid var(--color-divider);
 		border-radius: 1.25rem;
@@ -209,6 +212,8 @@
 
 	.creature-card {
 		display: flex;
+		width: 100%;
+		min-width: 0;
 		align-items: center;
 		gap: 0.6rem;
 		border: 1px solid var(--color-divider);

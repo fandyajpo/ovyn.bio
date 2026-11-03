@@ -13,7 +13,7 @@
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
 	const textureOptions = PROFILE_BACKGROUND_TEXTURE_OPTIONS.map((option) => ({ ...option }));
-	const creatureSettings = parseCreatureConfig(data.profile.creatures).list;
+	const creatureSettings = $derived(parseCreatureConfig(data.profile.creatures).list);
 	const coverIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
 	const coverVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.backgroundKey ?? ''));

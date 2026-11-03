@@ -167,6 +167,7 @@
 
 <Modal bind:open {title} description="Drag the photo to position it, then zoom in or out. Arrow keys nudge, plus and minus zoom.">
 	<div class="flex flex-col gap-4">
+		<!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
 		<div
 			class="crop-stage"
 			class:is-dragging={dragging}
