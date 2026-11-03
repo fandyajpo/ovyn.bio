@@ -977,6 +977,61 @@ html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 	--aurora-grain: 3%;
 }
 
+/*
+ * The landing wears the mockup's own theme in both app themes: charcoal-navy
+ * base with lavender, pink and periwinkle glows. The tokens are redefined on
+ * the frame, so every token-driven element on the landing (buttons, pills,
+ * gradient text, cards) picks the mockup palette without touching the rest of
+ * the site, which keeps its lime accent.
+ */
+.app-frame[data-landing='true'] {
+	--color-background: #14161d;
+	--color-surface: #1a1d26;
+	--color-surface-raised: #21252f;
+	--color-foreground: #f4f4f8;
+	--color-muted: rgb(244 244 248 / 62%);
+	--color-accent: #c4b5fd;
+	--color-accent-soft: rgb(196 181 253 / 14%);
+	--color-on-accent: #17131f;
+	--color-pop-pink: #fbcfe8;
+	--color-pop-blue: #a5b4fc;
+	--color-pop-lilac: #c4b5fd;
+	--color-divider: rgb(255 255 255 / 10%);
+	--color-nav-glass: rgb(20 22 29 / 92%);
+	--color-menu-glass: rgb(23 25 33 / 97%);
+	background-color: var(--color-background);
+	background-image:
+		radial-gradient(46rem 30rem at 78% 10%, rgb(196 181 253 / 13%), transparent 62%),
+		radial-gradient(40rem 26rem at 98% 72%, rgb(251 207 232 / 9%), transparent 64%),
+		radial-gradient(44rem 28rem at 8% 92%, rgb(165 180 252 / 8%), transparent 66%),
+		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 7%), transparent 70%);
+	background-repeat: no-repeat;
+	background-size: auto, auto, auto, auto;
+}
+
+/* The landing keeps the mockup's nav: the lime brand dot and sign-in pill
+   read lavender there, and footer links glow the same way. */
+.app-frame[data-landing='true'] .site-header span.text-lime-300 {
+	color: var(--color-accent);
+}
+
+.app-frame[data-landing='true'] .nav-actions a[href='/login'] {
+	border-color: transparent;
+	background: var(--color-accent);
+	color: var(--color-on-accent);
+}
+
+@media (hover: hover) and (pointer: fine) {
+	.app-frame[data-landing='true'] .nav-actions a[href='/login']:hover {
+		background: color-mix(in srgb, var(--color-accent) 86%, white);
+	}
+}
+
+.app-frame[data-landing='true'] .app-footer nav a:hover,
+.app-frame[data-landing='true'] .app-footer nav a:focus-visible {
+	color: var(--color-accent);
+}
+
 /* One background for the document: the frame paints the aurora, so the body
    must not paint a second, different gradient behind it. */
 body,

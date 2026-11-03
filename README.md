@@ -122,7 +122,10 @@ turning away from the edges and settling in place when motion is reduced.
 Every page wears
 a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
 it, so the dark palette glows lime and the cream palette warms into gold, pink
-and teal; public profiles keep their own backgrounds and opt out. Profile
+and teal; public profiles keep their own backgrounds and opt out. The landing
+instead wears the dark navy mockup theme in both app themes: charcoal-navy base,
+lavender-pink-periwinkle glows and a sparse pulsing pixel field behind the hero
+that fades clear of the headline. Profile
 wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom
 profile audio is user-initiated (never autoplayed); custom cursor images are
 PNG/WebP uploads.

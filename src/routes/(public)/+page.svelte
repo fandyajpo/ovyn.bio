@@ -4,6 +4,7 @@
 	import LandingDemo from '#lib/components/LandingDemo.svelte';
 	import LivingSnail from '#lib/components/LivingSnail.svelte';
 	import PixelButterfly from '#lib/components/PixelButterfly.svelte';
+	import PixelField from '#lib/components/PixelField.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import { slide } from 'svelte/transition';
 
@@ -201,10 +202,11 @@
 		<div class="landing-orbit landing-orbit--one" style={`--parallax-y: ${parallaxY}px`}></div>
 		<div class="landing-orbit landing-orbit--two" style={`--parallax-y: ${-parallaxY * 0.55}px`}></div>
 	</div>
+	<PixelField />
 	<PixelButterfly />
 	<LivingSnail />
 	<div class="relative grid items-center gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 lg:py-20">
-		<div class="flex flex-col items-start gap-6">
+		<div class="landing-hero-copy flex flex-col items-start gap-6">
 			<Reveal>
 				<p class="landing-eyebrow"><span class="status-dot"></span> YOUR SPACE. YOUR PEOPLE.</p>
 			</Reveal>
