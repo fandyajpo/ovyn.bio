@@ -978,13 +978,13 @@ html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 }
 
 /*
- * The landing wears the mockup's own theme in both app themes: charcoal-navy
- * base with lavender, pink and periwinkle glows. The tokens are redefined on
+ * The landing wears the mockup's theme in both app themes: charcoal-navy with
+ * lavender, pink and periwinkle glows in dark mode, and a soft lavender-washed
+ * cream with the same glow layout in light mode. The tokens are redefined on
  * the frame, so every token-driven element on the landing (buttons, pills,
- * gradient text, cards) picks the mockup palette without touching the rest of
- * the site, which keeps its lime accent.
+ * gradient text, cards) picks the palette without touching the rest of the site.
  */
-.app-frame[data-landing='true'] {
+html[data-theme='dark'] .app-frame[data-landing='true'] {
 	--color-background: #14161d;
 	--color-surface: #1a1d26;
 	--color-surface-raised: #21252f;
@@ -1005,6 +1005,31 @@ html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 		radial-gradient(40rem 26rem at 98% 72%, rgb(251 207 232 / 9%), transparent 64%),
 		radial-gradient(44rem 28rem at 8% 92%, rgb(165 180 252 / 8%), transparent 66%),
 		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 7%), transparent 70%);
+	background-repeat: no-repeat;
+	background-size: auto, auto, auto, auto;
+}
+
+html[data-theme='light'] .app-frame[data-landing='true'] {
+	--color-background: #f6f4fd;
+	--color-surface: #ffffff;
+	--color-surface-raised: #efedfa;
+	--color-foreground: #191a26;
+	--color-muted: rgb(50 52 68 / 62%);
+	--color-accent: #8b5cf6;
+	--color-accent-soft: rgb(139 92 246 / 12%);
+	--color-on-accent: #ffffff;
+	--color-pop-pink: #ec6fa8;
+	--color-pop-blue: #6d7ff0;
+	--color-pop-lilac: #8b5cf6;
+	--color-divider: rgb(25 26 38 / 10%);
+	--color-nav-glass: rgb(248 247 254 / 92%);
+	--color-menu-glass: rgb(252 251 255 / 97%);
+	background-color: var(--color-background);
+	background-image:
+		radial-gradient(46rem 30rem at 78% 10%, rgb(167 139 250 / 20%), transparent 62%),
+		radial-gradient(40rem 26rem at 98% 72%, rgb(244 178 210 / 16%), transparent 64%),
+		radial-gradient(44rem 28rem at 8% 92%, rgb(141 156 250 / 14%), transparent 66%),
+		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 10%), transparent 70%);
 	background-repeat: no-repeat;
 	background-size: auto, auto, auto, auto;
 }
@@ -1030,6 +1055,24 @@ html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 .app-frame[data-landing='true'] .app-footer nav a:hover,
 .app-frame[data-landing='true'] .app-footer nav a:focus-visible {
 	color: var(--color-accent);
+}
+
+/* The landing snail roams only the lower-right of the hero, so it never crawls
+   over the headline, the buttons or the name field. */
+.landing-snail-range {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	width: min(52%, 40rem);
+	height: 58%;
+	pointer-events: none;
+}
+
+@media (max-width: 40rem) {
+	.landing-snail-range {
+		width: 78%;
+		height: 34%;
+	}
 }
 
 /* One background for the document: the frame paints the aurora, so the body

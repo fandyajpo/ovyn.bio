@@ -204,7 +204,9 @@
 	</div>
 	<PixelField />
 	<PixelButterfly />
-	<LivingSnail />
+	<div class="landing-snail-range" aria-hidden="true">
+		<LivingSnail />
+	</div>
 	<div class="relative grid items-center gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 lg:py-20">
 		<div class="landing-hero-copy flex flex-col items-start gap-6">
 			<Reveal>
