@@ -1,8 +1,11 @@
 import type { CreatureSetting } from '#lib/schemas/creatures';
-import { getCreatureArt, type CreatureArt } from './art';
+import { creatureBounds, getCreatureArt, type CreatureArt } from './art';
 import { CREATURE_PROFILES, type CreatureProfile, type FlightState } from './profiles';
 
 export type Bounds = { width: number; height: number };
+
+/** A local anchor a creature orbits, keeping preview groups compact. */
+export type CreatureHome = { x: number; y: number; radius: number };
 
 export type Creature = {
 	setting: CreatureSetting;
@@ -26,6 +29,8 @@ export type Creature = {
 	cruise: number;
 	/** Responsive multiplier applied on top of the profile scale. */
 	fit: number;
+	/** When set, movement stays inside this small disc instead of the bounds. */
+	home: CreatureHome | null;
 };
 
 function clamp(value: number, min: number, max: number) {
@@ -144,21 +149,34 @@ export function createCreature(
 		seed: Math.random() * 100,
 		time: Math.random() * 20,
 		cruise,
-		fit: 1
+		fit: 1,
+		home: null
 	};
 }
 
-/** Small still frame used by the creature picker thumbnails. */
-export function createThumbCreature(setting: CreatureSetting): Creature | null {
-	const creature = createCreature(setting, 0, 1, { width: 120, height: 80 });
-	if (!creature) return null;
-	creature.x = 60;
-	creature.y = 42;
-	creature.heading = -0.32;
-	creature.flap = 0.9;
-	creature.state = 'gliding';
-	creature.bobPhase = 0.6;
-	return creature;
+/**
+ * A scale that makes every species read at the same apparent size, measured
+ * from its visible pixels rather than its canvas or wingspan.
+ */
+export function uniformCreatureScale(creature: Creature, target: number) {
+	const bounds = creatureBounds(creature.art);
+	return target / Math.max(1, Math.max(bounds.width, bounds.height));
+}
+
+/** Set the draw scale directly, storing it as the creature's fit multiplier. */
+export function setCreatureScale(creature: Creature, scale: number) {
+	creature.fit = scale / Math.max(0.01, creature.profile.scale * creature.setting.size);
+}
+
+/** Place a creature so its visible centre sits on the given point. */
+export function centerCreature(creature: Creature, centerX: number, centerY: number, scale: number) {
+	const bounds = creatureBounds(creature.art);
+	const cx = (bounds.minX + bounds.maxX) / 2;
+	const cy = (bounds.minY + bounds.maxY) / 2;
+	const cos = Math.cos(creature.heading);
+	const sin = Math.sin(creature.heading);
+	creature.x = centerX - (cx * cos - cy * sin) * scale;
+	creature.y = centerY - (cx * sin + cy * cos) * scale;
 }
 
 export function updateCreature(creature: Creature, dt: number, bounds: Bounds, margin: number) {
@@ -174,17 +192,26 @@ export function updateCreature(creature: Creature, dt: number, bounds: Bounds, m
 	);
 
 	// Edge awareness: bend towards the open middle well before the body arrives.
+	// A preview creature has its own small home disc, so the whole flock stays
+	// compact while each one still wanders.
+	const minX = creature.home ? creature.home.x - creature.home.radius : margin;
+	const maxX = creature.home ? creature.home.x + creature.home.radius : Math.max(margin, bounds.width - margin);
+	const minY = creature.home ? creature.home.y - creature.home.radius : margin;
+	const maxY = creature.home ? creature.home.y + creature.home.radius : Math.max(margin, bounds.height - margin);
+	const bandX = creature.home ? Math.max(4, (maxX - minX) * 0.42) : Math.max(1, margin);
+	const bandY = creature.home ? Math.max(4, (maxY - minY) * 0.42) : Math.max(1, margin);
+
 	const steerX =
-		creature.x < margin
-			? (margin - creature.x) / Math.max(1, margin)
-			: creature.x > bounds.width - margin
-				? -(creature.x - (bounds.width - margin)) / Math.max(1, margin)
+		creature.x < minX + bandX
+			? (minX + bandX - creature.x) / bandX
+			: creature.x > maxX - bandX
+				? -(creature.x - (maxX - bandX)) / bandX
 				: 0;
 	const steerY =
-		creature.y < margin
-			? (margin - creature.y) / Math.max(1, margin)
-			: creature.y > bounds.height - margin
-				? -(creature.y - (bounds.height - margin)) / Math.max(1, margin)
+		creature.y < minY + bandY
+			? (minY + bandY - creature.y) / bandY
+			: creature.y > maxY - bandY
+				? -(creature.y - (maxY - bandY)) / bandY
 				: 0;
 
 	let desired = creature.headingTarget;
@@ -213,8 +240,8 @@ export function updateCreature(creature: Creature, dt: number, bounds: Bounds, m
 	creature.x += Math.cos(creature.heading) * creature.speed * dt;
 	creature.y += Math.sin(creature.heading) * creature.speed * dt;
 
-	creature.x = clamp(creature.x, margin, Math.max(margin, bounds.width - margin));
-	creature.y = clamp(creature.y, margin, Math.max(margin, bounds.height - margin));
+	creature.x = clamp(creature.x, minX, Math.max(minX, maxX));
+	creature.y = clamp(creature.y, minY, Math.max(minY, maxY));
 
 	const flapMultiplier =
 		creature.state === 'gliding'

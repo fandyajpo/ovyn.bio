@@ -649,6 +649,119 @@ export function getCreatureArt(species: CreatureSpecies): CreatureArt | null {
 	return built;
 }
 
+type Box = { minX: number; minY: number; maxX: number; maxY: number };
+
+export type CreatureBounds = Box & { width: number; height: number };
+
+const pixelBoundsCache = new WeakMap<HTMLCanvasElement, Box | null>();
+const boundsCache = new WeakMap<CreatureArt, CreatureBounds>();
+
+/** The opaque area of a sprite, so transparent padding never skews its size. */
+function canvasPixelBounds(canvas: HTMLCanvasElement): Box | null {
+	const cached = pixelBoundsCache.get(canvas);
+	if (cached !== undefined) return cached;
+
+	const context = canvas.getContext('2d');
+	if (!context) {
+		pixelBoundsCache.set(canvas, null);
+		return null;
+	}
+
+	const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
+	let minX = canvas.width;
+	let minY = canvas.height;
+	let maxX = -1;
+	let maxY = -1;
+
+	for (let y = 0; y < canvas.height; y += 1) {
+		for (let x = 0; x < canvas.width; x += 1) {
+			if ((data[(y * canvas.width + x) * 4 + 3] ?? 0) <= 8) continue;
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+		}
+	}
+
+	const box = maxX < 0 ? null : { minX, minY, maxX, maxY };
+	pixelBoundsCache.set(canvas, box);
+	return box;
+}
+
+/**
+ * Visible bounds of a creature around its own anchor, in art pixels. Wings are
+ * measured in their widest pose and mirrored, since the left wing is a flip.
+ */
+export function creatureBounds(art: CreatureArt): CreatureBounds {
+	const cached = boundsCache.get(art);
+	if (cached) return cached;
+
+	const boxes: Box[] = [];
+	const body = canvasPixelBounds(art.body);
+	if (body) {
+		boxes.push({
+			minX: -art.bodyW / 2 + body.minX,
+			maxX: -art.bodyW / 2 + body.maxX,
+			minY: -art.bodyH / 2 + body.minY,
+			maxY: -art.bodyH / 2 + body.maxY
+		});
+	}
+
+	const wing = art.wing ? canvasPixelBounds(art.wing) : null;
+	if (wing && art.wing) {
+		const left = art.hingeX - art.wingW / 2;
+		boxes.push({
+			minX: left + wing.minX,
+			maxX: left + wing.maxX,
+			minY: art.hingeY - wing.maxY,
+			maxY: art.hingeY - wing.minY
+		});
+	}
+
+	const tail = art.tail ? canvasPixelBounds(art.tail) : null;
+	if (tail && art.tail) {
+		boxes.push({
+			minX: art.tailX - art.tail.width + tail.minX,
+			maxX: art.tailX - art.tail.width + tail.maxX,
+			minY: art.tailY - art.tail.height / 2 + tail.minY,
+			maxY: art.tailY - art.tail.height / 2 + tail.maxY
+		});
+	}
+
+	const crest = art.crest ? canvasPixelBounds(art.crest) : null;
+	if (crest && art.crest) {
+		boxes.push({
+			minX: art.crestX - art.crest.width / 2 + crest.minX,
+			maxX: art.crestX - art.crest.width / 2 + crest.maxX,
+			minY: art.crestY - art.crest.height + crest.minY,
+			maxY: art.crestY - art.crest.height + crest.maxY
+		});
+	}
+
+	const fallback: Box = {
+		minX: -art.bodyW / 2,
+		maxX: art.bodyW / 2,
+		minY: -art.bodyH / 2,
+		maxY: art.bodyH / 2
+	};
+	const first = boxes[0] ?? fallback;
+
+	let minX = first.minX;
+	let minY = first.minY;
+	let maxX = first.maxX;
+	let maxY = first.maxY;
+	for (const box of boxes) {
+		minX = Math.min(minX, box.minX);
+		minY = Math.min(minY, box.minY);
+		maxX = Math.max(maxX, box.maxX);
+		maxY = Math.max(maxY, box.maxY);
+	}
+
+	const bounds: CreatureBounds = { minX, minY, maxX, maxY, width: maxX - minX, height: maxY - minY };
+	boundsCache.set(art, bounds);
+	return bounds;
+}
+
 function buildButterfly(): CreatureArt | null {
 	const body = renderSprite(44, 18, 22, 9, paintButterflyBody);
 	const wing = renderSprite(26, 28, 13, 0, paintButterflyWing);

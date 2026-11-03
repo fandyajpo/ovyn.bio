@@ -2,8 +2,11 @@
 	import { onMount, untrack } from 'svelte';
 	import type { CreatureSetting } from '#lib/schemas/creatures';
 	import {
+		centerCreature,
 		createCreature,
 		drawCreature,
+		setCreatureScale,
+		uniformCreatureScale,
 		updateCreature,
 		type Bounds,
 		type Creature
@@ -43,6 +46,7 @@
 		let bounds: Bounds = { width: 320, height: 240 };
 		let margin = 48;
 		let creatures: Creature[] = [];
+		let currentList: CreatureSetting[] = [];
 		let frame = 0;
 		let paintClock = 0;
 		let running = false;
@@ -58,14 +62,36 @@
 		};
 
 		const build = (list: CreatureSetting[]) => {
+			currentList = list;
 			const active = list.filter((item) => item.enabled).slice(0, capacity());
 			const next: Creature[] = [];
+			const columns = Math.min(2, Math.max(1, active.length));
+			const rows = Math.ceil(active.length / columns);
+
 			for (let index = 0; index < active.length; index += 1) {
 				const setting = active[index];
 				if (!setting) continue;
 				const creature = createCreature(setting, index, active.length, bounds);
 				if (!creature) continue;
-				creature.fit = Math.min(1.15, Math.max(0.72, Math.min(bounds.width, bounds.height) / 900));
+
+				if (preview) {
+					// Preview creatures sit as one tidy flock around the centre, each
+					// on its own small anchor, all drawn at the same apparent size.
+					const column = index % columns;
+					const row = Math.floor(index / columns);
+					const anchorX = width / 2 + (column - (columns - 1) / 2) * 58;
+					const anchorY = height / 2 + (row - (rows - 1) / 2) * 48;
+					const scale = uniformCreatureScale(creature, 26 * Math.min(1.25, Math.max(0.8, setting.size)));
+					setCreatureScale(creature, scale);
+					centerCreature(creature, anchorX, anchorY, scale);
+					creature.home = { x: anchorX, y: anchorY, radius: 9 };
+					creature.cruise *= 0.4;
+					creature.heading = Math.random() * Math.PI * 2;
+					creature.headingTarget = creature.heading;
+				} else {
+					creature.fit = Math.min(1.15, Math.max(0.72, Math.min(bounds.width, bounds.height) / 900));
+				}
+
 				next.push(creature);
 			}
 			creatures = next;
@@ -134,6 +160,11 @@
 
 		const observer = new ResizeObserver(() => {
 			resize();
+			if (preview) {
+				// Anchors depend on the box, so the flock is laid out again.
+				build(currentList);
+				return;
+			}
 			for (const creature of creatures) {
 				creature.fit = Math.min(1.15, Math.max(0.72, Math.min(width, height) / 900));
 			}
