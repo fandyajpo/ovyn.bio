@@ -4,7 +4,7 @@
 	import { useQueryClient } from '@tanstack/svelte-query';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
-	import PixelSnail from './PixelSnail.svelte';
+	import SnailMascot from './SnailMascot.svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { toast } from './ui/toasts.svelte.ts';
 
@@ -107,7 +107,7 @@
 	<div class="site-header-inner flex h-16 w-full items-center justify-between px-4">
 		<a href="/" onclick={closeMenus} class="group flex shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
 			<span class="grid size-10 place-items-center transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]">
-				<PixelSnail size={40} />
+				<SnailMascot variant="navbar" size={40} />
 			</span>
 			<span>ovyn<span class="text-lime-300">.</span></span>
 			<span class="sticker sticker--dark hidden xl:inline-flex">your corner</span>

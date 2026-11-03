@@ -5,7 +5,7 @@
 	import Nav from '#lib/components/Nav.svelte';
 	import PageHelp from '#lib/components/PageHelp.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
-	import PixelSnail from '#lib/components/PixelSnail.svelte';
+	import SnailMascot from '#lib/components/SnailMascot.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 	import { startThemeSync } from '#lib/theme.svelte.ts';
@@ -49,7 +49,7 @@
 					<Reveal>
 						<div class="flex flex-col items-start gap-4">
 							<div class="flex items-center gap-3">
-								<PixelSnail size={48} />
+								<SnailMascot variant="footer" size={64} />
 								<span class="sticker sticker--dark">ovyn / internet personhood</span>
 							</div>
 							<p class="max-w-sm font-[family-name:var(--font-display)] text-xl font-semibold text-neutral-200">Your identity, out in the world.<br /><span class="text-neutral-500">Your people, one link away.</span></p>

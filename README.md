@@ -104,9 +104,14 @@ ovyn can be installed from supported browsers as a standalone app. Its service w
 The interface uses Poppins for controls with a warm serif (Newsreader) for
 headings, on a soft, low-contrast palette that opens dark and has a cream light
 mode. The theme choice is remembered and follows you across open tabs. A pixel
-snail is the mascot, sitting beside the wordmark in the header and in the
-footer, while the landing hero has a small pixel butterfly that drifts to random
-spots; both stand still for visitors who prefer reduced motion. The butterfly is
+snail is the mascot: one canvas creature drawn at two sizes, sitting beside the
+wordmark in the header and larger in the footer. It idles, breathes, blinks,
+looks around with two independently swaying eye stalks and occasionally crawls
+in place on a rippling muscular foot, with a spiralled shell that carries subtle
+secondary motion; the same art serves both sizes and holds a still pose for
+visitors who prefer reduced motion. The landing hero has a small pixel butterfly
+that drifts to random spots and stands still for visitors who prefer reduced
+motion. The butterfly is
 a canvas simulation: a detailed monarch sprite built from fine generated pixels,
 steered by a small velocity and noise model that cruises, hovers and darts, with
 wing beats that squash into perspective. The hero is also home to a living pixel
