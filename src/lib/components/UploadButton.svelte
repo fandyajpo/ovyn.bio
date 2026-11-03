@@ -178,7 +178,7 @@
 		border-radius: 1.15rem;
 		background:
 			radial-gradient(ellipse at 0% 0%, color-mix(in srgb, var(--color-accent) 7%, transparent), transparent 70%),
-			color-mix(in srgb, var(--color-surface) 60%, transparent);
+			color-mix(in srgb, var(--color-surface) 78%, transparent);
 		padding: 1rem 1.05rem;
 		color: var(--color-foreground);
 		font: inherit;

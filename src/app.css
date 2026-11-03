@@ -131,7 +131,7 @@ html[data-theme='light'] {
 	--color-surface-raised: #f3e6d2;
 	--color-preview-stage: #f3e6d2;
 	--color-foreground: #28233d;
-	--color-muted: #70677a;
+	--color-muted: #655c6e;
 	/* Deep amber accent: readable as text on bone and as a button fill with
 	   dark button text; the old pale gold washed out against the liquid. */
 	--color-accent: #b8860c;
@@ -1037,7 +1037,7 @@ html[data-theme='light'] .app-frame[data-landing='true'] {
 	--color-accent: #2563de;
 	--color-accent-soft: rgb(37 99 222 / 12%);
 	--color-on-accent: #ffffff;
-	--color-pop-pink: #e8853c;
+	--color-pop-pink: #c26418;
 	--color-pop-blue: #3b74e8;
 	--color-pop-lilac: #2563de;
 	--color-divider: rgb(28 29 38 / 10%);

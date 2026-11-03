@@ -253,7 +253,7 @@
 		min-width: 0;
 		border: 1px solid var(--color-divider);
 		border-radius: 0.9rem;
-		background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 96%, transparent), color-mix(in srgb, var(--color-background) 86%, transparent));
+		background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 96%, transparent), color-mix(in srgb, var(--color-background) 94%, transparent));
 		padding: 0.7rem 0.95rem;
 		color: var(--color-foreground);
 		font: inherit;
@@ -293,7 +293,7 @@
 		width: 100%;
 		border: 1px dashed color-mix(in srgb, var(--color-foreground) 18%, transparent);
 		border-radius: 1rem;
-		background: color-mix(in srgb, var(--color-surface) 62%, transparent);
+		background: color-mix(in srgb, var(--color-surface) 80%, transparent);
 		padding: 0.65rem;
 		color: var(--color-muted);
 		font: inherit;
