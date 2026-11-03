@@ -5,6 +5,7 @@ import { discordAccounts, profiles } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '../utils/errors';
 import { isValidSlug, normalizeSlug } from '../utils/slug';
 import { deleteReplacedObject } from '#lib/server/storage';
+import type { CreatureConfig } from '#lib/schemas/creatures';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -302,6 +303,17 @@ export async function setProfileUsernameColor(userId: string, usernameColor: str
 	return updated;
 }
 
+/** Living creatures are stored as configuration only, never as frame data. */
+export async function setProfileCreatures(userId: string, creatures: CreatureConfig) {
+	const [updated] = await db
+		.update(profiles)
+		.set({ creatures, updatedAt: new Date() })
+		.where(eq(profiles.userId, userId))
+		.returning();
+	if (!updated) throw new NotFoundError('Profile not found');
+	return updated;
+}
+
 export async function setProfileBackground(
 	userId: string,
 	backgroundTexture: string,
@@ -316,8 +328,7 @@ export async function setProfileBackground(
 	return updated;
 }
 
-export async function setProfileBackgroundKey(userId: string, backgroundKey: string | null) {
-	const previous = (await currentProfileFile(userId)).backgroundKey;
+export async function setProfileBackgroundKey(userId: string, backgroundKey: string | null) {	const previous = (await currentProfileFile(userId)).backgroundKey;
 	const [updated] = await db
 		.update(profiles)
 		.set({ backgroundKey, updatedAt: new Date() })

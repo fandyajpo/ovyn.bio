@@ -5,12 +5,15 @@
 	import Card from '#lib/components/ui/Card.svelte';
 	import Checkbox from '#lib/components/ui/Checkbox.svelte';
 	import ColorPicker from '#lib/components/ui/ColorPicker.svelte';
+	import CreaturePicker from '#lib/components/CreaturePicker.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
 	import { PROFILE_BACKGROUND_TEXTURE_OPTIONS } from '#lib/schemas/profile';
+	import { parseCreatureConfig } from '#lib/schemas/creatures';
 
 	let { data, form }: { data: PageData; form?: { error?: string; ok?: string } } = $props();
 	const textureOptions = PROFILE_BACKGROUND_TEXTURE_OPTIONS.map((option) => ({ ...option }));
+	const creatureSettings = parseCreatureConfig(data.profile.creatures).list;
 	const coverIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ''));
 	const coverVideoType = $derived(data.profile.bannerKey?.toLowerCase().endsWith('.webm') ? 'video/webm' : 'video/mp4');
 	const backgroundIsVideo = $derived(/\.(mp4|webm)$/i.test(data.profile.backgroundKey ?? ''));
@@ -143,6 +146,8 @@
 			<a href="/upgrade" class="text-sm text-lime-300 hover:underline">Unlock cursor effects with Premium ↗</a>
 		{/if}
 	</Card>
+
+	<CreaturePicker initial={creatureSettings} />
 
 	<a href="/{data.profile.slug}" class="text-sm text-lime-300 hover:underline">Preview my public page ↗</a>
 </div>

@@ -15,6 +15,7 @@ import {
 	uuid
 } from 'drizzle-orm/pg-core';
 import type { TemplateBlock } from '#lib/schemas/templates';
+import type { CreatureConfig } from '#lib/schemas/creatures';
 import { user } from './auth';
 
 // ---------------------------------------------------------------------------
@@ -81,6 +82,8 @@ export const profiles = pgTable(
 		templateId: uuid('template_id'),
 		/** Ordered page blocks applied from a template; rendered on the public page. */
 		blocks: jsonb('blocks').$type<TemplateBlock[]>().notNull().default(sql`'[]'::jsonb`),
+		/** Decorative living creatures and their motion settings. */
+		creatures: jsonb('creatures').$type<CreatureConfig>().notNull().default(sql`'{"version":1,"list":[]}'::jsonb`),
 		visibility: profileVisibilityEnum('visibility').notNull().default('public'),
 		/** Self-described persona picked during onboarding. */
 		persona: text('persona'),
