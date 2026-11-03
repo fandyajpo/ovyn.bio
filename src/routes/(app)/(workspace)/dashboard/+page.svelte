@@ -1,12 +1,21 @@
 <script lang="ts">
+	import { browser } from '$app/env';
 	import type { PageData } from './$types';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
+	import ShareProfileSheet from '#lib/components/ShareProfileSheet.svelte';
 	import { formatDate, formatIdr } from '#lib/utils';
 
 	let { data, form }: { data: PageData; form?: { error?: string; checkin?: { alreadyCheckedIn: boolean; points: number; streakCount: number; pointsEarned: number } } } = $props();
 	let referralCopied = $state(false);
+	let shareOpen = $state(false);
+
+	const profileUrl = $derived(
+		browser
+			? new URL(`/${data.profile.slug}`, window.location.origin).toString()
+			: `https://ovyn.me/${data.profile.slug}`
+	);
 
 	async function copyReferralLink() {
 		try {
@@ -28,6 +37,7 @@
 			Hey, {data.profile.displayName || data.profile.slug}
 		</h1>
 		<div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+			<Button onclick={() => (shareOpen = true)} variant="ghost" class="w-full sm:w-auto">Share page</Button>
 			<Button href="/shop" variant="ghost" class="w-full sm:w-auto">Explore the shop</Button>
 			<Button href="/customize" variant="secondary" class="w-full sm:w-auto">Customize page</Button>
 		</div>
@@ -138,4 +148,12 @@
 			</ul>
 		</Card>
 	{/if}
+
+	<ShareProfileSheet
+		bind:open={shareOpen}
+		url={profileUrl}
+		name={data.profile.displayName || data.profile.slug}
+		handle={data.profile.slug}
+		bio={data.profile.bio}
+	/>
 </div>

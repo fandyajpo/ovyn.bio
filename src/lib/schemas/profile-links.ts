@@ -85,4 +85,9 @@ export const profileLinkUpdateSchema = z
 export type ProfileLinkInput = z.infer<typeof profileLinkSchema>;
 export type ProfileLinkUpdateInput = z.infer<typeof profileLinkUpdateSchema>;
 
+/** The ids of every link on the page, in the order they should appear. */
+export const profileLinkOrderSchema = z.object({
+	ids: z.array(z.uuid()).min(1).max(40)
+});
+
 export const profileLinkIdSchema = z.object({ id: z.uuid() });

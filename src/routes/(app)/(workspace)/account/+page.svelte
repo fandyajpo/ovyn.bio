@@ -1,22 +1,20 @@
 <script lang="ts">
+	import { browser } from '$app/env';
 	import type { PageData } from './$types';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
+	import ShareProfileSheet from '#lib/components/ShareProfileSheet.svelte';
 	import { formatDate } from '#lib/utils';
 
 	let { data }: { data: PageData } = $props();
-	let shareMessage = $state('Share my page');
+	let shareOpen = $state(false);
 
-	async function shareProfile() {
-		try {
-			await navigator.clipboard.writeText(new URL(`/${data.profile.slug}`, window.location.origin).toString());
-			shareMessage = 'Profile link copied';
-		} catch {
-			shareMessage = 'Copy unavailable';
-		}
-		setTimeout(() => (shareMessage = 'Share my page'), 1800);
-	}
+	const profileUrl = $derived(
+		browser
+			? new URL(`/${data.profile.slug}`, window.location.origin).toString()
+			: `https://ovyn.me/${data.profile.slug}`
+	);
 </script>
 
 <svelte:head>
@@ -52,7 +50,7 @@
 			<div class="flex flex-wrap gap-2">
 				<Button href="/customize" variant="secondary">Edit my page</Button>
 				<Button href="/links" variant="ghost">Manage links</Button>
-				<Button onclick={shareProfile} variant="ghost">{shareMessage}</Button>
+				<Button onclick={() => (shareOpen = true)} variant="ghost">Share my page</Button>
 			</div>
 		</Card>
 
@@ -100,4 +98,12 @@
 			<a href="/templates" class="mt-3 inline-block text-sm text-lime-300 hover:underline">Browse templates</a>
 		</Card>
 	</div>
+
+	<ShareProfileSheet
+		bind:open={shareOpen}
+		url={profileUrl}
+		name={data.profile.displayName || data.profile.slug}
+		handle={data.profile.slug}
+		bio={data.profile.bio}
+	/>
 </div>

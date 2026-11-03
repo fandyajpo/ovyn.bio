@@ -2,8 +2,8 @@ import { fail, redirect } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import type { Actions, PageServerLoad } from './$types';
-import { profileLinkIdSchema, profileLinkSchema, profileLinkUpdateSchema } from '#lib/schemas/profile-links';
-import { addProfileLink, deleteProfileLink, listProfileLinks, updateProfileLink } from '#lib/server/services/profile-content';
+import { profileLinkIdSchema, profileLinkOrderSchema, profileLinkSchema, profileLinkUpdateSchema } from '#lib/schemas/profile-links';
+import { addProfileLink, deleteProfileLink, listProfileLinks, reorderProfileLinks, updateProfileLink } from '#lib/server/services/profile-content';
 import { AppError } from '#lib/server/utils/errors';
 import { rateLimit } from '#lib/server/utils/rate-limit';
 
@@ -37,6 +37,23 @@ export const actions: Actions = {
 			console.error(err);
 			message(form, 'Could not add this link');
 			return fail(500, { form });
+		}
+	},
+
+	reorder: async ({ request, locals }) => {
+		if (!locals.user) redirect(302, '/login');
+		const data = await request.formData();
+		const parsed = profileLinkOrderSchema.safeParse({ ids: data.getAll('id') });
+		if (!parsed.success) return fail(422, { error: 'That order could not be saved' });
+
+		try {
+			await rateLimit(`profile-links:${locals.user.id}`, 30, 60_000);
+			await reorderProfileLinks(locals.user.id, parsed.data.ids);
+			return { ok: 'Order saved.' };
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not save the new order' });
 		}
 	},
 

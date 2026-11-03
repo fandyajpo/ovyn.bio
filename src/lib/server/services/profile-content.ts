@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, or } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { profileLinks, profileTemplates, profiles } from '#lib/server/db/schema';
 import type { ProfileLinkInput, ProfileLinkProvider } from '#lib/schemas/profile-links';
@@ -108,6 +108,24 @@ export async function updateProfileLink(userId: string, input: ProfileLinkInput 
 		.where(and(eq(profileLinks.id, input.id), eq(profileLinks.userId, userId)))
 		.returning({ id: profileLinks.id });
 	if (!updated) throw new NotFoundError('Link not found');
+}
+
+/** Reorder every link the page owns, using the ids in their new order. */
+export async function reorderProfileLinks(userId: string, ids: string[]) {
+	const owned = await db
+		.select({ id: profileLinks.id })
+		.from(profileLinks)
+		.where(and(eq(profileLinks.userId, userId), inArray(profileLinks.id, ids)));
+	if (owned.length !== ids.length) throw new ValidationError('Those links do not belong to this page');
+
+	await db.transaction(async (tx) => {
+		for (const [index, id] of ids.entries()) {
+			await tx
+				.update(profileLinks)
+				.set({ sortOrder: index })
+				.where(and(eq(profileLinks.id, id), eq(profileLinks.userId, userId)));
+		}
+	});
 }
 
 export async function deleteProfileLink(userId: string, linkId: string) {

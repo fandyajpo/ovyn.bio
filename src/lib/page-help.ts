@@ -58,7 +58,7 @@ const PAGES: { match: string; help: PageHelp }[] = [
 		help: {
 			title: 'Links',
 			summary: 'The buttons that appear under your bio, in the order you set.',
-			tips: ['Pick a platform and paste your profile link.', 'Any link you added can be edited or removed later.', 'Email and crypto addresses are supported.', 'Links are checked before they go public.']
+			tips: ['Pick a platform and paste your profile link.', 'Any link you added can be edited or removed later.', 'Drag the handle to reorder your links.', 'Email and crypto addresses are supported.', 'Links are checked before they go public.']
 		}
 	},
 	{

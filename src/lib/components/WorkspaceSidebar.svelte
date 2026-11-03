@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { browser } from '$app/env';
 	import { fade } from 'svelte/transition';
 	import { signOut } from '#lib/auth-client';
 	import Avatar from './ui/Avatar.svelte';
 	import ThemeToggle from './ThemeToggle.svelte';
+	import ShareProfileSheet from './ShareProfileSheet.svelte';
 
 	let {
 		profileSlug,
@@ -19,7 +21,13 @@
 
 	let mobileOpen = $state(false);
 	let menuTrigger = $state<HTMLButtonElement | undefined>(undefined);
-	let shareMessage = $state('Share your profile');
+	let shareOpen = $state(false);
+
+	const profileUrl = $derived(
+		browser
+			? new URL(`/${profileSlug}`, window.location.origin).toString()
+			: `https://ovyn.me/${profileSlug}`
+	);
 
 	const accountLinks = [
 		{ href: '/account', label: 'Overview' },
@@ -55,14 +63,9 @@
 		}
 	}
 
-	async function shareProfile() {
-		try {
-			await navigator.clipboard.writeText(new URL(`/${profileSlug}`, window.location.origin).toString());
-			shareMessage = 'Profile link copied';
-		} catch {
-			shareMessage = 'Copy unavailable';
-		}
-		setTimeout(() => (shareMessage = 'Share your profile'), 1800);
+	function shareProfile() {
+		closeMobileMenu();
+		shareOpen = true;
 	}
 
 	async function logout() {
@@ -135,7 +138,7 @@
 		</section>
 	</nav>
 
-	<button type="button" class="workspace-share-button" onclick={shareProfile}>{shareMessage}</button>
+	<button type="button" class="workspace-share-button" onclick={shareProfile}>Share your profile</button>
 	<a class="workspace-landing-link" href="/" onclick={closeMobileMenu}>← Back to landing page</a>
 
 	<div class="workspace-tools">
@@ -143,6 +146,8 @@
 		<button type="button" class="workspace-signout" onclick={logout}>Sign out</button>
 	</div>
 </aside>
+
+<ShareProfileSheet bind:open={shareOpen} url={profileUrl} name={userName} handle={profileSlug} />
 
 <style>
 	.workspace-sidebar {
