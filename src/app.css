@@ -92,6 +92,25 @@
 	color-scheme: dark;
 	scroll-behavior: smooth;
 	scrollbar-width: none;
+
+	/*
+	 * Elevation: one place for the shadow recipes. An elevated element needs
+	 * roughly 2.5rem of clear space around it, so the blur never meets a
+	 * clipping edge. Clip only decorative inner wrappers, never layout ones.
+	 */
+	--shadow-card: 0 16px 36px rgb(58 40 20 / 10%);
+	--shadow-card-hover: 0 22px 46px rgb(58 40 20 / 14%);
+	--shadow-float: 0 22px 48px rgb(0 0 0 / 32%);
+	--shadow-toast: 0 18px 40px rgb(0 0 0 / 22%);
+	--shadow-nav: 0 4px 18px rgb(0 0 0 / 18%);
+
+	/* Layers: floating UI climbs this ladder instead of inventing z-index. */
+	--layer-raised: 30;
+	--layer-nav: 40;
+	--layer-float: 50;
+	--layer-tooltip: 60;
+	--layer-overlay: 70;
+	--layer-modal: 100;
 }
 
 html[data-theme='light'] {
@@ -941,7 +960,7 @@ html[data-theme='light'] .sticker--lilac {
 .app-frame:not([data-profile-page='true']) {
 	--aurora-strong: 16%;
 	--aurora-glow: 11%;
-	--aurora-grain: 3.5%;
+	--aurora-grain: 3%;
 	background-color: var(--color-background);
 	background-image:
 		radial-gradient(ellipse 62% 46% at 8% 0%, color-mix(in srgb, var(--color-accent) var(--aurora-strong), transparent), transparent 66%),
@@ -955,11 +974,39 @@ html[data-theme='light'] .sticker--lilac {
 html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 	--aurora-strong: 24%;
 	--aurora-glow: 18%;
-	--aurora-grain: 4.5%;
+	--aurora-grain: 3%;
 }
 
-@media (min-width: 48rem) {
-	.app-frame:not([data-profile-page='true']) { background-attachment: fixed; }
+/* One background for the document: the frame paints the aurora, so the body
+   must not paint a second, different gradient behind it. */
+body,
+html[data-theme='light'] body {
+	background-image: none;
+}
+
+/* Scrolling lists of elevated cards get padding so their shadows never sit
+   against the scroll edge. */
+.elevated-scroll {
+	padding: 0.5rem;
+	scroll-padding-block: 0.75rem;
+}
+
+/* Decorative rings are clipped by their own wrapper, never by the hero, so
+   card shadows keep their soft edges. */
+.landing-orbit-clip {
+	position: absolute;
+	z-index: -1;
+	inset: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+
+/* Public profiles keep a quiet backdrop of their own instead of the aurora. */
+.app-frame[data-profile-page='true'] {
+	background-color: var(--color-background);
+	background-image:
+		radial-gradient(60rem 34rem at 8% -10%, color-mix(in srgb, var(--color-pop-lilac) 9%, transparent), transparent 66%),
+		radial-gradient(48rem 32rem at 100% 10%, color-mix(in srgb, var(--color-pop-pink) 6%, transparent), transparent 68%);
 }
 
 .landing-orbit {
@@ -1072,7 +1119,17 @@ html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 .plan-current { width: fit-content; margin-top: auto; }
 
 .landing-end { border-radius: 0; background: none; }
-.landing-end-ring { position: absolute; top: -10rem; left: 50%; width: 26rem; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--color-accent) 17%, transparent); border-radius: 50%; transform: translateX(-50%); }
+.landing-end-ring {
+	position: absolute;
+	top: -7rem;
+	left: 50%;
+	width: min(96vw, 40rem);
+	height: 18rem;
+	border: 0;
+	background: radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--color-pop-lilac) 13%, transparent), transparent 70%);
+	transform: translateX(-50%);
+	pointer-events: none;
+}
 
 .upload-dropzone {
 	border-color: var(--color-divider) !important;

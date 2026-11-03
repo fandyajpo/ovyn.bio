@@ -66,7 +66,7 @@
 
 	.ovyn-tooltip-bubble {
 		position: absolute;
-		z-index: 60;
+		z-index: var(--layer-tooltip);
 		width: max-content;
 		max-width: min(17rem, 80vw);
 		border: 1px solid var(--color-divider);

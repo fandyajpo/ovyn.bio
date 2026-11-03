@@ -195,9 +195,11 @@
 	<meta name="description" content="A personal corner of the internet to show your style, share your links and find your people." />
 </svelte:head>
 
-<section class="landing-hero relative isolate overflow-hidden">
-	<div class="landing-orbit landing-orbit--one" style={`--parallax-y: ${parallaxY}px`} aria-hidden="true"></div>
-	<div class="landing-orbit landing-orbit--two" style={`--parallax-y: ${-parallaxY * 0.55}px`} aria-hidden="true"></div>
+<section class="landing-hero relative isolate">
+	<div class="landing-orbit-clip" aria-hidden="true">
+		<div class="landing-orbit landing-orbit--one" style={`--parallax-y: ${parallaxY}px`}></div>
+		<div class="landing-orbit landing-orbit--two" style={`--parallax-y: ${-parallaxY * 0.55}px`}></div>
+	</div>
 	<PixelButterfly />
 	<div class="relative grid items-center gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 lg:py-20">
 		<div class="flex flex-col items-start gap-6">
@@ -386,7 +388,7 @@
 </section>
 
 <Reveal stagger>
-	<section class="landing-end relative overflow-hidden py-14 text-center sm:py-20">
+	<section class="landing-end relative py-14 text-center sm:py-20">
 		<div class="landing-end-ring" aria-hidden="true"></div>
 		<div class="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
 			<p class="landing-eyebrow justify-center" data-reveal-item style="--reveal-order: 0">YOUR TAB IS OPEN</p>

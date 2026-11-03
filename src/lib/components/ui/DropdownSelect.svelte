@@ -274,7 +274,7 @@
 
 	.ovyn-dropdown-panel {
 		position: absolute;
-		z-index: 30;
+		z-index: var(--layer-raised);
 		top: calc(100% + 0.4rem);
 		right: 0;
 		left: 0;
@@ -364,7 +364,7 @@
 
 		.ovyn-dropdown-panel {
 			position: fixed;
-			z-index: 70;
+			z-index: var(--layer-overlay);
 			top: auto;
 			right: 0.6rem;
 			bottom: calc(0.6rem + env(safe-area-inset-bottom));

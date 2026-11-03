@@ -60,7 +60,7 @@
 <style>
 	.ovyn-overlay {
 		position: fixed;
-		z-index: 100;
+		z-index: var(--layer-modal);
 		inset: 0;
 		display: grid;
 		place-items: center;

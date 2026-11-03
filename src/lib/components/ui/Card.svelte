@@ -19,7 +19,7 @@
 		border: 1px solid var(--color-divider);
 		border-radius: 1.5rem;
 		background: color-mix(in srgb, var(--color-surface) 86%, transparent);
-		box-shadow: 0 16px 36px rgb(58 40 20 / 10%);
+		box-shadow: var(--shadow-card);
 		transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 	}
 
@@ -28,7 +28,7 @@
 	@media (hover: hover) and (pointer: fine) {
 		.ovyn-surface--interactive:hover {
 			border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
-			box-shadow: 0 22px 46px rgb(58 40 20 / 14%);
+			box-shadow: var(--shadow-card-hover);
 			transform: translateY(-3px);
 		}
 	}

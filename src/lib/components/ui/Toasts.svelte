@@ -2,7 +2,7 @@
 	import { toasts, dismiss } from './toasts.svelte.ts';
 </script>
 
-<div class="toast-stack pointer-events-none fixed inset-x-0 bottom-4 z-50 flex flex-col items-center gap-2 px-4">
+<div class="toast-stack pointer-events-none fixed inset-x-0 bottom-4 flex flex-col items-center gap-2 px-4">
 	{#each toasts as t (t.id)}
 		<button
 			type="button"
@@ -17,6 +17,10 @@
 </div>
 
 <style>
+	.toast-stack {
+		z-index: var(--layer-float);
+	}
+
 	.toast {
 		--toast-accent: var(--color-accent);
 		--toast-text: var(--color-foreground);
@@ -31,7 +35,7 @@
 		text-align: left;
 		box-shadow:
 			inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 8%, transparent),
-			0 18px 40px rgb(0 0 0 / 22%);
+			var(--shadow-toast);
 	}
 
 	.toast[data-kind='success'] { --toast-accent: var(--color-accent); }

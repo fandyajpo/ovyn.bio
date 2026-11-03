@@ -103,7 +103,7 @@
 
 <svelte:window onkeydown={closeOnEscape} onpointerdown={closeOnOutsidePointerDown} />
 
-<header class="site-header sticky top-0 z-40">
+<header class="site-header sticky top-0">
 	<div class="site-header-inner flex h-16 w-full items-center justify-between px-4">
 		<a href="/" onclick={closeMenus} class="group flex shrink-0 items-center gap-2 font-[family-name:var(--font-display)] text-lg font-bold tracking-tight">
 			<span class="grid size-10 place-items-center transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-[-4deg]">
@@ -202,13 +202,14 @@
 
 <style>
 	.site-header {
+		z-index: var(--layer-nav);
 		border-bottom: 1px solid var(--color-divider);
 		background:
 			radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--color-pop-pink) 14%, transparent), transparent 58%),
 			radial-gradient(ellipse at 88% 0%, color-mix(in srgb, var(--color-pop-blue) 13%, transparent), transparent 58%),
 			var(--color-nav-glass);
 		backdrop-filter: blur(18px);
-		box-shadow: 0 4px 18px rgb(0 0 0 / 18%);
+		box-shadow: var(--shadow-nav);
 	}
 
 	.site-header-inner {
@@ -392,7 +393,7 @@
 
 	.mobile-menu-overlay {
 		position: fixed;
-		z-index: 50;
+		z-index: var(--layer-float);
 		top: calc(4rem + env(safe-area-inset-top));
 		right: 0;
 		bottom: 0;
