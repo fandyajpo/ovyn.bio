@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /customize
+Disallow: /dashboard
+Disallow: /links
+Disallow: /settings
+Disallow: /templates
+Disallow: /upgrade
+Disallow: /billing
+Disallow: /checkout
+Disallow: /onboarding
+Disallow: /admin
+Disallow: /api
+
+Sitemap: https://ovyn.me/sitemap.xml

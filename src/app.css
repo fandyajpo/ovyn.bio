@@ -111,6 +111,13 @@
 	--layer-tooltip: 60;
 	--layer-overlay: 70;
 	--layer-modal: 100;
+
+	/*
+	 * Page texture: one subtle tile of rounded lines and pixel blocks laid
+	 * over every page background, in both themes. Neutral grey ink so it reads
+	 * on the dark charcoal and on the bone light base alike.
+	 */
+	--texture-tile: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='96'%20height='96'%3E%3Cg%20fill='none'%20stroke='%2388888d'%20stroke-opacity='.4'%20stroke-width='2'%20stroke-linecap='round'%3E%3Cpath%20d='M10%2018h28'/%3E%3Cpath%20d='M62%2078h22'/%3E%3Cpath%20d='M78%2012v14'/%3E%3C/g%3E%3Cg%20fill='%2388888d'%20fill-opacity='.35'%3E%3Crect%20x='12'%20y='52'%20width='4'%20height='4'/%3E%3Crect%20x='44'%20y='10'%20width='4'%20height='4'/%3E%3Crect%20x='84'%20y='42'%20width='4'%20height='4'/%3E%3Crect%20x='28'%20y='84'%20width='4'%20height='4'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 html[data-theme='light'] {
@@ -967,8 +974,9 @@ html[data-theme='light'] .sticker--lilac {
 		radial-gradient(ellipse 52% 42% at 96% 10%, color-mix(in srgb, var(--color-pop-pink) var(--aurora-glow), transparent), transparent 64%),
 		radial-gradient(ellipse 66% 48% at 84% 82%, color-mix(in srgb, var(--color-pop-blue) var(--aurora-glow), transparent), transparent 68%),
 		radial-gradient(ellipse 58% 44% at 10% 96%, color-mix(in srgb, var(--color-pop-lilac) var(--aurora-glow), transparent), transparent 68%),
-		repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--color-foreground) var(--aurora-grain), transparent) 0% 25%, transparent 0% 50%);
-	background-size: auto, auto, auto, auto, 4px 4px;
+		repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--color-foreground) var(--aurora-grain), transparent) 0% 25%, transparent 0% 50%),
+		var(--texture-tile);
+	background-size: auto, auto, auto, auto, 4px 4px, 96px 96px;
 }
 
 html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
@@ -1004,34 +1012,37 @@ html[data-theme='dark'] .app-frame[data-landing='true'] {
 		radial-gradient(46rem 30rem at 78% 10%, rgb(196 181 253 / 13%), transparent 62%),
 		radial-gradient(40rem 26rem at 98% 72%, rgb(251 207 232 / 9%), transparent 64%),
 		radial-gradient(44rem 28rem at 8% 92%, rgb(165 180 252 / 8%), transparent 66%),
-		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 7%), transparent 70%);
-	background-repeat: no-repeat;
-	background-size: auto, auto, auto, auto;
+		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 7%), transparent 70%),
+		var(--texture-tile);
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+	background-size: auto, auto, auto, auto, 96px 96px;
 }
 
 html[data-theme='light'] .app-frame[data-landing='true'] {
-	--color-background: #f6f4fd;
-	--color-surface: #ffffff;
-	--color-surface-raised: #efedfa;
-	--color-foreground: #191a26;
-	--color-muted: rgb(50 52 68 / 62%);
-	--color-accent: #8b5cf6;
-	--color-accent-soft: rgb(139 92 246 / 12%);
+	/* Blue and orange on a clean, slightly darker bone base. */
+	--color-background: #ebe7dc;
+	--color-surface: #f9f7ef;
+	--color-surface-raised: #f0ede1;
+	--color-foreground: #1c1d24;
+	--color-muted: rgb(46 48 58 / 62%);
+	--color-accent: #2563de;
+	--color-accent-soft: rgb(37 99 222 / 12%);
 	--color-on-accent: #ffffff;
-	--color-pop-pink: #ec6fa8;
-	--color-pop-blue: #6d7ff0;
-	--color-pop-lilac: #8b5cf6;
-	--color-divider: rgb(25 26 38 / 10%);
-	--color-nav-glass: rgb(248 247 254 / 92%);
-	--color-menu-glass: rgb(252 251 255 / 97%);
+	--color-pop-pink: #e8853c;
+	--color-pop-blue: #3b74e8;
+	--color-pop-lilac: #2563de;
+	--color-divider: rgb(28 29 38 / 10%);
+	--color-nav-glass: rgb(246 244 236 / 92%);
+	--color-menu-glass: rgb(251 249 243 / 97%);
 	background-color: var(--color-background);
 	background-image:
-		radial-gradient(46rem 30rem at 78% 10%, rgb(167 139 250 / 20%), transparent 62%),
-		radial-gradient(40rem 26rem at 98% 72%, rgb(244 178 210 / 16%), transparent 64%),
-		radial-gradient(44rem 28rem at 8% 92%, rgb(141 156 250 / 14%), transparent 66%),
-		radial-gradient(60rem 40rem at 50% 118%, rgb(148 163 184 / 10%), transparent 70%);
-	background-repeat: no-repeat;
-	background-size: auto, auto, auto, auto;
+		radial-gradient(46rem 30rem at 78% 10%, rgb(59 116 232 / 16%), transparent 62%),
+		radial-gradient(40rem 26rem at 98% 72%, rgb(232 133 60 / 13%), transparent 64%),
+		radial-gradient(44rem 28rem at 8% 92%, rgb(59 116 232 / 12%), transparent 66%),
+		radial-gradient(60rem 40rem at 50% 118%, rgb(148 150 158 / 10%), transparent 70%),
+		var(--texture-tile);
+	background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+	background-size: auto, auto, auto, auto, 96px 96px;
 }
 
 /* The landing keeps the mockup's nav: the lime brand dot and sign-in pill
@@ -1104,7 +1115,10 @@ html[data-theme='light'] body {
 	background-color: var(--color-background);
 	background-image:
 		radial-gradient(60rem 34rem at 8% -10%, color-mix(in srgb, var(--color-pop-lilac) 9%, transparent), transparent 66%),
-		radial-gradient(48rem 32rem at 100% 10%, color-mix(in srgb, var(--color-pop-pink) 6%, transparent), transparent 68%);
+		radial-gradient(48rem 32rem at 100% 10%, color-mix(in srgb, var(--color-pop-pink) 6%, transparent), transparent 68%),
+		var(--texture-tile);
+	background-repeat: no-repeat, no-repeat, repeat;
+	background-size: auto, auto, 96px 96px;
 }
 
 .landing-orbit {

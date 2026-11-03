@@ -10,7 +10,15 @@
 	let host = $state<HTMLDivElement | undefined>(undefined);
 	let canvas = $state<HTMLCanvasElement | undefined>(undefined);
 
-	const COLORS = ['#c4b5fd', '#fbcfe8', '#a5b4fc'] as const;
+	/* Dark mode keeps the mockup's lavender family; light mode follows the
+	   blue and orange palette, so the field never fights the theme. */
+	const DARK_COLORS = ['#c4b5fd', '#fbcfe8', '#a5b4fc'] as const;
+	const LIGHT_COLORS = ['#8fb5fa', '#f2b28a', '#6d89f5'] as const;
+
+	const themeColors = () =>
+		typeof document !== 'undefined' && document.documentElement.dataset.theme === 'light'
+			? LIGHT_COLORS
+			: DARK_COLORS;
 
 	type Pixel = {
 		x: number;
@@ -36,12 +44,13 @@
 		let frame = 0;
 		let lastDraw = 0;
 		let inView = true;
+		let colors = themeColors();
 
 		const seedPixel = (): Pixel => ({
 			x: Math.random() * width,
 			y: Math.random() * height,
 			size: Math.random() > 0.86 ? 9 : 6,
-			color: COLORS[Math.floor(Math.random() * COLORS.length)] ?? COLORS[0],
+			color: colors[Math.floor(Math.random() * colors.length)] ?? colors[0],
 			alpha: 0.12 + Math.random() * 0.52,
 			period: 2600 + Math.random() * 3800,
 			phase: Math.random() * Math.PI * 2
@@ -114,6 +123,15 @@
 		resizeObserver.observe(box);
 		build();
 
+		// The palette follows the theme toggle without a reload.
+		const themeObserver = new MutationObserver(() => {
+			const next = themeColors();
+			if (next === colors) return;
+			colors = next;
+			build();
+		});
+		themeObserver.observe(document.documentElement, { attributeFilter: ['data-theme'] });
+
 		if (!reduceMotion) {
 			frame = requestAnimationFrame(tick);
 			const onVisibility = () => {
@@ -128,12 +146,14 @@
 				cancelAnimationFrame(frame);
 				resizeObserver.disconnect();
 				intersection.disconnect();
+				themeObserver.disconnect();
 				document.removeEventListener('visibilitychange', onVisibility);
 			};
 		}
 
 		return () => {
 			resizeObserver.disconnect();
+			themeObserver.disconnect();
 		};
 	});
 </script>

@@ -122,11 +122,13 @@ turning away from the edges and settling in place when motion is reduced.
 Every page wears
 a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
 it, so the dark palette glows lime and the cream palette warms into gold, pink
-and teal; public profiles keep their own backgrounds and opt out. The landing
-instead wears the dark navy mockup theme, which follows the theme toggle: charcoal
-navy with lavender-pink-periwinkle glows in dark mode, a lavender-washed cream in
-light mode, plus a sparse pulsing pixel field behind the hero that fades clear of
-the headline, and the snail roaming only the lower right. Profile
+and teal; public profiles keep their own backgrounds and opt out. A faint tile of
+rounded lines and pixel blocks textures every page background in both themes. The
+landing instead wears the dark navy mockup theme, which follows the theme toggle:
+charcoal navy with lavender-pink-periwinkle glows in dark mode, blue-and-orange
+accents on a clean bone base in light mode, plus a sparse pulsing pixel field
+behind the hero that fades clear of the headline, and the snail roaming only the
+lower right. Profile
 wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom
 profile audio is user-initiated (never autoplayed); custom cursor images are
 PNG/WebP uploads.
@@ -292,6 +294,18 @@ managed here yet.
 - Check status: `POST /orders/v1.0/transfer-va/status`
 - Webhook: register `https://ovyn.me/api/webhooks/doku` in DOKU Dashboard →
   Settings → Payment Settings → Webhook
+
+## Search engine visibility
+
+- Every page carries default Open Graph and Twitter card tags from the root
+  layout; the landing adds its canonical URL and og:type.
+- Public profiles emit canonical, og:url, og:type profile, the avatar as
+  og:image/twitter:image, and ProfilePage JSON-LD. Private profiles emit
+  `robots: noindex, nofollow` and no OG data, so they stay out of search.
+- `static/robots.txt` allows public pages, disallows the workspace, admin,
+  checkout, onboarding and API routes, and points at `/sitemap.xml`.
+- `/sitemap.xml` is generated live from public profiles (capped at 5.000) plus
+  the static public pages, cached for an hour.
 
 ## Roadmap / not yet done
 

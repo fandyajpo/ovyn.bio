@@ -195,6 +195,13 @@
 <svelte:head>
 	<title>ovyn - your space on the internet</title>
 	<meta name="description" content="A personal corner of the internet to show your style, share your links and find your people." />
+	<link rel="canonical" href="https://ovyn.me/" />
+	<meta property="og:url" content="https://ovyn.me/" />
+	<meta property="og:type" content="website" />
+	<meta property="og:title" content="ovyn - your space on the internet" />
+	<meta property="og:description" content="A personal corner of the internet to show your style, share your links and find your people." />
+	<meta name="twitter:title" content="ovyn - your space on the internet" />
+	<meta name="twitter:description" content="A personal corner of the internet to show your style, share your links and find your people." />
 </svelte:head>
 
 <section class="landing-hero relative isolate">

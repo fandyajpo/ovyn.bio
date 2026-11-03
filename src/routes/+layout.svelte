@@ -76,6 +76,11 @@
 	<Toasts />
 </QueryClientProvider>
 
+<svelte:head>
+	<meta property="og:site_name" content="ovyn" />
+	<meta name="twitter:card" content="summary" />
+</svelte:head>
+
 <style>
 	.app-frame {
 		min-height: 100svh;

@@ -15,14 +15,53 @@
 	});
 	const bannerIsVideo = $derived(data.bannerIsVideo);
 	const bannerVideoType = $derived(data.bannerVideoType);
+
+	// SEO: private corners stay out of search engines entirely.
+	const SITE_ORIGIN = 'https://ovyn.me';
+	const profileUrl = $derived(`${SITE_ORIGIN}/${p.slug}`);
+	const ogImage = $derived(!data.private && data.avatarUrl ? data.avatarUrl : null);
+	const ogTitle = $derived(`${displayName} (@${p.slug}) - ovyn`);
+	const ogDescription = $derived(p.bio || `Find ${displayName} on ovyn.`);
+	const jsonLd = $derived.by(() => {
+		if (data.private) return null;
+		return JSON.stringify({
+			'@context': 'https://schema.org',
+			'@type': 'ProfilePage',
+			name: `${displayName} (@${p.slug})`,
+			url: profileUrl,
+			mainEntity: {
+				'@type': 'Person',
+				name: displayName,
+				alternateName: `@${p.slug}`,
+				description: p.bio || undefined,
+				url: profileUrl
+			}
+		});
+	});
 </script>
 
 <svelte:head>
 	<title>{displayName} (@{p.slug}) - ovyn</title>
 	<meta name="description" content={p.bio || `${displayName}'s space on ovyn.`} />
-	<meta property="og:title" content={`${displayName} (@${p.slug}) - ovyn`} />
-	<meta property="og:description" content={p.bio || `Find ${displayName} on ovyn.`} />
-	<meta property="og:type" content="profile" />
+	{#if data.private}
+		<meta name="robots" content="noindex, nofollow" />
+	{:else}
+		<link rel="canonical" href={profileUrl} />
+		<meta property="og:title" content={ogTitle} />
+		<meta property="og:description" content={ogDescription} />
+		<meta property="og:type" content="profile" />
+		<meta property="og:url" content={profileUrl} />
+		{#if ogImage}
+			<meta property="og:image" content={ogImage} />
+			<meta property="og:image:alt" content={displayName} />
+		{/if}
+		<meta name="twitter:title" content={ogTitle} />
+		<meta name="twitter:description" content={ogDescription} />
+		{#if ogImage}<meta name="twitter:image" content={ogImage} />{/if}
+		{#if jsonLd}
+			<script type="application/ld+json">{@html jsonLd}</script>
+		{/if}
+	{/if}
 </svelte:head>
 
 {#if data.private}

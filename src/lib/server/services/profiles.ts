@@ -1,4 +1,4 @@
-import { and, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { account, user } from '#lib/server/db/schema/auth';
 import { discordAccounts, profiles } from '#lib/server/db/schema';
@@ -359,6 +359,17 @@ export async function getProfileByUserId(userId: string) {
 export async function getDiscordAccountByUserId(userId: string) {
 	const [row] = await db.select().from(discordAccounts).where(eq(discordAccounts.userId, userId)).limit(1);
 	return row ?? null;
+}
+
+/** Public profile slugs for the sitemap; capped so the response stays light. */
+export async function listPublicProfileSlugs(): Promise<string[]> {
+	const rows = await db
+		.select({ slug: profiles.slug })
+		.from(profiles)
+		.where(eq(profiles.visibility, 'public'))
+		.orderBy(desc(profiles.updatedAt))
+		.limit(5000);
+	return rows.map((row) => row.slug);
 }
 
 export { isUniqueViolation, user };
