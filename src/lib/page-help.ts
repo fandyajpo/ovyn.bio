@@ -94,6 +94,7 @@ const PAGES: { match: string; help: PageHelp }[] = [
 				'Your username is your public link, so pick one you like.',
 				'A private page keeps everything hidden from visitors.',
 				'The picture here is the one shown everywhere on ovyn.',
+				'Crop and position your picture before it uploads.',
 				'Frames, wallpapers and badges are chosen from dropdowns.'
 			]
 		}

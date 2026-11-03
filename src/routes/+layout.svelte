@@ -5,6 +5,7 @@
 	import Nav from '#lib/components/Nav.svelte';
 	import PageHelp from '#lib/components/PageHelp.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
+	import PixelSnail from '#lib/components/PixelSnail.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
 	import { startThemeSync } from '#lib/theme.svelte.ts';
@@ -47,7 +48,10 @@
 				<div class="app-footer-inner mx-auto flex max-w-6xl flex-col gap-8 px-4 py-8 sm:flex-row sm:items-end sm:justify-between">
 					<Reveal>
 						<div class="flex flex-col items-start gap-4">
-							<span class="sticker sticker--dark">ovyn / internet personhood</span>
+							<div class="flex items-center gap-3">
+								<PixelSnail size={38} />
+								<span class="sticker sticker--dark">ovyn / internet personhood</span>
+							</div>
 							<p class="max-w-sm font-[family-name:var(--font-display)] text-xl font-semibold text-neutral-200">Your identity, out in the world.<br /><span class="text-neutral-500">Your people, one link away.</span></p>
 							<nav aria-label="Footer" class="flex flex-wrap gap-4 font-mono text-xs text-neutral-500">
 								<a href="/discover" class="hover:text-lime-300">Discover</a>

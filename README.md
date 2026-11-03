@@ -102,7 +102,10 @@ ovyn can be installed from supported browsers as a standalone app. Its service w
 
 The interface uses Poppins for controls with a warm serif (Newsreader) for
 headings, on a soft, low-contrast palette that opens dark and has a cream light
-mode. The theme choice is remembered and follows you across open tabs. Profile
+mode. The theme choice is remembered and follows you across open tabs. A pixel
+snail is the mascot, sitting beside the wordmark in the header and in the
+footer, while the landing hero has a small pixel butterfly that drifts to random
+spots; both stand still for visitors who prefer reduced motion. Profile
 wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom
 profile audio is user-initiated (never autoplayed); custom cursor images are
 PNG/WebP uploads.
@@ -163,7 +166,10 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   instead of a second query, and DOKU routes get a longer function timeout.
 - **Uploads** use presigned PUTs to Neon Object Storage; keys are
   server-generated and namespaced per user, and ownership is re-verified when
-  a key is attached to a profile. Replacing an avatar, cover, background,
+  a key is attached to a profile. Avatars and covers pass through a crop and
+  position step first: drag the photo, zoom with the buttons or arrow keys, and
+  the browser writes a square avatar or a 2.7:1 cover before the usual
+  optimise and upload. Replacing an avatar, cover, background,
   audio, cursor or cosmetic artwork deletes the file it replaced, while the
   seed artwork under `static/` is shared and never deleted.
 - **Shop & cosmetics** - cosmetic items (avatar frames, wallpapers, badges)

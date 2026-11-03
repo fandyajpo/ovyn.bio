@@ -1,9 +1,11 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { untrack } from 'svelte';
 	import { toast } from '#lib/components/ui/toasts.svelte.ts';
 	import { cn } from '#lib/utils';
 	import { optimizeImage } from '#lib/image-optimize';
 	import { CLIENT_UPLOAD_LIMITS, formatFileSize } from '#lib/upload-limits';
+	import ImageCropModal from './ImageCropModal.svelte';
 
 	let {
 		kind,
@@ -20,6 +22,10 @@
 	let input: HTMLInputElement | null = $state(null);
 	let uploading = $state(false);
 	let dragging = $state(false);
+	let cropOpen = $state(false);
+	let cropFile = $state<File | null>(null);
+
+	const cropAspect = $derived(kind === 'avatar' ? 1 : 2.7);
 
 	function attachInput(element: HTMLInputElement) {
 		input = element;
@@ -34,7 +40,7 @@
 
 	function onPicked(event: Event) {
 		const file = (event.target as HTMLInputElement).files?.[0];
-		if (file) void uploadFile(file);
+		if (file) handlePicked(file);
 	}
 
 	function onDragOver(event: DragEvent) {
@@ -50,8 +56,38 @@
 		event.preventDefault();
 		dragging = false;
 		const file = event.dataTransfer?.files[0];
-		if (file && !uploading) void uploadFile(file);
+		if (file && !uploading) handlePicked(file);
 	}
+
+	/** Avatars and covers get positioned by hand before they are stored. */
+	function shouldCrop(file: File) {
+		return (kind === 'avatar' || kind === 'banner') && /^image\/(jpeg|png|webp)$/.test(file.type);
+	}
+
+	function handlePicked(file: File) {
+		if (shouldCrop(file)) {
+			cropFile = file;
+			cropOpen = true;
+			return;
+		}
+		void uploadFile(file);
+	}
+
+	function onCropped(file: File) {
+		cropFile = null;
+		cropOpen = false;
+		void uploadFile(file);
+	}
+
+	// Closing the dialog without confirming drops the picked file.
+	$effect(() => {
+		if (cropOpen) return;
+		untrack(() => {
+			if (!cropFile) return;
+			cropFile = null;
+			if (input) input.value = '';
+		});
+	});
 
 	async function uploadFile(original: File) {
 		const limits = CLIENT_UPLOAD_LIMITS[kind];
@@ -146,6 +182,14 @@
 				: 'image/jpeg,image/png,image/webp'}
 	class="hidden"
 	onchange={onPicked}
+/>
+
+<ImageCropModal
+	bind:open={cropOpen}
+	file={cropFile}
+	aspect={cropAspect}
+	title={kind === 'avatar' ? 'Crop your profile picture' : scope === 'circle' ? 'Crop your banner' : 'Crop your cover'}
+	onconfirm={onCropped}
 />
 
 <style>
