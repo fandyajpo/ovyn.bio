@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
+	import { debounce } from 'es-toolkit';
 	import type { PageData } from './$types';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -13,26 +14,46 @@
 	let description = $state(untrack(() => data.guild.description ?? ''));
 	let visibility = $state<string>(untrack(() => data.guild.visibility));
 
+	type Candidate = { userId: string; slug: string; displayName: string | null };
+
 	let inviteQuery = $state('');
-	let candidates = $state<Array<{ userId: string; slug: string; displayName: string | null }>>([]);
+	let candidates = $state<Candidate[]>([]);
 	let searching = $state(false);
 
-	let searchTimer: ReturnType<typeof setTimeout>;
+	// The request id marks the newest keystroke: a slower response from an older
+	// query must never overwrite its result.
+	let searchRequest = 0;
+
+	const fetchCandidates = debounce(async (query: string, requestId: number): Promise<void> => {
+		try {
+			const res = await fetch(`/guild/${data.guild.slug}/manage/candidates?q=${encodeURIComponent(query)}`);
+			if (!res.ok) throw new Error(`Candidate search failed with ${res.status}`);
+			const found = (await res.json()) as Candidate[];
+			if (requestId !== searchRequest) return;
+			candidates = found;
+		} catch {
+			if (requestId !== searchRequest) return;
+			candidates = [];
+		} finally {
+			if (requestId === searchRequest) searching = false;
+		}
+	}, 300);
+
+	// A pending search must not fire once the page is gone.
+	$effect(() => () => fetchCandidates.cancel());
 
 	function onSearch() {
-		clearTimeout(searchTimer);
+		searchRequest += 1;
+		const requestId = searchRequest;
+		fetchCandidates.cancel();
+
 		if (inviteQuery.length < 2) {
 			candidates = [];
+			searching = false;
 			return;
 		}
 		searching = true;
-		searchTimer = setTimeout(async () => {
-			const res = await fetch(
-				`/guild/${data.guild.slug}/manage/candidates?q=${encodeURIComponent(inviteQuery)}`
-			);
-			candidates = await res.json();
-			searching = false;
-		}, 300);
+		void fetchCandidates(inviteQuery, requestId);
 	}
 </script>
 

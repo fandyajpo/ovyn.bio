@@ -20,6 +20,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Validation | Zod 4 |
 | Drag and drop | dnd-kit (`@dnd-kit/svelte`) - sortable link rows and template blocks |
 | Forms & client data | Superforms, TanStack Query 6, TanStack Table 9, date-fns 4 |
+| Utilities | es-toolkit (debounce, cloneDeep and friends instead of hand-rolled helpers) |
 
 Note on SvelteKit 3: configuration lives in `vite.config.ts` (via the
 `sveltekit()` plugin options - there is no `svelte.config.js`), imports use the

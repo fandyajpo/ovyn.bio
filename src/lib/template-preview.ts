@@ -1,3 +1,4 @@
+import { cloneDeep } from 'es-toolkit';
 import type { TemplateBlock } from '#lib/schemas/templates';
 
 const CHANNEL_NAME = 'ovyn-template-preview';
@@ -18,7 +19,10 @@ function storageKey(key: string): string {
 
 function plainBlocks(blocks: TemplateBlock[]): TemplateBlock[] {
 	try {
-		return JSON.parse(JSON.stringify(blocks)) as TemplateBlock[];
+		// Proxies and other exotic values cannot be structured-cloned, so storage
+		// and the channel always receive plain JSON. cloneDeep unwraps Svelte's
+		// reactive proxies into plain objects.
+		return cloneDeep(blocks);
 	} catch {
 		return [];
 	}

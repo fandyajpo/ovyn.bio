@@ -1,4 +1,4 @@
-import { randomUUID, createHash } from 'node:crypto';
+import { randomUUID } from 'node:crypto';
 import {
 	DeleteObjectCommand,
 	GetObjectCommand,
@@ -126,6 +126,10 @@ const presignedCache = new Map<string, { url: string; expiresAt: number }>();
 
 const PRESIGNED_CACHE_MAX = 2_000;
 
+// One signing job per key: concurrent renders of the same profile share a
+// single presign call instead of racing several identical ones.
+const inFlightPresigns = new Map<string, Promise<string>>();
+
 /**
  * Short-lived read URL for private objects. The URL is reused for most of its
  * lifetime, otherwise it would change on every render and neither the browser
@@ -136,12 +140,33 @@ export async function presignDownload(key: string, expiresIn = 60 * 60 * 24 * 7)
 	const cached = presignedCache.get(cacheKey);
 	if (cached && cached.expiresAt > Date.now()) return cached.url;
 
-	const { client, bucket } = s3WithBucket();
-	const url = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+	const pending = inFlightPresigns.get(cacheKey);
+	if (pending) return pending;
 
-	if (presignedCache.size > PRESIGNED_CACHE_MAX) presignedCache.clear();
-	presignedCache.set(cacheKey, { url, expiresAt: Date.now() + (expiresIn - 60 * 60) * 1000 });
-	return url;
+	const job = (async () => {
+		const { client, bucket } = s3WithBucket();
+		const url = await getSignedUrl(client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn });
+
+		// Evict only the oldest entry, so one burst never wipes everyone's URLs.
+		// Deleting before re-setting also keeps a refreshed key at the newest
+		// position instead of its original insertion slot.
+		if (presignedCache.size >= PRESIGNED_CACHE_MAX) {
+			const oldest = presignedCache.keys().next().value;
+			if (oldest !== undefined) presignedCache.delete(oldest);
+		}
+		presignedCache.delete(cacheKey);
+		presignedCache.set(cacheKey, { url, expiresAt: Date.now() + (expiresIn - 60 * 60) * 1000 });
+		return url;
+	})();
+
+	inFlightPresigns.set(cacheKey, job);
+	try {
+		return await job;
+	} finally {
+		// Only the caller that created the job removes it; waiters above just
+		// awaited it and need the entry gone for the next miss.
+		if (inFlightPresigns.get(cacheKey) === job) inFlightPresigns.delete(cacheKey);
+	}
 }
 
 export async function deleteObject(key: string): Promise<void> {
@@ -176,9 +201,4 @@ export function assertOwnObjectKey(userId: string, kind: UploadKind, key: string
 	if (!key.startsWith(`${kind}s/${userId}/`)) {
 		throw new AppError(403, 'You can only use files you uploaded');
 	}
-}
-
-/** ETag-ish integrity helper (reserved for future client-side checksums). */
-export function checksum(body: string): string {
-	return createHash('sha256').update(body).digest('hex');
 }

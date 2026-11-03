@@ -4,6 +4,10 @@ node_modules
 /package
 /.vercel
 
+# The project installs with pnpm; an npm lockfile here would resolve a
+# different dependency tree.
+package-lock.json
+
 .env
 .env.*
 !.env.example

@@ -1,4 +1,3 @@
-import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getDiscordAccountByUserId, getProfileByUserId } from '#lib/server/services/profiles';
 import { presignDownload } from '#lib/server/storage';
@@ -9,7 +8,7 @@ import { presignDownload } from '#lib/server/storage';
  */
 export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.user) {
-		return json({ viewer: null }, { headers: { 'cache-control': 'no-store' } });
+		return Response.json({ viewer: null }, { headers: { 'cache-control': 'no-store' } });
 	}
 
 	const fallback = { name: locals.user.name, image: locals.user.image ?? null };
@@ -26,8 +25,8 @@ export const GET: RequestHandler = async ({ locals }) => {
 
 		const name = profile.displayName || discord?.globalName || discord?.username || locals.user.name;
 
-		return json({ viewer: { name, image } }, { headers: { 'cache-control': 'no-store' } });
+		return Response.json({ viewer: { name, image } }, { headers: { 'cache-control': 'no-store' } });
 	} catch {
-		return json({ viewer: fallback }, { headers: { 'cache-control': 'no-store' } });
+		return Response.json({ viewer: fallback }, { headers: { 'cache-control': 'no-store' } });
 	}
 };
