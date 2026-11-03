@@ -85,7 +85,7 @@
 
 	.ovyn-button--secondary {
 		border-color: var(--color-divider);
-		background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 92%, transparent), color-mix(in srgb, var(--color-background) 82%, transparent));
+		background: linear-gradient(160deg, color-mix(in srgb, var(--color-surface) 96%, transparent), color-mix(in srgb, var(--color-background) 90%, transparent));
 		color: var(--color-foreground);
 		box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-foreground) 8%, transparent);
 	}

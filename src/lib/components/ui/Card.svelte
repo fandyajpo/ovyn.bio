@@ -18,7 +18,7 @@
 		position: relative;
 		border: 1px solid var(--color-divider);
 		border-radius: 1.5rem;
-		background: color-mix(in srgb, var(--color-surface) 86%, transparent);
+		background: color-mix(in srgb, var(--color-surface) 93%, transparent);
 		box-shadow: var(--shadow-card);
 		transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
 	}

@@ -40,9 +40,10 @@
 		{#if !isProfilePage}
 			<LiquidBackground
 				baseColor={themeState.value === 'light' ? '#ebe7dc' : '#000000'}
-				colorA={themeState.value === 'light' ? '#3b74e8' : '#2b0a4d'}
+				colorA={themeState.value === 'light' ? '#5b8af5' : '#2b0a4d'}
 				colorB={themeState.value === 'light' ? '#e8853c' : '#c98a4a'}
 				rimColor={themeState.value === 'light' ? '#f6c9a8' : '#f2b8d9'}
+				intensity={themeState.value === 'light' ? 0.9 : 1}
 			/>
 		{/if}
 		{#if showsSiteChrome}<Nav />{/if}
