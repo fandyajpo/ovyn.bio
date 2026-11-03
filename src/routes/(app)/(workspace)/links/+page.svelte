@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
 	import { invalidateAll } from '$app/navigation';
-	import { enhance } from '$app/forms';
 	import { superForm } from 'sveltekit-superforms';
 	import type { PageData } from './$types';
 	import Button from '#lib/components/ui/Button.svelte';
@@ -197,7 +196,7 @@
 
 	<Card class="p-5">
 		<h2 class="font-medium text-neutral-100">Add a link</h2>
-		<form method="POST" action="?/add" use:enhance={enhanceAdd} class="mt-4 grid gap-4 sm:grid-cols-2">
+		<form method="POST" action="?/add" use:enhanceAdd class="mt-4 grid gap-4 sm:grid-cols-2">
 			<Select
 				name="provider"
 				label="Platform"
