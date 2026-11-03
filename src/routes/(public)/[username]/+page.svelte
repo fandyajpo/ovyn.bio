@@ -303,13 +303,9 @@
 
 	.profile-links .profile-link {
 		gap: 0.6rem;
-		padding: 0.35rem 0.8rem 0.35rem 0.4rem;
-		border: 1px solid transparent;
-		border-radius: 999px;
+		padding-block: 0.55rem;
 		transition:
 			color 200ms ease,
-			border-color 220ms ease,
-			background-color 220ms ease,
 			transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
 	}
 
@@ -337,8 +333,6 @@
 
 	@media (hover: hover) and (pointer: fine) {
 		.profile-links .profile-link:hover {
-			border-color: color-mix(in srgb, var(--color-accent) 32%, transparent);
-			background: var(--color-accent-soft);
 			transform: translateY(-2px);
 		}
 

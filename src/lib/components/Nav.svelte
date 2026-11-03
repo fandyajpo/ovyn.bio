@@ -286,19 +286,32 @@
 
 	.top-nav-link {
 		--nav-accent: var(--color-accent);
+		position: relative;
 		display: inline-flex;
 		min-height: 2.85rem;
 		align-items: center;
 		justify-content: center;
-		border: 1px solid transparent;
-		border-radius: 999px;
 		padding: 0.65rem 0.85rem;
 		color: var(--color-muted);
 		font-size: 0.9rem;
 		font-weight: 600;
 		text-decoration: none;
 		white-space: nowrap;
-		transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+		transition: color 180ms ease, transform 220ms cubic-bezier(0.2, 0.7, 0.2, 1);
+	}
+
+	.top-nav-link::after {
+		position: absolute;
+		right: 0.85rem;
+		bottom: 0.5rem;
+		left: 0.85rem;
+		height: 1.5px;
+		border-radius: 2px;
+		background: var(--nav-accent);
+		content: '';
+		transform: scaleX(0);
+		transform-origin: left center;
+		transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
 	}
 
 	.top-nav-link[data-tone='blue'],
@@ -317,9 +330,11 @@
 	}
 
 	.top-nav-link[aria-current='page'] {
-		border-color: color-mix(in srgb, var(--nav-accent) 34%, transparent);
-		background: color-mix(in srgb, var(--nav-accent) 13%, transparent);
-		color: var(--color-foreground);
+		color: color-mix(in srgb, var(--nav-accent) 60%, var(--color-foreground));
+	}
+
+	.top-nav-link[aria-current='page']::after {
+		transform: scaleX(1);
 	}
 
 	.mobile-menu-toggle {
@@ -553,9 +568,12 @@
 
 	@media (hover: hover) and (pointer: fine) {
 		.top-nav-link:hover:not([aria-current='page']) {
-			border-color: color-mix(in srgb, var(--nav-accent) 26%, transparent);
-			background: color-mix(in srgb, var(--nav-accent) 9%, transparent);
 			color: var(--color-foreground);
+			transform: translateY(-1px);
+		}
+
+		.top-nav-link:hover::after {
+			transform: scaleX(1);
 		}
 
 		.mobile-menu-link:hover {
@@ -567,6 +585,7 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.top-nav-link,
+		.top-nav-link::after,
 		.mobile-menu-toggle,
 		.menu-glyph,
 		.menu-glyph::before,
