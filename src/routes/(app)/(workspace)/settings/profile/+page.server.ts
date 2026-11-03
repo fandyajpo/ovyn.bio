@@ -24,7 +24,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 		profile.avatarKey ? presignDownload(profile.avatarKey) : null
 	]);
 
-	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl ?? discord?.avatarUrl ?? locals.user.image ?? null };
+	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl };
 };
 
 export const actions: Actions = {
@@ -79,7 +79,7 @@ export const actions: Actions = {
 		} catch (err) {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
-			return fail(500, { error: 'Could not restore your Discord avatar' });
+			return fail(500, { error: 'Could not remove your profile picture' });
 		}
 	},
 

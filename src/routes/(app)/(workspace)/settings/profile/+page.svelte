@@ -207,13 +207,13 @@
 		<div class="flex items-center gap-4">
 			<Avatar name={displayName} src={data.avatarUrl} size="lg" />
 			<div>
-				<p class="mb-1 text-sm text-neutral-300">Use your sign-in account picture or upload a custom one.</p>
-				<p class="mb-2 text-xs text-neutral-500">JPG, PNG or WebP · max 1 MB</p>
+				<p class="mb-1 text-sm text-neutral-300">Upload a custom picture. Removing it shows your initial instead.</p>
+				<p class="mb-2 text-xs text-neutral-500">JPG, PNG, GIF, WebP, AVIF, SVG and more · max 4 MB</p>
 				<div class="flex flex-wrap items-center gap-2">
 					<UploadButton kind="avatar" existingKey={data.profile.avatarKey} label="Upload picture" />
 					{#if data.profile.avatarKey}
 						<form method="POST" action="/settings/profile?/avatarReset">
-							<button type="submit" class="rounded-xl border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:bg-neutral-800">Use account picture</button>
+							<button type="submit" class="rounded-xl border border-neutral-700 px-3 py-2 text-xs text-neutral-300 transition hover:bg-neutral-800">Remove picture</button>
 						</form>
 					{/if}
 				</div>

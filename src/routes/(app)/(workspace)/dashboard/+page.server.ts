@@ -1,8 +1,5 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
-import { db } from '#lib/server/db';
-import { discordAccounts } from '#lib/server/db/schema';
-import { eq } from 'drizzle-orm';
 import { getMembership } from '#lib/server/services/guilds';
 import { getProfileByUserId } from '#lib/server/services/profiles';
 import { listMyInvitations } from '#lib/server/services/invitations';
@@ -27,9 +24,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
 	const profile = await getProfileByUserId(user.id);
 	const membership = await getMembership(user.id);
-	const [discord, invitations, orders, rewards, referralCode, analytics, referralSummary] = await Promise.all([
-		db.select({ avatarUrl: discordAccounts.avatarUrl }).from(discordAccounts)
-			.where(eq(discordAccounts.userId, user.id)).limit(1),
+	const [invitations, orders, rewards, referralCode, analytics, referralSummary] = await Promise.all([
 		listMyInvitations(user.id),
 		listUserOrders(user.id),
 		getRewardSummary(user.id),
@@ -37,7 +32,8 @@ export const load: PageServerLoad = async ({ locals }) => {
 		getProfileAnalytics(user.id),
 		getReferralSummary(user.id)
 	]);
-	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : discord[0]?.avatarUrl ?? user.image ?? null;
+	// The profile picture follows the database alone: the uploaded avatar or nothing.
+	const avatarUrl = profile.avatarKey ? await presignDownload(profile.avatarKey) : null;
 
 	return {
 		profile,

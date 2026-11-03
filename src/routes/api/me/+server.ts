@@ -11,7 +11,7 @@ export const GET: RequestHandler = async ({ locals }) => {
 		return Response.json({ viewer: null }, { headers: { 'cache-control': 'no-store' } });
 	}
 
-	const fallback = { name: locals.user.name, image: locals.user.image ?? null };
+	const fallback = { name: locals.user.name, image: null };
 
 	try {
 		const [profile, discord] = await Promise.all([
@@ -19,9 +19,9 @@ export const GET: RequestHandler = async ({ locals }) => {
 			getDiscordAccountByUserId(locals.user.id)
 		]);
 
-		const image = profile.avatarKey
-			? await presignDownload(profile.avatarKey)
-			: (discord?.avatarUrl ?? locals.user.image ?? null);
+		// The profile picture follows the database alone: an uploaded avatar or
+		// no picture at all. Provider images are never substituted.
+		const image = profile.avatarKey ? await presignDownload(profile.avatarKey) : null;
 
 		const name = profile.displayName || discord?.globalName || discord?.username || locals.user.name;
 

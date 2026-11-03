@@ -176,7 +176,6 @@ export const discordAccounts = pgTable(
 		discordId: text('discord_id').notNull().unique(),
 		username: text('username').notNull(),
 		globalName: text('global_name'),
-		avatarUrl: text('avatar_url'),
 		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},

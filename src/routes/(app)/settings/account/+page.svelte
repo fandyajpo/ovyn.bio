@@ -24,7 +24,7 @@
 	<section class="rounded-xl border border-neutral-800 p-5">
 		<h2 class="font-medium text-neutral-200">{data.discord ? 'Discord identity' : 'Google identity'}</h2>
 		<div class="mt-4 flex items-center gap-4">
-			<Avatar name={data.discord?.globalName ?? data.discord?.username ?? data.userName} src={data.discord?.avatarUrl ?? data.userImage} size="lg" />
+			<Avatar name={data.discord?.globalName ?? data.discord?.username ?? data.userName} src={data.avatarUrl} size="lg" />
 			<div class="min-w-0">
 				<p class="truncate font-medium text-neutral-100">{data.discord?.globalName ?? data.discord?.username ?? data.userName}</p>
 				<p class="mt-1 font-mono text-xs text-neutral-400">{data.discord ? `@${data.discord.username}` : 'Signed in with Google'}</p>

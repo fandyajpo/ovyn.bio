@@ -11,6 +11,7 @@ import {
 	userRewards
 } from '#lib/server/db/schema';
 import { user } from '#lib/server/db/schema/auth';
+import { presignDownload } from '#lib/server/storage';
 import { ConflictError, NotFoundError } from '#lib/server/utils/errors';
 
 const DAILY_POINTS = 10;
@@ -228,7 +229,7 @@ export async function getProfileAnalytics(userId: string) {
 				displayName: profiles.displayName,
 				globalName: discordAccounts.globalName,
 				discordUsername: discordAccounts.username,
-				avatarUrl: discordAccounts.avatarUrl,
+				avatarKey: profiles.avatarKey,
 				viewedOn: profileViews.viewedOn,
 				createdAt: profileViews.createdAt
 			})
@@ -241,21 +242,24 @@ export async function getProfileAnalytics(userId: string) {
 	]);
 
 	const seenVisitors = new Set<string>();
-	const recentVisitors = visitorRows
-		.filter((visitor) => {
-			if (seenVisitors.has(visitor.viewerUserId)) return false;
-			seenVisitors.add(visitor.viewerUserId);
-			return true;
-		})
-		.slice(0, 20)
-		.map((visitor) => ({
-			slug: visitor.slug,
-			displayName: visitor.displayName,
-			globalName: visitor.globalName,
-			discordUsername: visitor.discordUsername,
-			avatarUrl: visitor.avatarUrl,
-			viewedOn: visitor.viewedOn
-		}));
+	const recentVisitors = await Promise.all(
+		visitorRows
+			.filter((visitor) => {
+				if (seenVisitors.has(visitor.viewerUserId)) return false;
+				seenVisitors.add(visitor.viewerUserId);
+				return true;
+			})
+			.slice(0, 20)
+			.map(async (visitor) => ({
+				slug: visitor.slug,
+				displayName: visitor.displayName,
+				globalName: visitor.globalName,
+				discordUsername: visitor.discordUsername,
+				// Visitor pictures come from their own database avatars now.
+				avatarUrl: visitor.avatarKey ? await presignDownload(visitor.avatarKey) : null,
+				viewedOn: visitor.viewedOn
+			}))
+	);
 
 	return {
 		views: summary?.views ?? 0,

@@ -104,9 +104,6 @@ export async function provisionUser(userId: string): Promise<void> {
 		return;
 	}
 
-	const avatarUrl = discordUser.avatar
-		? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=256`
-		: null;
 	const newDiscordName = discordUser.global_name ?? discordUser.username;
 
 	await db.transaction(async (tx) => {
@@ -119,8 +116,7 @@ export async function provisionUser(userId: string): Promise<void> {
 				userId,
 				discordId: discordUser.id,
 				username: discordUser.username,
-				globalName: discordUser.global_name,
-				avatarUrl
+				globalName: discordUser.global_name
 			})
 			.onConflictDoUpdate({
 				target: discordAccounts.discordId,
@@ -128,7 +124,6 @@ export async function provisionUser(userId: string): Promise<void> {
 					userId,
 					username: discordUser.username,
 					globalName: discordUser.global_name,
-					avatarUrl,
 					updatedAt: new Date()
 				}
 			});
