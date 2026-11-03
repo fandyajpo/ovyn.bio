@@ -71,6 +71,13 @@
       "when": 1793630000000,
       "tag": "0009_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793640000000,
+      "tag": "0010_profile_creatures",
+      "breakpoints": true
     }
   ]
 }
