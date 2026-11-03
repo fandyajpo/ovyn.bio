@@ -22,9 +22,13 @@
 	const ogImage = $derived(!data.private && data.avatarUrl ? data.avatarUrl : null);
 	const ogTitle = $derived(`${displayName} (@${p.slug}) - ovyn`);
 	const ogDescription = $derived(p.bio || `Find ${displayName} on ovyn.`);
-	const jsonLd = $derived.by(() => {
+	const jsonLdScript = $derived.by(() => {
 		if (data.private) return null;
-		return JSON.stringify({
+		// Svelte's parser cannot embed expressions inside a literal <script>
+		// element, so the whole tag is built as one string and injected with
+		// {@html}. The payload is generated server-side and contains no user
+		// input beyond what JSON.stringify escapes.
+		const payload = JSON.stringify({
 			'@context': 'https://schema.org',
 			'@type': 'ProfilePage',
 			name: `${displayName} (@${p.slug})`,
@@ -37,6 +41,7 @@
 				url: profileUrl
 			}
 		});
+		return `<script type="application/ld+json">${payload}</script>`;
 	});
 </script>
 
@@ -58,8 +63,8 @@
 		<meta name="twitter:title" content={ogTitle} />
 		<meta name="twitter:description" content={ogDescription} />
 		{#if ogImage}<meta name="twitter:image" content={ogImage} />{/if}
-		{#if jsonLd}
-			<script type="application/ld+json">{@html jsonLd}</script>
+		{#if jsonLdScript}
+			{@html jsonLdScript}
 		{/if}
 	{/if}
 </svelte:head>

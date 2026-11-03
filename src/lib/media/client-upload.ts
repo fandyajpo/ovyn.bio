@@ -215,7 +215,7 @@ async function sanitizeSvgAvatar(file: File): Promise<File> {
 	const svg = parsed.documentElement;
 	svg.querySelectorAll('script, foreignObject, iframe, object, embed, link, base').forEach((node) => node.remove());
 	for (const node of svg.querySelectorAll('*')) {
-		for (const attribute of [...node.attributes]) {
+		for (const attribute of Array.from(node.attributes)) {
 			const name = attribute.name.toLowerCase();
 			const value = attribute.value.trim().toLowerCase();
 			if (name.startsWith('on')) {
