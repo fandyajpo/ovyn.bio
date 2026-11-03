@@ -105,7 +105,10 @@ headings, on a soft, low-contrast palette that opens dark and has a cream light
 mode. The theme choice is remembered and follows you across open tabs. A pixel
 snail is the mascot, sitting beside the wordmark in the header and in the
 footer, while the landing hero has a small pixel butterfly that drifts to random
-spots; both stand still for visitors who prefer reduced motion. Profile
+spots; both stand still for visitors who prefer reduced motion. The landing also
+wears a page-wide aurora gradient built from the theme tokens, with a 4px pixel
+grain over it, so the dark palette glows lime and the cream palette warms into
+gold, pink and teal. Profile
 wallpapers accept JPEG, PNG, WebP, GIF, MP4 and WebM uploads up to 25 MB. Custom
 profile audio is user-initiated (never autoplayed); custom cursor images are
 PNG/WebP uploads.
