@@ -3,6 +3,7 @@
 	import type { PageData } from './$types';
 	import { goto, invalidateAll } from '$app/navigation';
 	import Avatar from '#lib/components/ui/Avatar.svelte';
+	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
 	import Select from '#lib/components/ui/Select.svelte';
 	import UploadButton from '#lib/components/UploadButton.svelte';
@@ -140,7 +141,7 @@
 		</p>
 	{/if}
 
-	<section class="flex items-center gap-4 rounded-xl border border-neutral-800 p-5">
+	<Card class="settings-card flex items-center gap-4 p-5">
 		<Avatar name={displayName} src={data.avatarUrl} size="lg" />
 		<div class="min-w-0">
 			<p class="truncate font-medium text-neutral-100">{displayName}</p>
@@ -152,9 +153,9 @@
 				Sign-in details · Account settings
 			</a>
 		</div>
-	</section>
+	</Card>
 
-	<section class="rounded-xl border border-neutral-800 p-5">
+	<Card class="settings-card p-5">
 		<h2 class="mb-4 font-medium text-neutral-200">Your profile details</h2>
 		<form method="POST" action="/settings/profile?/identity" class="flex flex-col gap-4">
 			<Input
@@ -199,9 +200,9 @@
 				<button type="submit" class="rounded-xl bg-lime-300 px-4 py-2.5 text-sm font-semibold text-neutral-950 transition hover:bg-lime-200">Save profile</button>
 			</div>
 		</form>
-	</section>
+	</Card>
 
-	<section class="rounded-xl border border-neutral-800 p-5">
+	<Card class="settings-card p-5">
 		<h2 class="mb-3 font-medium text-neutral-200">Profile picture</h2>
 		<div class="flex items-center gap-4">
 			<Avatar name={displayName} src={data.avatarUrl} size="lg" />
@@ -218,9 +219,9 @@
 				</div>
 			</div>
 		</div>
-	</section>
+	</Card>
 
-	<section class="rounded-xl border border-neutral-800 p-5">
+	<Card class="settings-card p-5">
 		<h2 class="mb-1 font-medium text-neutral-200">Cosmetics</h2>
 		<p class="mb-4 text-sm text-neutral-400">
 			Owned frames, wallpapers and badges. Choose one from each dropdown, or None to take it off. Get more in the <a href="/shop" class="text-lime-300 hover:underline">shop</a>.
@@ -241,9 +242,9 @@
 
 		{#if equipping}<p class="mt-3 text-xs text-neutral-500">Saving…</p>{/if}
 		{#if equipError}<p class="mt-3 text-sm text-red-400" role="alert">{equipError}</p>{/if}
-	</section>
+	</Card>
 
-	<section class="rounded-xl border border-neutral-800 p-5">
+	<Card class="settings-card p-5">
 		<h2 class="mb-3 font-medium text-neutral-200">Page visibility</h2>
 		<label class="flex items-center gap-3 text-sm text-neutral-300">
 			<input
@@ -259,5 +260,13 @@
 		{#if form?.error && !form?.values}
 			<p class="mt-2 text-sm text-red-400" role="alert">{form.error}</p>
 		{/if}
-	</section>
+	</Card>
 </div>
+
+<style>
+	/* The aurora runs behind this page, so every card paints its own opaque
+	   surface instead of letting the gradient bleed through the form. */
+	:global(.ovyn-surface.settings-card) {
+		background: var(--color-surface);
+	}
+</style>
