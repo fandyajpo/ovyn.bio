@@ -8,7 +8,8 @@
 	import SnailMascot from '#lib/components/SnailMascot.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import Toasts from '#lib/components/ui/Toasts.svelte';
-	import { startThemeSync } from '#lib/theme.svelte.ts';
+	import { startThemeSync, themeState } from '#lib/theme.svelte.ts';
+	import LiquidBackground from '#lib/components/LiquidBackground.svelte';
 	import { QueryClientProvider } from '@tanstack/svelte-query';
 	import { createQueryClient } from '#lib/queries/client';
 
@@ -33,6 +34,9 @@
 <QueryClientProvider client={queryClient}>
 	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
+		<!-- The liquid-metal canvas is the dark-mode site background. Profiles keep
+			their own user-styled backgrounds, and light mode keeps its painted ones. -->
+		{#if !isProfilePage && themeState.value === 'dark'}<LiquidBackground />{/if}
 		{#if showsSiteChrome}<Nav />{/if}
 
 		<div class="app-workspace">
