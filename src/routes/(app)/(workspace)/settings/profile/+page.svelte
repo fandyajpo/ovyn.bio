@@ -18,9 +18,7 @@
 		};
 	} = $props();
 
-	const displayName = $derived(
-		data.profile.displayName || data.discord?.globalName || data.discord?.username || data.profile.slug
-	);
+	const displayName = $derived(data.profile.displayName || data.profile.slug);
 	let usernameStatus = $state('');
 	let usernameAvailable = $state<boolean | null>(null);
 	let usernameTimer: ReturnType<typeof setTimeout> | undefined;

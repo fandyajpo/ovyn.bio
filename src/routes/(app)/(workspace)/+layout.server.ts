@@ -17,7 +17,8 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 	return {
 		profileSlug: profile.slug,
 		currentPlan: plan,
-		userName: locals.user.name,
+		// Sidebar identity follows the database profile, not the sign-in account.
+		userName: profile.displayName ?? profile.slug,
 		userImage
 	};
 };

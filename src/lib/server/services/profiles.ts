@@ -74,11 +74,22 @@ async function ensureProfile(userId: string, fallbackName: string): Promise<void
 }
 
 /**
- * Sync Discord identity when available and ensure every OAuth user has a
- * profile with a unique slug. Runs inside Better Auth's session-create hook,
- * so failures must not block sign-in. ovyn profile details stay user-owned.
+ * Registers the provider identity exactly once. On the account's first
+ * sign-in the Discord identity is stored and the profile is seeded from it;
+ * every later sign-in touches nothing — no provider fetch, no writes — so the
+ * database is the only source of identity data after registration and ovyn
+ * details stay user-owned. Runs inside Better Auth's session-create hook, so
+ * failures must never block sign-in.
  */
 export async function provisionUser(userId: string): Promise<void> {
+	// Already registered: nothing to sync, nothing to fetch.
+	const [registered] = await db
+		.select({ id: discordAccounts.id })
+		.from(discordAccounts)
+		.where(eq(discordAccounts.userId, userId))
+		.limit(1);
+	if (registered) return;
+
 	const [acc] = await db
 		.select()
 		.from(account)
@@ -90,6 +101,7 @@ export async function provisionUser(userId: string): Promise<void> {
 		return;
 	}
 
+	// First registration: read the provider identity once and store it.
 	let discordUser: DiscordUser;
 	try {
 		discordUser = await fetchDiscordUser(acc.accessToken);
@@ -104,8 +116,6 @@ export async function provisionUser(userId: string): Promise<void> {
 		return;
 	}
 
-	const newDiscordName = discordUser.global_name ?? discordUser.username;
-
 	await db.transaction(async (tx) => {
 		// Lock the account row so two concurrent sign-ins don't race.
 		await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
@@ -118,39 +128,17 @@ export async function provisionUser(userId: string): Promise<void> {
 				username: discordUser.username,
 				globalName: discordUser.global_name
 			})
-			.onConflictDoUpdate({
-				target: discordAccounts.discordId,
-				set: {
-					userId,
-					username: discordUser.username,
-					globalName: discordUser.global_name,
-					updatedAt: new Date()
-				}
-			});
+			.onConflictDoNothing({ target: discordAccounts.discordId });
 
-		// Seed a profile from Discord on first sign-in; later profile edits are
-		// owned by the user and stay independent of Discord changes.
-		const [profile] = await tx
-			.select()
-			.from(profiles)
-			.where(eq(profiles.userId, userId))
-			.limit(1);
-
-		if (!profile) {
-			await tx
-				.insert(profiles)
-				.values({
-					userId,
-					slug: await availableSlug(tx, discordUser.username),
-					displayName: newDiscordName,
-					bio: discordUser.bio
-				})
-				.onConflictDoNothing({ target: profiles.userId });
-			return;
-		}
-
-		// Existing profile fields are ovyn-owned and are intentionally not
-		// overwritten when Discord identity data changes.
+		await tx
+			.insert(profiles)
+			.values({
+				userId,
+				slug: await availableSlug(tx, discordUser.username),
+				displayName: discordUser.global_name ?? discordUser.username,
+				bio: discordUser.bio
+			})
+			.onConflictDoNothing({ target: profiles.userId });
 	});
 }
 

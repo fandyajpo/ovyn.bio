@@ -11,7 +11,9 @@
 	const p = $derived.by(() => data.profile);
 	const displayName = $derived.by(() => {
 		const profile = data.profile;
-		return profile.displayName || data.discord?.globalName || data.discord?.username || profile.slug;
+		// The public page shows the database identity: the ovyn display name or
+		// the username. The sign-in provider's name is never substituted.
+		return profile.displayName || profile.slug;
 	});
 	const bannerIsVideo = $derived(data.bannerIsVideo);
 	const bannerVideoType = $derived(data.bannerVideoType);
