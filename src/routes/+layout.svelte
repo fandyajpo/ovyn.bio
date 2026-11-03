@@ -34,9 +34,17 @@
 <QueryClientProvider client={queryClient}>
 	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
-		<!-- The liquid-metal canvas is the dark-mode site background. Profiles keep
-			their own user-styled backgrounds, and light mode keeps its painted ones. -->
-		{#if !isProfilePage && themeState.value === 'dark'}<LiquidBackground />{/if}
+		<!-- The liquid-metal canvas is the site background. Profiles keep their own
+			user-styled backgrounds. Dark mode: black base, violet ribbon, copper-gold
+			highlights. Light mode: bone base, blue ribbon, orange highlights. -->
+		{#if !isProfilePage}
+			<LiquidBackground
+				baseColor={themeState.value === 'light' ? '#ebe7dc' : '#000000'}
+				colorA={themeState.value === 'light' ? '#3b74e8' : '#2b0a4d'}
+				colorB={themeState.value === 'light' ? '#e8853c' : '#c98a4a'}
+				rimColor={themeState.value === 'light' ? '#f6c9a8' : '#f2b8d9'}
+			/>
+		{/if}
 		{#if showsSiteChrome}<Nav />{/if}
 
 		<div class="app-workspace">

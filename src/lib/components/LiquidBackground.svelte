@@ -2,23 +2,36 @@
 	import { onMount } from 'svelte';
 
 	type Props = {
-		/** Deep violet body of the liquid metal. */
+		/** Deep violet body of the liquid metal (dark) / blue body (light). */
 		colorA?: string;
-		/** Copper-gold highlight colour. */
+		/** Copper-gold highlight colour (dark) / orange highlight (light). */
 		colorB?: string;
+		/** The flat page colour behind the ribbon: black (dark) or bone (light). */
+		baseColor?: string;
+		/** Pink-lavender (dark) / warm peach (light) fresnel edge reflections. */
+		rimColor?: string;
 		/** Flow speed multiplier; the shader time advances at this rate. */
 		speed?: number;
 		/** Overall brightness multiplier for the rendered liquid. */
 		intensity?: number;
 	};
 
-	let { colorA = '#2b0a4d', colorB = '#c98a4a', speed = 0.15, intensity = 1 }: Props = $props();
+	let {
+		colorA = '#2b0a4d',
+		colorB = '#c98a4a',
+		baseColor = '#000000',
+		rimColor = '#f2b8d9',
+		speed = 0.15,
+		intensity = 1
+	}: Props = $props();
 
 	let host = $state<HTMLDivElement | undefined>(undefined);
 	let canvas = $state<HTMLCanvasElement | undefined>(undefined);
 
 	const colorAv = $derived(hexToLinear(colorA, [0.16, 0.04, 0.3]));
 	const colorBv = $derived(hexToLinear(colorB, [0.8, 0.55, 0.3]));
+	const baseAv = $derived(hexToLinear(baseColor, [0, 0, 0]));
+	const rimAv = $derived(hexToLinear(rimColor, [0.95, 0.72, 0.85]));
 
 	function hexToLinear(hex: string, fallback: [number, number, number]): [number, number, number] {
 		const match = /^#?([0-9a-f]{6})$/i.exec(hex.trim());
@@ -39,6 +52,8 @@
 	uniform float u_time;
 	uniform vec3 u_colorA;
 	uniform vec3 u_colorB;
+	uniform vec3 u_base;
+	uniform vec3 u_rim;
 	uniform float u_speed;
 	uniform float u_intensity;
 
@@ -146,12 +161,13 @@
 
 		vec3 body = u_colorA * (0.35 + 0.65 * diffuse);
 		vec3 copper = u_colorB;
-		vec3 pink = vec3(1.0, 0.78, 0.92) * 0.85;
 
-		vec3 col = mix(u_colorA * 0.04, body, ribbonMask);
+		// The page colour shows through wherever the ribbon isn't, with a
+		// whisper of the surface variation so it never reads as flat paint.
+		vec3 col = mix(u_base * (0.96 + 0.08 * clamp(r.x * 0.5 + 0.5, 0.0, 1.0)), body, ribbonMask);
 		col += copper * specular * ribbonMask * 1.3;
 		col += copper * pow(clamp(r.x * 0.5 + 0.5, 0.0, 1.0), 3.0) * ribbonMask * 0.4;
-		col += pink * rim * (0.35 + 0.4 * ribbonMask);
+		col += u_rim * rim * (0.35 + 0.4 * ribbonMask);
 		col += vec3(1.0, 0.97, 0.9) * specular * ribbonMask * 0.4;
 
 		// A few droplets drift near the ribbon; cheap trig placement, no fbm.
@@ -283,6 +299,8 @@ const FRAGMENT_ES3 = `
 		const uTime = gl.getUniformLocation(program, 'u_time');
 		const uColorA = gl.getUniformLocation(program, 'u_colorA');
 		const uColorB = gl.getUniformLocation(program, 'u_colorB');
+		const uBase = gl.getUniformLocation(program, 'u_base');
+		const uRim = gl.getUniformLocation(program, 'u_rim');
 		const uSpeed = gl.getUniformLocation(program, 'u_speed');
 		const uIntensity = gl.getUniformLocation(program, 'u_intensity');
 
@@ -300,6 +318,8 @@ const FRAGMENT_ES3 = `
 			gl.uniform1f(uTime, time);
 			gl.uniform3f(uColorA, colorAv[0], colorAv[1], colorAv[2]);
 			gl.uniform3f(uColorB, colorBv[0], colorBv[1], colorBv[2]);
+			gl.uniform3f(uBase, baseAv[0], baseAv[1], baseAv[2]);
+			gl.uniform3f(uRim, rimAv[0], rimAv[1], rimAv[2]);
 			gl.uniform1f(uSpeed, speed);
 			gl.uniform1f(uIntensity, intensity);
 			gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -392,6 +412,8 @@ const FRAGMENT_ES3 = `
 		// Read the props here so the effect re-runs (and repaints) when they change.
 		void colorAv;
 		void colorBv;
+		void baseAv;
+		void rimAv;
 		void intensity;
 		drawRef?.(performance.now());
 	});
@@ -411,8 +433,13 @@ const FRAGMENT_ES3 = `
 		width: 100vw;
 		height: 100vh;
 		pointer-events: none;
-		/* Shown as-is when WebGL is unavailable. */
+		/* Flat colour behind the canvas: correct from the first paint, since it
+		   follows the html attribute set before hydration, not a reactive prop. */
 		background: #000;
+	}
+
+	:global(html[data-theme='light']) .liquid-host {
+		background: #ebe7dc;
 	}
 
 	.liquid-canvas {

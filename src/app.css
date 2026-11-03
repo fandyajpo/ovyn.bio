@@ -1566,15 +1566,20 @@ html[data-theme='light'] body {
 .app-frame[data-onboarding='true'] .page-container { max-width: none; }
 
 /*
- * Liquid-metal backdrop: in dark mode the LiquidBackground canvas (mounted
- * from +layout.svelte) is the page background, so the frame paints nothing
- * over it — this sits last so it also wins over the landing theme block. Cards
- * and surfaces stay token-driven and float above the liquid. Light mode keeps
- * its painted aurora/bone backgrounds, because its text is dark and would be
- * unreadable on the dark liquid. Public profiles never mount the canvas and
- * keep their own user-styled backdrops.
+ * Liquid-metal backdrop: the LiquidBackground canvas (mounted from
+ * +layout.svelte) is the page background in both themes — black with a violet
+ * ribbon and copper-gold highlights in dark mode, bone with a blue ribbon and
+ * orange highlights in light mode — so the frame paints nothing over it. These
+ * rules sit last so they also win over the landing theme blocks; cards and
+ * surfaces stay token-driven and float above the liquid. Public profiles never
+ * mount the canvas and keep their own user-styled backdrops.
  */
 html[data-theme='dark'] .app-frame:not([data-profile-page='true']) {
+	background-color: transparent;
+	background-image: none;
+}
+
+html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
 	background-color: transparent;
 	background-image: none;
 }
