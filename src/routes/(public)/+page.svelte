@@ -223,13 +223,8 @@
 			</Reveal>
 			<Reveal delay={210}>
 				<div class="flex flex-wrap items-center gap-3">
-					<span
-						class="landing-magnetic"
-						bind:this={magnetEl}
-						onpointermove={moveMagnet}
-						onpointerleave={resetMagnet}
-					>
-						<Button href="/login">Get started with Discord or Google</Button>
+					<span class="landing-magnetic" bind:this={magnetEl}>
+						<Button href="/login" onpointermove={moveMagnet} onpointerleave={resetMagnet}>Get started with Discord or Google</Button>
 					</span>
 					<Button href="/discover" variant="ghost">Find your circle <span aria-hidden="true">↗</span></Button>
 				</div>

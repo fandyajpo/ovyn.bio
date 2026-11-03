@@ -1,6 +1,5 @@
 import {
 	columnFilteringFeature,
-	createColumnHelper,
 	createFilteredRowModel,
 	createPaginatedRowModel,
 	createSortedRowModel,
@@ -8,7 +7,8 @@ import {
 	rowPaginationFeature,
 	rowSortingFeature,
 	sortFn_alphanumeric,
-	tableFeatures
+	tableFeatures,
+	type ColumnDef
 } from '@tanstack/svelte-table';
 import { formatDay } from '#lib/utils/date';
 
@@ -65,39 +65,43 @@ export const catalogTableFeatures = tableFeatures({
 	sortFns: { alphanumeric: sortFn_alphanumeric }
 });
 
-const columnHelper = createColumnHelper<typeof catalogTableFeatures, CatalogRow>();
-
 /** Headless column definitions: the page keeps all of the markup and styling. */
-export const catalogColumns = [
-	columnHelper.accessor((row) => row.product.name, {
+export const catalogColumns: ColumnDef<typeof catalogTableFeatures, CatalogRow>[] = [
+	{
 		id: 'product',
+		accessorFn: (row) => row.product.name,
 		header: 'Product',
 		filterFn: 'includesString',
 		sortFn: 'alphanumeric'
-	}),
-	columnHelper.accessor((row) => typeLabel(row), {
+	},
+	{
 		id: 'type',
+		accessorFn: (row) => typeLabel(row),
 		header: 'Type',
 		sortFn: 'alphanumeric'
-	}),
-	columnHelper.accessor((row) => row.product.price, {
+	},
+	{
 		id: 'price',
+		accessorFn: (row) => row.product.price,
 		header: 'Price',
 		enableSorting: false
-	}),
-	columnHelper.accessor((row) => availability(row), {
+	},
+	{
 		id: 'availability',
+		accessorFn: (row) => availability(row),
 		header: 'Availability',
 		enableSorting: false
-	}),
-	columnHelper.accessor((row) => (row.product.active ? 'active' : 'inactive'), {
+	},
+	{
 		id: 'status',
+		accessorFn: (row) => (row.product.active ? 'active' : 'inactive'),
 		header: 'Status',
 		sortFn: 'alphanumeric'
-	}),
-	columnHelper.accessor((row) => row.product.updatedAt, {
+	},
+	{
 		id: 'updated',
+		accessorFn: (row) => row.product.updatedAt,
 		header: 'Updated',
 		enableSorting: false
-	})
+	}
 ];

@@ -31,11 +31,11 @@ export const actions: Actions = {
 			return message(form, 'Link added.');
 		} catch (err) {
 			if (err instanceof AppError) {
-				message(form, err.message, { status: err.status });
+				message(form, err.message);
 				return fail(err.status, { form });
 			}
 			console.error(err);
-			message(form, 'Could not add this link', { status: 500 });
+			message(form, 'Could not add this link');
 			return fail(500, { form });
 		}
 	},
