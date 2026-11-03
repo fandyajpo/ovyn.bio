@@ -16,7 +16,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	]);
 
 	return {
-		discord: discord ?? null,
+		discord: discord[0] ?? null,
 		userName: locals.user.name,
 		avatarUrl: profile.avatarKey ? await presignDownload(profile.avatarKey) : null
 	};
