@@ -13,8 +13,13 @@ minimumReleaseAgeExclude:
   - '@voidzero-dev/vite-plus-core@1.4.0'
   - better-auth@1.7.15
   - vite-plus@1.4.0
+  - '@tanstack/query-core@5.105.3'
+  - '@tanstack/svelte-query@6.3.9'
 
 overrides:
   # SvelteKit and the Vite plugins import `vite`; point them at the Vite+ core.
   # Keep this version in step with the vite-plus version in package.json.
   vite@*: npm:@voidzero-dev/vite-plus-core@1.4.0
+permissions:
+  '@tanstack/svelte-table':
+    skills: false
