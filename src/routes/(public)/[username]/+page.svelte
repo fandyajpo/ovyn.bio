@@ -41,7 +41,9 @@
 				url: profileUrl
 			}
 		});
-		return `<script type="application/ld+json">${payload}<\/script>`;
+		// Svelte's scanner ends the component script at the first "</script" sequence,
+		// even inside a string, so the closing tag is assembled from two pieces.
+		return `<script type="application/ld+json">${payload}</` + `script>`;
 	});
 </script>
 
