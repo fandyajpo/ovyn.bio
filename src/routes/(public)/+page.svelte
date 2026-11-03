@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import LandingDemo from '#lib/components/LandingDemo.svelte';
+	import LivingSnail from '#lib/components/LivingSnail.svelte';
 	import PixelButterfly from '#lib/components/PixelButterfly.svelte';
 	import Reveal from '#lib/components/Reveal.svelte';
 	import { slide } from 'svelte/transition';
@@ -201,6 +202,7 @@
 		<div class="landing-orbit landing-orbit--two" style={`--parallax-y: ${-parallaxY * 0.55}px`}></div>
 	</div>
 	<PixelButterfly />
+	<LivingSnail />
 	<div class="relative grid items-center gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 lg:py-20">
 		<div class="flex flex-col items-start gap-6">
 			<Reveal>

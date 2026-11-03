@@ -109,7 +109,12 @@ footer, while the landing hero has a small pixel butterfly that drifts to random
 spots; both stand still for visitors who prefer reduced motion. The butterfly is
 a canvas simulation: a detailed monarch sprite built from fine generated pixels,
 steered by a small velocity and noise model that cruises, hovers and darts, with
-wing beats that squash into perspective. Every page wears
+wing beats that squash into perspective. The hero is also home to a living pixel
+snail: a generated spiral shell with growth rings and ambient occlusion, a
+translucent muscular foot, four independently swaying tentacles and a small
+behaviour system that crawls, explores, rests and goes alert at its own pace,
+turning away from the edges and settling in place when motion is reduced.
+Every page wears
 a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
 it, so the dark palette glows lime and the cream palette warms into gold, pink
 and teal; public profiles keep their own backgrounds and opt out. Profile
