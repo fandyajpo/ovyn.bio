@@ -21,11 +21,13 @@
 		let cancelled = false;
 		void (async () => {
 			try {
-				const res = await fetch('/api/auth/get-session', { headers: { accept: 'application/json' } });
+				// /api/me resolves the same avatar the public page shows, so an
+				// uploaded picture wins over the provider's image.
+				const res = await fetch('/api/me', { headers: { accept: 'application/json' } });
 				if (res.ok) {
-					const body = (await res.json()) as { user?: { name?: string; image?: string | null } } | null;
-					const name = body?.user?.name;
-					if (!cancelled && name) viewer = { name, image: body?.user?.image ?? null };
+					const body = (await res.json()) as { viewer?: { name?: string; image?: string | null } | null };
+					const name = body?.viewer?.name;
+					if (!cancelled && name) viewer = { name, image: body?.viewer?.image ?? null };
 				}
 			} catch {
 				// A failed check simply leaves the signed-out actions in place.
