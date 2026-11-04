@@ -1,12 +1,73 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import Badge from '#lib/components/ui/Badge.svelte';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Tooltip from '#lib/components/ui/Tooltip.svelte';
 	import { formatDate, formatIdr } from '#lib/utils';
+	import { formatFileSize } from '#lib/media/categories';
 
 	let { data }: { data: PageData } = $props();
+
+	type MediaReport = {
+		totalObjects: number;
+		totalBytes: number;
+		bytesByCategory: Record<string, number>;
+		largest: Array<{ key: string; sizeBytes: number }>;
+		queue: { pending: number; failed: number; done: number };
+		orphanCandidates: string[];
+	};
+
+	let mediaReport = $state<MediaReport | null>(null);
+	let mediaBusy = $state('');
+	let mediaMessage = $state('');
+
+	async function loadMediaReport() {
+		mediaBusy = 'load';
+		try {
+			const response = await fetch('/api/admin/media');
+			if (!response.ok) throw new Error('The storage report is unavailable.');
+			mediaReport = await response.json();
+		} catch {
+			mediaReport = null;
+		} finally {
+			mediaBusy = '';
+		}
+	}
+
+	async function runMediaAction(action: 'process' | 'enqueue-orphans') {
+		mediaBusy = action;
+		mediaMessage = '';
+		try {
+			const response = await fetch('/api/admin/media', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ action, limit: 100 })
+			});
+			const payload = (await response.json().catch(() => ({}))) as {
+				ok?: boolean;
+				queued?: number;
+				error?: string;
+			};
+			if (!response.ok || !payload.ok) {
+				throw new Error(payload.error ?? 'The cleanup action failed.');
+			}
+			mediaMessage =
+				action === 'enqueue-orphans'
+					? `Queued ${payload.queued ?? 0} orphaned object${(payload.queued ?? 0) === 1 ? '' : 's'} for verified deletion.`
+					: 'The cleanup queue was processed.';
+			await loadMediaReport();
+		} catch (err) {
+			mediaMessage = err instanceof Error ? err.message : 'The cleanup action failed.';
+		} finally {
+			mediaBusy = '';
+		}
+	}
+
+	onMount(() => {
+		void loadMediaReport();
+	});
 
 	function statusTone(status: string): 'lime' | 'warning' | 'danger' | 'neutral' {
 		if (['succeeded', 'paid', 'completed'].includes(status)) return 'lime';
@@ -69,7 +130,7 @@
 				<Card class="border-pop-lilac/25 bg-pop-lilac/[0.04] p-4 sm:p-5">
 					<div class="flex items-start justify-between gap-3">
 						<div class="flex items-center gap-2">
-							<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Paid orders</p>
+							<p class="font-mono text-[10px] tracking-wider text-neutral-400">Paid orders</p>
 							<Tooltip label="Paid order details" content="Orders whose DOKU payment status is marked successful." />
 						</div>
 						<span class="grid size-9 place-items-center rounded-xl bg-pop-lilac/15 text-lg text-pop-lilac" aria-hidden="true">↗</span>
@@ -80,7 +141,7 @@
 
 				<Card class="border-pop-pink/25 bg-pop-pink/[0.04] p-4 sm:p-5">
 					<div class="flex items-start justify-between gap-3">
-						<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Confirmed revenue</p>
+						<p class="font-mono text-[10px] tracking-wider text-neutral-400">Confirmed revenue</p>
 						<span class="grid size-9 place-items-center rounded-xl bg-pop-pink/15 text-lg text-pop-pink" aria-hidden="true">$</span>
 					</div>
 					<p class="mt-3 break-words font-[family-name:var(--font-display)] text-2xl font-bold text-pop-pink sm:text-3xl">{formatIdr(data.overview.paidRevenue)}</p>
@@ -126,7 +187,7 @@
 				</div>
 				<div class="hidden overflow-x-auto lg:block">
 					<table class="w-full min-w-[48rem] text-left text-sm">
-						<thead class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">
+						<thead class="font-mono text-[10px] tracking-wider text-neutral-500">
 							<tr><th scope="col" class="px-5 py-3">Item</th><th scope="col" class="px-5 py-3">Buyer</th><th scope="col" class="px-5 py-3">Amount</th><th scope="col" class="px-5 py-3">Status</th><th scope="col" class="px-5 py-3">Date</th></tr>
 						</thead>
 						<tbody class="divide-y divide-neutral-800">
@@ -166,6 +227,44 @@
 						Sales analytics <span aria-hidden="true">↗</span>
 					</a>
 				</div>
+			</Card>
+
+			<Card class="border-neutral-800/60 bg-neutral-950/30 p-5">
+				<span class="sticker sticker--dark">STORAGE HOUSEKEEPING</span>
+				{#if mediaReport}
+					<p class="mt-4 text-sm text-neutral-400">
+						{mediaReport.totalObjects} object{mediaReport.totalObjects === 1 ? '' : 's'} · {formatFileSize(mediaReport.totalBytes)}
+					</p>
+					<p class="mt-1 text-xs text-neutral-500">
+						Cleanup queue: {mediaReport.queue.pending} pending, {mediaReport.queue.failed} failed, {mediaReport.queue.done} done
+					</p>
+					<p class="mt-1 text-xs text-neutral-500">
+						{mediaReport.orphanCandidates.length} unreferenced candidate{mediaReport.orphanCandidates.length === 1 ? '' : 's'} — every one is re-verified against live references before deletion
+					</p>
+				{:else if mediaBusy === 'load'}
+					<p class="mt-4 text-sm text-neutral-500">Loading the storage report…</p>
+				{:else}
+					<p class="mt-4 text-sm text-neutral-500">The storage report is unavailable.</p>
+				{/if}
+				<div class="mt-4 flex flex-col gap-2">
+					<Button
+						variant="secondary"
+						onclick={() => runMediaAction('enqueue-orphans')}
+						loading={mediaBusy === 'enqueue-orphans'}
+					>
+						Queue unreferenced files for deletion
+					</Button>
+					<Button
+						variant="ghost"
+						onclick={() => runMediaAction('process')}
+						loading={mediaBusy === 'process'}
+					>
+						Retry the cleanup queue
+					</Button>
+				</div>
+				{#if mediaMessage}
+					<p class="mt-3 text-xs text-neutral-400" role="status">{mediaMessage}</p>
+				{/if}
 			</Card>
 		</aside>
 	</div>

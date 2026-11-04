@@ -355,7 +355,8 @@ All uploads share one pipeline instead of per-page logic:
 - `GET /api/admin/media` returns the dry-run storage report (totals, bytes by
   category, largest assets, queue state, unreferenced objects) and
   `POST /api/admin/media` retries the queue or queues orphaned objects (max 500
-  per call) for verified deletion. Platform admin only.
+  per call) for verified deletion. Platform admin only; the admin dashboard
+  shows the same report with buttons for both actions.
 
 Deliberately deferred: server-side re-encoding with Sharp. Bytes go directly
 from the browser to storage through a signed PUT, so routing 25 MB files through
