@@ -14,7 +14,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const [links, form] = await Promise.all([
 		listProfileLinks(locals.user.id),
-		superValidate({ provider: 'instagram' as const, url: '' }, linkFormAdapter)
+		superValidate(linkFormAdapter)
 	]);
 	return { links, form };
 };

@@ -1452,6 +1452,18 @@ html[data-theme='light'] .app-frame[data-liquid='true'] {
 }
 
 /*
+ * Landing eyebrow: the small mono caption above headlines. The landing scopes
+ * its own richer version, so this keeps the class legible wherever else it
+ * appears (the upgrade page) instead of leaving bare uppercase text.
+ */
+.landing-eyebrow {
+	color: var(--color-muted);
+	font-family: var(--font-mono);
+	font-size: 0.66rem;
+	letter-spacing: 0.1em;
+}
+
+/*
  * Liquid glass: cards read as frosted panes over the liquid everywhere it
  * runs — a thinner veil of the surface colour plus a backdrop blur that
  * keeps the ribbon calm behind text. Both themes; the veil is token-driven

@@ -4,7 +4,7 @@
 	import LinkProviderIcon from '#lib/components/LinkProviderIcon.svelte';
 	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
 	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
-	import { formatDate } from '#lib/utils';
+	import { formatDay } from '#lib/utils';
 
 	let { data } = $props();
 
@@ -167,7 +167,7 @@
 			{/if}
 
 			<footer class="profile-signoff">
-				<p>Here since {formatDate(p.createdAt)}</p>
+				<p>Here since {formatDay(p.createdAt)}</p>
 				<span>ovyn · your identity, out in the world</span>
 			</footer>
 			{#if data.viewerTracked}<p class="profile-view-note">Signed-in visits may appear in this profile's analytics.</p>{/if}

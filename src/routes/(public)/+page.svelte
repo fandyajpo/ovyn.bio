@@ -284,7 +284,7 @@
 				<article class="create-card">
 					<h3 class="font-medium text-neutral-100">{item.title}</h3>
 					<p class="mt-2 text-sm leading-6 text-neutral-400">{item.copy}</p>
-					<p class="mt-4 font-mono text-[10px] uppercase tracking-wider text-neutral-500">{item.tag}</p>
+					<p class="mt-4 font-mono text-[10px] tracking-wider text-neutral-500">{item.tag}</p>
 				</article>
 			</Reveal>
 		{/each}

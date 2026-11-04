@@ -46,7 +46,7 @@
 	<div class="responsive-grid-container">
 		<div class="adaptive-metrics grid gap-4">
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your identity</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Your identity</p>
 			<div class="mt-3 flex items-center gap-3">
 				<Avatar name={data.profile.displayName || data.profile.slug} src={data.avatarUrl} size="md" />
 				<div>
@@ -61,7 +61,7 @@
 		</Card>
 
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your circle</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Your circle</p>
 			{#if data.guild}
 				<a href="/guild" class="mt-3 block font-medium text-lime-300 hover:underline">{data.guild.name}</a>
 				<p class="font-mono text-xs text-neutral-500">Joined {formatDate(data.membership?.joinedAt ?? data.guild.createdAt)}</p>
@@ -75,7 +75,7 @@
 		</Card>
 
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Billing</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Billing</p>
 			{#if data.pendingOrder}
 				<a href="/checkout/{data.pendingOrder.id}" class="mt-3 block font-medium text-amber-300 hover:underline">
 					Pending payment: {formatIdr(data.pendingOrder.amount)}
@@ -91,7 +91,7 @@
 	<div class="responsive-grid-container">
 		<div class="adaptive-metrics grid gap-4">
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Daily check-in</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Daily check-in</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.rewards.streakCount} day streak</p>
 			<p class="mt-1 text-sm text-neutral-400">{data.rewards.points} ovyn points · +{data.rewardValues.dailyCheckin} daily, +{data.rewardValues.weeklyStreakBonus} every 7-day streak</p>
 			{#if form?.checkin}
@@ -108,14 +108,14 @@
 		</Card>
 
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile views · 30 days</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Profile views · 30 days</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-2xl font-bold">{data.analytics.views} views</p>
 			<p class="mt-1 text-sm text-neutral-400">{data.analytics.uniqueVisitors} unique signed-in visitors</p>
 			<a href="/account/analytics" class="mt-3 inline-block text-sm text-lime-300 hover:underline">View analytics</a>
 		</Card>
 
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Invite friends</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Invite friends</p>
 			<p class="mt-2 text-sm text-neutral-400">They earn {data.rewardValues.referral} points after their first check-in; you earn the same.</p>
 			<p class="mt-2 text-xs text-neutral-500">
 				{data.referralSummary.rewarded} rewarded · {data.referralSummary.pending} awaiting first check-in

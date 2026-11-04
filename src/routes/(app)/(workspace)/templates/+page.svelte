@@ -32,7 +32,7 @@
 	{#if data.appliedTemplate}
 		<Card class="flex flex-wrap items-center justify-between gap-4 border-lime-300/30 p-5">
 			<div>
-				<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">Applied layout</p>
+				<p class="font-mono text-[10px] tracking-wider text-neutral-500">Applied layout</p>
 				<p class="mt-1 font-medium text-neutral-100">{data.appliedTemplate.name}</p>
 				<p class="text-xs text-neutral-500">{data.appliedTemplate.theme} · live on your public page</p>
 			</div>

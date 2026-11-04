@@ -19,11 +19,11 @@
 	<div class="responsive-grid-container">
 		<div class="adaptive-stats grid gap-4">
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Signed-in visits</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Signed-in visits</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold">{data.analytics.views}</p>
 		</Card>
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Unique visitors</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Unique visitors</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold">{data.analytics.uniqueVisitors}</p>
 		</Card>
 		</div>

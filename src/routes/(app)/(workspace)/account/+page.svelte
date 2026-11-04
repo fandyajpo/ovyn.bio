@@ -5,7 +5,7 @@
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import ShareProfileSheet from '#lib/components/ShareProfileSheet.svelte';
-	import { formatDate } from '#lib/utils';
+	import { formatDate, formatDay } from '#lib/utils';
 
 	let { data }: { data: PageData } = $props();
 	let shareOpen = $state(false);
@@ -43,7 +43,7 @@
 				<div class="min-w-0 flex-1">
 					<p class="truncate font-[family-name:var(--font-display)] text-xl font-semibold">{data.profile.displayName || data.profile.slug}</p>
 					<p class="font-mono text-sm text-lime-300">ovyn.me/{data.profile.slug}</p>
-					<p class="text-xs text-neutral-500">{data.profile.visibility === 'public' ? 'Public page' : 'Private page'} · member since {formatDate(data.profile.createdAt)}</p>
+					<p class="text-xs text-neutral-500">{data.profile.visibility === 'public' ? 'Public page' : 'Private page'} · member since {formatDay(data.profile.createdAt)}</p>
 				</div>
 			</div>
 			<p class="text-sm text-neutral-400">{data.profile.bio || 'Add a short bio to make your page feel like you.'}</p>
@@ -56,7 +56,7 @@
 
 		<Card class="flex flex-col gap-3 p-5">
 			<div class="flex items-center justify-between gap-3">
-				<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Current plan</p>
+				<p class="font-mono text-xs tracking-wider text-neutral-500">Current plan</p>
 				<span class="sticker {data.plan.tier === 'premium' ? 'sticker--lilac' : 'sticker--blue'}">{data.plan.tier}</span>
 			</div>
 			<p class="font-[family-name:var(--font-display)] text-2xl font-bold">{data.plan.tier === 'premium' ? 'Premium' : 'Free'}</p>
@@ -71,7 +71,7 @@
 
 	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Your circle</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Your circle</p>
 			{#if data.circle}
 				<p class="mt-2 truncate font-[family-name:var(--font-display)] text-2xl font-bold">{data.circle.guild.name}</p>
 				<p class="text-sm text-neutral-500">Your role: {data.circle.membership.role}</p>
@@ -82,18 +82,18 @@
 			{/if}
 		</Card>
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile views · 30 days</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Profile views · 30 days</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold">{data.analytics.views}</p>
 			<p class="text-sm text-neutral-500">{data.analytics.uniqueVisitors} unique visitors</p>
 			<a href="/account/analytics" class="mt-3 inline-block text-sm text-lime-300 hover:underline">Open analytics</a>
 		</Card>
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Profile badges</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Profile badges</p>
 			<p class="mt-2 font-[family-name:var(--font-display)] text-3xl font-bold">{data.owned.badges.length}</p>
 			<a href="/account/badges" class="mt-3 inline-block text-sm text-lime-300 hover:underline">View badges</a>
 		</Card>
 		<Card class="p-5">
-			<p class="font-mono text-xs uppercase tracking-wider text-neutral-500">Templates</p>
+			<p class="font-mono text-xs tracking-wider text-neutral-500">Templates</p>
 			<p class="mt-2 text-sm text-neutral-300">Save your look or try a community style.</p>
 			<a href="/templates" class="mt-3 inline-block text-sm text-lime-300 hover:underline">Browse templates</a>
 		</Card>

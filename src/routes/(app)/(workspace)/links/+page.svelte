@@ -238,11 +238,11 @@
 							label={link.label}
 							onarrow={(direction) => moveByOne(link.id, direction)}
 						>
-							<div class="flex min-w-0 flex-1 items-start justify-between gap-3">
+							<div class="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
 								<div class="flex min-w-0 items-center gap-3">
 									<LinkProviderIcon provider={link.provider} />
 									<div class="min-w-0">
-										<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-500">{providerLabel(link.provider)}</p>
+										<p class="font-mono text-[10px] tracking-wider text-neutral-500">{providerLabel(link.provider)}</p>
 										<a href={link.url} target="_blank" rel="noopener noreferrer nofollow" class="mt-1 block truncate font-medium text-lime-300 hover:underline">{link.label}</a>
 									</div>
 								</div>

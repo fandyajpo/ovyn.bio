@@ -23,7 +23,7 @@
 
 <div class="mx-auto flex max-w-5xl flex-col gap-8 py-3">
 	<div class="max-w-2xl">
-		<p class="landing-eyebrow">PLANS THAT STAY SIMPLE</p>
+		<p class="landing-eyebrow">Plans that stay simple</p>
 		<h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">Your space, your choice.</h1>
 		<p class="mt-3 text-sm leading-7 text-neutral-400">Start free. Premium is Rp 30.000 a month: 30 days per payment, renewed by hand, with no automatic charge.</p>
 	</div>
@@ -32,7 +32,7 @@
 
 	<Card class="flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between">
 		<div>
-			<p class="text-xs font-medium uppercase tracking-[0.16em] text-neutral-500">Your current plan</p>
+			<p class="text-xs font-medium tracking-[0.16em] text-neutral-500">Your current plan</p>
 			<p class="mt-1 text-xl font-semibold">{data.plan.tier === 'premium' ? 'ovyn Premium' : 'ovyn Free'}</p>
 		</div>
 		{#if data.plan.tier === 'premium'}
@@ -48,7 +48,7 @@
 
 	<div class="grid gap-5 md:grid-cols-2">
 		<Card class="plan-card flex flex-col gap-5 p-6 sm:p-8">
-			<div><p class="landing-eyebrow">THE ESSENTIALS</p><h2 class="mt-2 text-2xl font-semibold">Free</h2></div>
+			<div><p class="landing-eyebrow">The essentials</p><h2 class="mt-2 text-2xl font-semibold">Free</h2></div>
 			<p class="text-3xl font-semibold">Rp 0 <span class="text-sm font-normal text-neutral-500">forever</span></p>
 			<ul class="plan-feature-list">
 				{#each freeFeatures as feature (feature)}<li><span aria-hidden="true">✓</span>{feature}</li>{/each}
@@ -58,7 +58,7 @@
 
 		<Card class="plan-card plan-card--premium flex flex-col gap-5 p-6 sm:p-8">
 			<div class="flex items-start justify-between gap-4">
-				<div><p class="landing-eyebrow">THE FULL TOOLKIT</p><h2 class="mt-2 text-2xl font-semibold">Premium</h2></div>
+				<div><p class="landing-eyebrow">The full toolkit</p><h2 class="mt-2 text-2xl font-semibold">Premium</h2></div>
 				<span class="premium-mark">30 DAYS</span>
 			</div>
 			<p class="text-3xl font-semibold">Rp 30.000 <span class="text-sm font-normal text-neutral-500">per month</span></p>

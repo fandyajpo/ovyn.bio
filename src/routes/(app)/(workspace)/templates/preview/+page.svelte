@@ -82,7 +82,6 @@
 		font-family: var(--font-mono);
 		font-size: 0.65rem;
 		letter-spacing: 0.12em;
-		text-transform: uppercase;
 	}
 
 	.preview-state.is-live {

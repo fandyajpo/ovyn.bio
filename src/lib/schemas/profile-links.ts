@@ -60,7 +60,7 @@ export const PROFILE_LINK_PROVIDER_LABELS: Record<ProfileLinkProvider, string> =
 };
 
 const profileLinkFields = {
-	provider: z.enum(PROFILE_LINK_PROVIDER_IDS),
+	provider: z.enum(PROFILE_LINK_PROVIDER_IDS).default('instagram'),
 	url: z.string().trim().min(1, 'Enter a link or address').max(2048),
 	label: z.string().trim().max(48).default('')
 };
