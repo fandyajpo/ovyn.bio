@@ -224,60 +224,38 @@ export type CreatureArt = {
 	glow: boolean;
 };
 
-const DRAGONFLY_BODY: Palette = [
-	[20, 42, 48],
-	[30, 68, 76],
-	[44, 98, 106],
-	[64, 132, 134],
-	[104, 168, 160],
-	[168, 206, 188]
-];
-const DRAGONFLY_WING: Palette = [
-	[92, 136, 150],
-	[124, 172, 182],
-	[160, 200, 202],
-	[198, 224, 220],
-	[228, 240, 232]
-];
-const BAT_BODY: Palette = [
-	[20, 17, 26],
-	[34, 28, 42],
-	[52, 42, 58],
-	[74, 58, 74],
-	[98, 76, 84],
-	[132, 100, 100]
-];
-const EAGLE_BODY: Palette = [
-	[38, 26, 16],
-	[60, 40, 22],
-	[88, 58, 30],
-	[120, 80, 42],
-	[156, 108, 60],
-	[196, 148, 94]
-];
-const EAGLE_HEAD: Palette = [
-	[176, 168, 148],
-	[208, 202, 182],
-	[230, 226, 208],
-	[244, 242, 232],
-	[252, 250, 244]
-];
-const CROW: Palette = [
-	[12, 14, 20],
-	[20, 24, 32],
-	[30, 36, 48],
-	[44, 52, 68],
-	[64, 74, 92],
-	[96, 108, 128]
-];
-const PARROT: Palette = [
-	[74, 14, 24],
-	[118, 20, 32],
-	[164, 28, 40],
-	[198, 50, 52],
-	[226, 92, 84],
-	[246, 144, 122]
-];
+// Dragonfly — sunset wings and a striped body, from the reference.
+const DF_DARK: Rgb = [36, 16, 14];
+const DF_RED: Rgb = [212, 64, 44];
+const DF_ORANGE: Rgb = [244, 140, 56];
+const DF_AMBER: Rgb = [250, 196, 108];
+const DF_PINK: Rgb = [240, 130, 130];
+const DF_TEAL: Rgb = [110, 180, 170];
+const DF_SMOKE: Rgb = [64, 46, 46];
+// Bat — charcoal membrane wings and fluffy grey fur, from the reference.
+const BAT_DARK: Rgb = [30, 30, 34];
+const BAT_MEMBRANE: Rgb = [40, 40, 46];
+const BAT_LIGHT: Rgb = [76, 76, 84];
+const BAT_FUR: Rgb = [66, 66, 74];
+const BAT_FANG: Rgb = [232, 228, 216];
+// Eagle — bald plumage: dark brown flight feathers, white head and fanned tail.
+const EAGLE_DARK: Rgb = [52, 32, 18];
+const EAGLE_BROWN: Rgb = [96, 58, 30];
+const EAGLE_LIGHT: Rgb = [150, 102, 56];
+const EAGLE_CREAM: Rgb = [236, 230, 216];
+const EAGLE_BEAK: Rgb = [232, 178, 52];
+// Crow — black with an iridescent blue sheen, from the reference.
+const CROW_DARK: Rgb = [16, 17, 22];
+const CROW_MID: Rgb = [30, 32, 42];
+const CROW_LIGHT: Rgb = [52, 56, 70];
+const CROW_SHEEN: Rgb = [70, 92, 118];
+// Parrot — scarlet with a yellow crown and blue flight feathers.
+const PAR_RED: Rgb = [196, 44, 52];
+const PAR_RED_DARK: Rgb = [140, 24, 34];
+const PAR_YELLOW: Rgb = [248, 204, 80];
+const PAR_BLUE: Rgb = [64, 98, 168];
+const PAR_BEAK: Rgb = [160, 150, 138];
+const PAR_FACE: Rgb = [232, 224, 208];
 const COCKATOO: Palette = [
 	[112, 106, 104],
 	[150, 142, 138],
@@ -330,79 +308,69 @@ const HORN: Rgb = [222, 208, 174];
 const BEAK: Rgb = [226, 168, 58];
 
 // ---------------------------------------------------------------------------
-// The landing butterfly, ported. Its wing and body painters are the quality
-// bar every species in this flock aims at, so the monarch itself joins it.
+// The Great Mormon, rebuilt from the owner's reference: cream forewings with
+// black veins and scalloped spotted margins, red hindwing spots, swallowtail
+// tails, and a slender dark body. The craft bar every species aims at.
 // ---------------------------------------------------------------------------
 
-const MONARCH_WING_INK: Rgb = [34, 22, 12];
-const MONARCH_WING_DARK: Rgb = [154, 64, 24];
-const MONARCH_WING_MID: Rgb = [214, 104, 40];
-const MONARCH_WING_LIGHT: Rgb = [244, 146, 66];
-const MONARCH_WING_PALE: Rgb = [255, 186, 112];
-const MONARCH_WING_SPOT: Rgb = [255, 232, 190];
-const MONARCH_VEIN_ANGLES = [-1.15, -0.85, -0.55, -0.28, 0.02, 0.32, 0.62];
-const MONARCH_WING_SPOTS: Array<[number, number]> = [
-	[20, -0.95],
-	[22, -0.62],
-	[18, -1.18],
-	[15, 0.38],
-	[18, 0.66],
-	[11, -0.18]
-];
-const MONARCH_BODY_TONE: Rgb = [62, 40, 22];
-const MONARCH_BODY_DARK: Rgb = [38, 24, 14];
-const MONARCH_BODY_LIGHT: Rgb = [112, 74, 40];
+const MORMON_INK: Rgb = [30, 22, 16];
+const MORMON_CREAM: Rgb = [250, 244, 226];
+const MORMON_CREAM_DIM: Rgb = [224, 214, 190];
+const MORMON_RED: Rgb = [186, 42, 36];
+const MORMON_BODY_TONE: Rgb = [58, 40, 28];
+const MORMON_BODY_DARK: Rgb = [34, 23, 16];
+const MORMON_BODY_LIGHT: Rgb = [96, 70, 48];
 
-/** The landing butterfly's wing: two lobes around the hinge, in hinge-relative units. */
-function monarchWing(x: number, ly: number): [Rgb, number?] | null {
-	if (!insideMonarchWing(x, ly)) return null;
+function insideMormonWing(u: number, v: number) {
+	// Fore lobe (swept forward) and hind lobe, plus the twin swallowtail
+	// tails trailing rearward.
+	if (ellipse(u, v, 13, 12, 13, 12, -0.28) <= 1) return true;
+	if (ellipse(u, v, -5, 16, 10, 8.4, 0.12) <= 1) return true;
+	if (segHit(u, v, -6, 15, -20, 18) || segHit(u, v, -8, 19, -21, 23)) return true;
+	return false;
+}
 
-	const edge =
-		!insideMonarchWing(x - 1, ly) || !insideMonarchWing(x + 1, ly) || !insideMonarchWing(x, ly - 1) || !insideMonarchWing(x, ly + 1);
-	if (edge) return [MONARCH_WING_INK];
+function paintButterflyWing(u: number, v: number): [Rgb, number?] | null {
+	if (!insideMormonWing(u, v)) return null;
 
-	const radius = Math.hypot(x, ly);
-	const angle = Math.atan2(ly, x);
-	const fore = ellipse(x, ly, 17, -12, 20, 12, -0.4);
-	const hind = ellipse(x, ly, 12, 6, 15, 11, 0.3);
+	const fore = ellipse(u, v, 13, 12, 13, 12, -0.28);
+	const hind = ellipse(u, v, -5, 16, 10, 8.4, 0.12);
+	const onFore = fore <= 1;
 
-	let base: Rgb = radius < 9 ? MONARCH_WING_DARK : radius < 17 ? MONARCH_WING_MID : MONARCH_WING_LIGHT;
-
-	// Veins radiate from the hinge, fanning across the wing.
-	if (radius > 5 && MONARCH_VEIN_ANGLES.some((candidate) => Math.abs(deltaAround(angle, candidate)) < 0.028)) {
-		return [mix(MONARCH_WING_INK, [255, 250, 240], 0.14)];
-	}
-
-	// Concentric scale bands give the wing its layered texture.
-	const band = (radius - 6) % 6.5;
-	if (radius > 8 && band >= 0 && band < 0.6) base = mix(base, MONARCH_WING_DARK, 0.16);
-
-	// Cream spots ringed along the wing edge.
-	for (const [spotRadius, spotAngle] of MONARCH_WING_SPOTS) {
-		if (Math.abs(radius - spotRadius) < 1.4 && Math.abs(deltaAround(angle, spotAngle)) < 0.1) {
-			return [MONARCH_WING_SPOT];
+	// Swallowtail tails: black ribbons with a cream spine.
+	if (segHit(u, v, -6, 15, -20, 18) || segHit(u, v, -8, 19, -21, 23)) {
+		if (segHit(u, v, -8, 17.2, -19, 19.8) || segHit(u, v, -10, 21.4, -20, 23)) {
+			return [MORMON_CREAM_DIM, 1];
 		}
+		return [MORMON_INK, 1];
 	}
 
-	if (hind <= 1 && fore > 1) base = mix(base, MONARCH_WING_DARK, 0.08);
-	if (ly < -4 && grain(x, ly) > 0.87) base = MONARCH_WING_PALE;
-	if (radius > 23 && grain(x, ly) > 0.55) base = mix(base, [255, 250, 240], 0.12);
-	if (grain(x, ly) > 0.94) base = mix(base, MONARCH_WING_DARK, 0.1);
+	// Margin: the scalloped black border.
+	const margin = 0.09 + Math.abs(Math.sin(u * 0.85 + v * 0.7 + (onFore ? 0 : 2.1))) * 0.03;
+	if (onFore ? fore > 1 - margin : hind > 1 - margin - 0.02) {
+		// Pale spots pierce the fore wing's border.
+		if (onFore && v > 4 && grain(u * 1.6, v * 1.2) > 0.6) return [MORMON_CREAM, 1];
+		return [MORMON_INK, 1];
+	}
 
-	return [base];
-}
+	// Veins: black, fanning from the fore and hind roots.
+	const root = onFore ? [6, 1] : [-5, 5];
+	const dist = Math.hypot(u - root[0], v - root[1]);
+	const angle = Math.atan2(v - root[1], u - root[0]);
+	const rays = onFore ? [-0.55, -0.22, 0.06, 0.34, 0.6, 0.88] : [-0.5, -0.15, 0.2, 0.55];
+	const reach = onFore ? 17 : 12;
+	if (dist > 2.4 && dist < reach + 5 && rays.some((r) => Math.abs(Math.atan2(Math.sin(angle - r), Math.cos(angle - r))) < 0.05)) {
+		return [MORMON_INK, 1];
+	}
 
-function insideMonarchWing(x: number, ly: number) {
-	return (
-		ellipse(x, ly, 17, -12, 20, 12, -0.4) <= 1 || ellipse(x, ly, 12, 6, 15, 11, 0.3) <= 1
-	);
-}
+	// Red spots just inside the hind margin.
+	for (const [ru, rv] of [[-13, 15], [-9, 17], [-15, 11], [-10, 13]] as const) {
+		if (Math.hypot(u - ru, v - rv) < 1.2) return [MORMON_RED, 1];
+	}
 
-function paintButterflyWing(x: number, y: number): [Rgb, number?] | null {
-	// The landing wing spans ±28 around its hinge; the sprite canvas starts at
-	// the hinge, so the shape sits shifted down (fore lobe near the top, hind
-	// lobe below) and the engine folds it around the creature's centre line.
-	return monarchWing(x, y - 28);
+	// Base: warm cream with living grain.
+	const shade = grain(u * 1.3, v * 1.1) > 0.88 ? 0.16 : grain(u, v) > 0.94 ? -0.12 : 0;
+	return [mix(MORMON_CREAM, MORMON_CREAM_DIM, 0.38 + shade), 1];
 }
 
 function segHit(x: number, y: number, x0: number, y0: number, x1: number, y1: number): boolean {
@@ -413,242 +381,287 @@ function segHit(x: number, y: number, x0: number, y0: number, x1: number, y1: nu
 	return Math.hypot(x - (x0 + dx * t), y - (y0 + dy * t)) <= 0.6;
 }
 
-/**
- * The landing body, rotated into flight orientation: the landing builds it
- * head-up, so landing (x, y) maps to sprite (y, -x) — antennae forward,
- * abdomen trailing, wings attaching along the dorsal centre line.
- */
 function paintButterflyBody(x: number, y: number): [Rgb, number?] | null {
+	// Slender dark body in flight orientation: antennae forward (+x),
+	// segmented abdomen trailing (-x), wings attaching along y = 0.
 	const ly = -x;
 	const lx = y;
 
-	// Abdomen: tapering segments with visible rings.
-	if (ly >= 6 && ly <= 24) {
-		const half = Math.max(1, Math.round(4 - ((ly - 6) / 18) * 2.6));
+	// Abdomen with clear segment rings.
+	if (ly >= 6 && ly <= 20) {
+		const half = Math.max(1, Math.round(3.4 - ((ly - 6) / 14) * 2.2));
 		if (Math.abs(lx) <= half) {
-			const rim = Math.abs(lx) === half || ly === 24;
-			const ring = ly % 4 === 0;
-			const fuzz = grain(ly, lx) > 0.7;
-			return [rim ? MONARCH_BODY_DARK : ring || fuzz ? MONARCH_BODY_LIGHT : MONARCH_BODY_TONE, 1];
+			const rim = Math.abs(lx) === half || ly === 20;
+			const ring = ly % 3 === 0;
+			return [rim ? MORMON_BODY_DARK : ring ? MORMON_BODY_LIGHT : MORMON_BODY_TONE, 1];
 		}
 		return null;
 	}
 
-	// Thorax: the fuzzy middle the wings attach to.
+	// Thorax with fuzz.
 	if (ly >= -6 && ly <= 6) {
-		const half = ly < -3 || ly > 3 ? 4 : 5;
+		const half = ly < -3 || ly > 3 ? 3 : 4;
 		if (Math.abs(lx) <= half) {
-			const rim = Math.abs(lx) === half;
-			return [rim ? MONARCH_BODY_DARK : grain(ly, lx) > 0.7 ? MONARCH_BODY_LIGHT : MONARCH_BODY_TONE, 1];
+			return [grain(ly, lx) > 0.7 ? MORMON_BODY_LIGHT : MORMON_BODY_TONE, 1];
 		}
 		return null;
 	}
 
-	// Head and compound eyes.
-	if (ly >= -15 && ly <= -6) {
-		const half = ly < -13 || ly > -8 ? 2 : 4;
-		if (Math.abs(lx) <= half) {
-			if (ly === -12 && Math.abs(lx) === 2) return [MONARCH_WING_SPOT, 1];
-			if (ly === -11 && Math.abs(lx) === 2) return [MONARCH_BODY_DARK, 1];
-			return [Math.abs(lx) === half ? MONARCH_BODY_DARK : MONARCH_BODY_TONE, 1];
+	// Head with eyes.
+	if (ly >= -13 && ly <= -5) {
+		if (ly >= -9 && ly <= -5 && Math.abs(lx) <= 2) {
+			return [MORMON_BODY_DARK, 1];
 		}
-		return null;
+		return [MORMON_BODY_TONE, 1];
 	}
 
-	// Antennae: two segments each, curving outward, with tiny clubs.
+	// Antennae with clubs, sweeping forward.
 	for (const side of [-1, 1] as const) {
-		if (segHit(x, y, 14, side, 21, side * 4) || segHit(x, y, 21, side * 4, 26, side * 9)) {
-			return [MONARCH_BODY_DARK, 1];
+		if (segHit(x, y, 9, side, 15, side * 4) || segHit(x, y, 15, side * 4, 20, side * 7)) {
+			return [MORMON_BODY_DARK, 1];
 		}
-		if (Math.hypot(x - 26, y - side * 9) <= 1.1) return [MONARCH_WING_SPOT, 1];
-	}
-
-	// Six delicate legs trailing beneath the body.
-	for (const side of [-1, 1] as const) {
-		for (const [a, b, c, d] of [
-			[3, 4, -3, 9],
-			[-1, 5, -9, 10],
-			[-5, 4, -13, 8]
-		] as const) {
-			if (segHit(x, y, a, side * b, c, side * d)) return [MONARCH_BODY_DARK, 1];
-		}
+		if (Math.hypot(x - 20, y - side * 7) <= 1) return [MORMON_BODY_DARK, 1];
 	}
 
 	return null;
-}
-
-function deltaAround(a: number, b: number) {
-	return Math.atan2(Math.sin(a - b), Math.cos(a - b));
 }
 
 function paintDragonflyBody(x: number, y: number): [Rgb, number?] | null {
-	const abdomen = capsule(x, y, -21, 0, 7, 0, 2.9);
-	if (abdomen <= 1) {
-		const ring = Math.floor((x + 21) / 3.4) % 2 === 0 ? 0.08 : 0;
-		// A metallic dorsal stripe catches the light along the top.
-		const dorsal = y < -1.4 ? 0.12 : 0;
-		const shade = 0.5 + (1 - abdomen) * 0.2 + ring + dorsal + (grain(x, y) - 0.5) * 0.06;
-		return [tone(DRAGONFLY_BODY, shade)];
+	// Striped abdomen: red rings over a near-black rod, tapering rearward.
+	if (x >= -26 && x <= 2 && Math.abs(y) <= 2.2 - Math.max(0, (2 - x) * 0.06)) {
+		const ring = Math.floor((x + 26) / 2.6) % 2 === 0;
+		return [ring ? DF_RED : mix(DF_DARK, [110, 30, 26], 0.4), 1];
 	}
-	if (ellipse(x, y, 10, 0, 5.4, 4.6) <= 1) return [tone(DRAGONFLY_BODY, 0.62)];
-	if (ellipse(x, y, 17, 0, 4.6, 4.2) <= 1) {
-		if (ellipse(x, y, 18, -1.4, 2.1, 1.9) <= 1 || ellipse(x, y, 18, 1.4, 2.1, 1.9) <= 1) {
-			return [[104, 40, 34]];
-		}
-		return [tone(DRAGONFLY_BODY, 0.7)];
+	// Thin cerci at the tail tip.
+	if (x >= -30 && x < -26 && (Math.abs(y - 0.8) < 0.5 || Math.abs(y + 0.8) < 0.5)) {
+		return [DF_DARK, 1];
+	}
+	// Thorax.
+	if (x >= 2 && x <= 8 && Math.abs(y) <= 4) {
+		return [mix(DF_DARK, [90, 40, 34], grain(x, y) * 0.4), 1];
+	}
+	// Head with wrap-around eyes.
+	if (x >= 8 && x <= 13 && Math.abs(y) <= 4.4) {
+		if (Math.abs(y) > 2.2 && x > 10) return [[24, 44, 40], 1];
+		return [mix(DF_DARK, [70, 34, 30], 0.5), 1];
 	}
 	return null;
 }
 
-function paintDragonflyWing(x: number, y: number): [Rgb, number?] | null {
-	const fore = ellipse(x, y, 0, 11, 10.5, 12.5);
-	const hind = ellipse(x, y, 0, 31, 9, 14);
+function paintDragonflyWing(u: number, v: number): [Rgb, number?] | null {
+	// Four wing panels per side share the canvas: fore (forward of the hinge)
+	// and hind (behind it), painted as one swept surface.
+	const fore = ellipse(u, v, 6, 13, 6.6, 10, 0.06);
+	const hind = ellipse(u, v, -6, 17, 7.4, 11.4, -0.06);
 	if (fore > 1 && hind > 1) return null;
+	const onFore = fore <= 1;
 
-	// Fine cross veins make the membrane read as glass.
-	if (Math.abs(x) > 7 || (Math.round(y) % 5 === 0 && Math.abs(x) < 6)) {
-		return [DRAGONFLY_WING[1] ?? INK, 190];
-	}
-	return [tone(DRAGONFLY_WING, 0.55 + grain(x, y) * 0.35), 170];
+	// Dark smoky root the wings share near the body.
+	if (v < 6) return [DF_SMOKE, 225];
+
+	// Longitudinal veins and cross rungs, dark over the warm film.
+	const veins =
+		Math.abs(((u * 2.6 + v * (onFore ? 0.4 : -0.6)) % 5) - 2.5) < 0.6 ||
+		Math.abs(((v + u * 0.3) % 4) - 2) < 0.35;
+	if (veins && v > 7) return [mix(DF_DARK, DF_RED, 0.3), 215];
+
+	// The sunset gradient: amber → orange → pink, with teal at the tips.
+	const gradient = v / 30;
+	let film =
+		gradient < 0.45
+			? mix(DF_AMBER, DF_ORANGE, 1 - gradient * 2.2)
+			: mix(DF_PINK, DF_ORANGE, Math.max(0, (0.8 - gradient) * 2.5));
+	if (gradient > 0.78) film = mix(film, DF_TEAL, 0.4);
+
+	// The pterostigma: a dark cell near the fore wing's leading tip.
+	if (onFore && u > 9 && v < 10) return [DF_DARK, 230];
+
+	return [film, 215];
 }
 
 function paintBatBody(x: number, y: number): [Rgb, number?] | null {
-	if (ellipse(x, y, 0, 0, 8.4, 6.4) <= 1) {
-		// A faint fur collar around the shoulders.
-		const fur = x > 1.2 && Math.abs(y) < 4.6 && grain(x, y) > 0.55 ? 0.07 : 0;
-		const shade = 0.42 + (1 - ellipse(x, y, 0, 0, 8.4, 6.4)) * 0.3 + fur + (grain(x, y) - 0.5) * 0.12;
-		return [tone(BAT_BODY, shade)];
+	// Ears reaching forward of the head, with dark inner membranes.
+	if (ellipse(x, y, 11, 3, 2.6, 1.4) <= 1 || ellipse(x, y, 11, -3, 2.6, 1.4) <= 1) {
+		const inner = ellipse(x, y, 11.4, 3, 1.2, 0.7) <= 1 || ellipse(x, y, 11.4, -3, 1.2, 0.7) <= 1;
+		return [inner ? BAT_DARK : BAT_FUR, 1];
 	}
-	if (ellipse(x, y, 6.4, 0, 3.6, 3.4) <= 1) {
-		if (ellipse(x, y, 8.4, -0.8, 0.9, 0.9) <= 1 || ellipse(x, y, 8.4, 1.6, 0.9, 0.9) <= 1) return [EYE_DARK];
-		return [tone(BAT_BODY, 0.62)];
+	// Head and fluffy body.
+	if (ellipse(x, y, 8, 0, 3.6, 2.4) <= 1 || ellipse(x, y, -2, 0, 6.4, 2.8) <= 1) {
+		const fuzz = grain(x * 1.4, y * 1.4) > 0.6 ? mix(BAT_FUR, BAT_LIGHT, 0.25) : BAT_FUR;
+		return [fuzz, 1];
 	}
-	// Tall ears with a warm inner membrane.
-	if (ellipse(x, y, 4.6, -5, 1.9, 4.4, -0.25) <= 1 || ellipse(x, y, 4.6, 5, 1.9, 4.4, 0.25) <= 1) {
-		if (ellipse(x, y, 4.6, -4.9, 0.9, 3, -0.25) <= 1 || ellipse(x, y, 4.6, 4.9, 0.9, 3, 0.25) <= 1) {
-			return [[138, 94, 92]];
-		}
-		return [tone(BAT_BODY, 0.76)];
+	// Eyes and tiny fangs.
+	if (ellipse(x, y, 8, 1.4, 0.6, 0.6) <= 1 || ellipse(x, y, 8, -1.4, 0.6, 0.6) <= 1) {
+		return [[14, 14, 16], 1];
 	}
-	// Tiny feet trailing behind.
-	if (capsule(x, y, -7, -2.6, -10, -4.4, 0.7) <= 1 || capsule(x, y, -7, 2.6, -10, 4.4, 0.7) <= 1) {
-		return [tone(BAT_BODY, 0.5)];
+	if ((x === 11 || x === 10) && Math.abs(y) < 0.4) {
+		return [BAT_FANG, 1];
+	}
+	// Feet.
+	if (capsule(x, y, -6, 2, -11, 3.4, 0.8) <= 1 || capsule(x, y, -6, -2, -11, -3.4, 0.8) <= 1) {
+		return [BAT_DARK, 1];
 	}
 	return null;
 }
 
-function paintBatWing(x: number, y: number): [Rgb, number?] | null {
-	if (y < 0 || y > 26) return null;
-	if (ellipse(x, y, 0, 15, 9.6, 12) > 1) return null;
-
-	// Finger struts.
-	if (Math.abs(x) < 0.6 || capsule(x, y, 0, 0, 5.4, 22, 0.6) <= 1 || capsule(x, y, 0, 0, -5.4, 22, 0.6) <= 1) {
-		return [tone(BAT_BODY, 0.34)];
+function paintBatWing(u: number, v: number): [Rgb, number?] | null {
+	// The scalloped trailing edge: membrane dips between finger tips.
+	const depth = 25 - Math.abs(Math.sin((u + 18) * 0.55 + 0.5)) * 5;
+	if (v > depth || v < 0) return null;
+	// Finger struts from the shoulder to the scallop peaks.
+	const struts: Array<[number, number]> = [
+		[16, 8],
+		[7, 23],
+		[-8, 25],
+		[-16, 17]
+	];
+	for (const [tu, tv] of struts) {
+		if (capsule(u, v, 6, 0, tu, tv, 0.9) <= 1) return [BAT_DARK, 1];
 	}
-
-	const shade = 0.5 - Math.abs(x) * 0.012 + (1 - ellipse(x, y, 0, 15, 9.6, 12)) * 0.16;
-	return [tone(BAT_BODY, shade), 236];
+	// Membrane: lighter panels between the struts.
+	const panel = grain(u * 0.8, v) > 0.5 ? 0.1 : 0;
+	const shade = clamp(0.45 + (v / 30) * 0.2 + panel + (grain(u, v) - 0.5) * 0.08, 0, 1);
+	let colour = mix(BAT_MEMBRANE, BAT_LIGHT, shade * 0.7);
+	// Thin pale trailing edge.
+	if (v > depth - 1.2) colour = mix(colour, [130, 130, 138], 0.5);
+	return [colour, 240];
 }
 
 function paintEagleBody(x: number, y: number): [Rgb, number?] | null {
-	const body = ellipse(x, y, -4, 0, 12.5, 5.4);
-	if (body <= 1) {
-		const shade = 0.44 + (1 - body) * 0.22 + (grain(x, y) - 0.5) * 0.1;
-		return [tone(EAGLE_BODY, shade)];
+	// White fanned tail with separated feathers.
+	if (x >= -29 && x <= -13 && Math.abs(y) <= 6.4 - Math.abs(x + 21) * 0.28) {
+		const feather = Math.round(y) % 2 === 0;
+		return [feather ? EAGLE_CREAM : mix(EAGLE_CREAM, EAGLE_BROWN, 0.2), 1];
 	}
-	// White head and hooked beak.
-	if (ellipse(x, y, 11, -1.6, 5.4, 4.6) <= 1) {
-		if (ellipse(x, y, 13.4, -2.4, 1, 1) <= 1) return [EYE_DARK];
-		return [tone(EAGLE_HEAD, 0.55 + (1 - ellipse(x, y, 11, -1.6, 5.4, 4.6)) * 0.35)];
+	// Dark brown body and shoulders.
+	if (x >= -14 && x <= 14 && Math.abs(y) <= 5.6 - Math.max(0, x - 6) * 0.35) {
+		return [mix(EAGLE_DARK, EAGLE_BROWN, 0.45 + grain(x, y) * 0.3), 1];
 	}
-	if (capsule(x, y, 15.4, -0.4, 18.6, -1.8, 1.1) <= 1) return [BEAK];
-	// White wedge tail with separated feathers.
-	if (Math.abs(y) < 4.6 && x > -22 && x < -12) {
-		return [tone(EAGLE_HEAD, Math.round(x) % 3 === 0 ? 0.44 : 0.6)];
+	// White head with the pale nape.
+	if (x >= 13 && x <= 24 && Math.abs(y) <= 3.8) {
+		return [mix(EAGLE_CREAM, [200, 194, 180], grain(x, y) * 0.3), 1];
 	}
-	if (capsule(x, y, -10, -3, -10, 3, 1.4) <= 1) return [tone(EAGLE_HEAD, 0.5)];
+	// Eye.
+	if (Math.hypot(x - 18.4, y + 0.6) <= 1) return [[24, 20, 16], 1];
+	// Hooked yellow beak.
+	if (x >= 23 && x <= 28 && Math.abs(y) <= 1.6 - (x - 23) * 0.3) {
+		return [EAGLE_BEAK, 1];
+	}
 	return null;
 }
 
-function paintEagleWing(x: number, y: number): [Rgb, number?] | null {
-	if (y < 0 || y > 38) return null;
-	// Broad, swept wing with feather scallops on the trailing edge.
-	const span = (y - 6) * 0.12;
-	const chord = 13 - y * 0.2;
-	if (y < 6) {
-		if (ellipse(x, y, 0, 4, 10, 7) > 1) return null;
-	} else if (Math.abs(x + span) > chord || y > 34 + Math.sin(x * 0.9) * 2.2) {
-		return null;
-	}
+function paintEagleWing(u: number, v: number): [Rgb, number?] | null {
+	// The leading edge sweeps from the shoulder; the trailing edge fans out
+	// toward the body's rear with scalloped primaries.
+	const leading = 2.4 + (u - 9) * 0.14;
+	if (v < leading || v < 0) return null;
+	const depth = 16 + clamp((-u - 2) * 1.15, 0, 15) + Math.abs(Math.sin(u * 1.05)) * 1.6;
+	if (v > depth) return null;
+	if (u < -14.5) return null;
 
-	// Feather rows.
-	const row = Math.floor(y / 4.4);
-	const shade = 0.38 + (y / 38) * 0.3 + (row % 2 === 0 ? 0.06 : -0.04) + (grain(x, y) - 0.5) * 0.08;
-	const colour = tone(EAGLE_BODY, shade);
-	if (y > 30) return [mix(colour, EAGLE_BODY[0] ?? INK, 0.45)];
-	return [colour];
+	// Primary fingers at the trailing edge: dark tips with transparent notches.
+	const primaries = clamp((-u - 2) * 1.15, 0, 15);
+	if (primaries > 8 && v > depth - 2.6 && Math.sin(u * 1.35) > 0.25) return null;
+
+	// Feather rows: lighter coverts over dark flight feathers.
+	const row = Math.floor(v / 5.5);
+	const shade = 0.34 + (v / 34) * 0.3 + (row % 2 === 0 ? 0.06 : -0.04) + (grain(u, v) - 0.5) * 0.08;
+	let colour = mix(EAGLE_BROWN, EAGLE_LIGHT, clamp(shade, 0, 1) * 0.8);
+	if (primaries > 8) colour = mix(colour, EAGLE_DARK, 0.45);
+	// Warm rim along the leading edge.
+	if (v < leading + 1.4) colour = mix(colour, EAGLE_CREAM, 0.28);
+	return [colour, 1];
 }
 
 function paintCrowBody(x: number, y: number): [Rgb, number?] | null {
-	if (ellipse(x, y, -3, 0, 11.4, 4.8) <= 1) {
-		const sheen = Math.sin(x * 0.7 + y * 0.4) > 0.55 ? 0.1 : 0;
-		const shade = 0.42 + (1 - ellipse(x, y, -3, 0, 11.4, 4.8)) * 0.24 + sheen;
-		const colour = tone(CROW, shade);
-		// An oil-sheen flash of teal across the shoulder feathers.
-		return sheen > 0 ? [mix(colour, [88, 148, 140], 0.4)] : [colour];
+	// Fanned tail with rounded, separated feather tips.
+	if (x >= -24 && x <= -11 && Math.abs(y) <= 4.6 - Math.abs(x + 18) * 0.22) {
+		const gap = Math.round(y) % 2 === 0;
+		return [gap ? CROW_MID : mix(CROW_DARK, [10, 10, 14], 0.4), 1];
 	}
-	if (ellipse(x, y, 9.4, 0, 4, 3.8) <= 1) {
-		if (ellipse(x, y, 11, -1.2, 0.9, 0.9) <= 1) return [EYE_LIGHT];
-		return [tone(CROW, 0.5)];
+	// Body and neck, with an iridescent shoulder.
+	if (x >= -12 && x <= 13 && Math.abs(y) <= 5.2 - Math.max(0, x - 6) * 0.4) {
+		const sheen = grain(x * 0.8, y) > 0.75 ? mix(CROW_LIGHT, CROW_SHEEN, 0.5) : CROW_MID;
+		return [mix(CROW_DARK, sheen, 0.5), 1];
 	}
-	if (capsule(x, y, 12, 0, 15.6, 0, 1) <= 1) return [tone(CROW, 0.24)];
-	if (Math.abs(y) < 3.6 && x < -12) return [tone(CROW, 0.32)];
+	// Head, sturdy beak, glinting eye.
+	if (x >= 12 && x <= 20 && Math.abs(y) <= 3.4) {
+		if (Math.hypot(x - 16, y - 0.8) <= 1) return [EYE_LIGHT, 1];
+		return [mix(CROW_DARK, CROW_LIGHT, 0.3), 1];
+	}
+	if (x >= 19 && x <= 23 && Math.abs(y) <= 1.2) return [CROW_DARK, 1];
 	return null;
 }
 
-function paintCrowWing(x: number, y: number): [Rgb, number?] | null {
-	if (y < 0 || y > 32) return null;
-	const chord = 10 - y * 0.12;
-	if (Math.abs(x) > chord) return null;
+function paintCrowWing(u: number, v: number): [Rgb, number?] | null {
+	// The wing deepens toward the rear; primaries separate into fingers.
+	if (v < 2 + Math.max(0, (u - 6) * 0.5) || v < 0) return null;
+	const depth = 18 + clamp((-u + 2) * 1.1, 0, 13) + Math.abs(Math.sin(u * 1.2)) * 1.4;
+	if (v > depth) return null;
+	if (u < -14.5) return null;
 
-	const row = Math.floor(y / 4);
-	const sheen = Math.sin(x * 0.5 + y * 0.3) > 0.6 ? 0.08 : 0;
-	const shade = 0.36 + (y / 32) * 0.26 + (row % 2 ? -0.03 : 0.05) + sheen;
-	return [tone(CROW, shade)];
+	// Primary fingers: the outer feathers spread with transparent notches.
+	const spread = clamp((-u - 4) * 1.2, 0, 14);
+	if (spread > 8 && v > depth - 3 - spread * 0.2 && Math.sin(u * 1.5 + 1) > 0.15) return null;
+
+	// Layered feather rows: coverts, secondaries, primaries.
+	const row = Math.floor(v / 4.6);
+	const shade = 0.4 + (v / 32) * 0.26 + (row % 2 ? -0.03 : 0.05) + (grain(u, v) - 0.5) * 0.07;
+	let colour = mix(CROW_DARK, CROW_LIGHT, clamp(shade, 0, 1) * 0.85);
+	// Iridescent sheen on the upper rows.
+	if (row < 2 && grain(u * 0.9 + 3, v) > 0.78) colour = mix(colour, CROW_SHEEN, 0.45);
+	// Feather shafts.
+	if (Math.abs(((v - 2) % 4.6) - 2.3) < 0.3 && v > 6) colour = mix(colour, CROW_DARK, 0.4);
+	return [colour, 1];
 }
 
 function paintParrotBody(x: number, y: number): [Rgb, number?] | null {
-	if (ellipse(x, y, -3, 0, 10.4, 5.2) <= 1) {
-		const shade = 0.46 + (1 - ellipse(x, y, -3, 0, 10.4, 5.2)) * 0.28 + (grain(x, y) - 0.5) * 0.07;
-		return [tone(PARROT, shade)];
+	// Yellow crown and cheek.
+	if (x >= 8 && x <= 14 && Math.abs(y) <= 3.6) {
+		if (Math.hypot(x - 11.4, y - 0.6) <= 1) return [[20, 18, 22], 1];
+		return [mix(PAR_YELLOW, [230, 180, 120], grain(x, y) * 0.3), 1];
 	}
-	// Pale face patch and dark beak.
-	if (ellipse(x, y, 8, -0.6, 3.6, 3.4) <= 1) {
-		if (ellipse(x, y, 9.4, -1.2, 0.9, 0.9) <= 1) return [EYE_DARK];
-		return [[232, 224, 208]];
+	// Hooked grey beak.
+	if (x >= 13 && x <= 17 && y >= -1 && y <= 3) return [PAR_BEAK, 1];
+	// Scarlet body with a softer belly.
+	if (x >= -10 && x <= 12 && Math.abs(y) <= 5.2 - Math.max(0, x - 4) * 0.3) {
+		const belly = y > 1.6 ? 0.18 : 0;
+		return [mix(PAR_RED, PAR_RED_DARK, 0.25 - belly + grain(x, y) * 0.1), 1];
 	}
-	if (capsule(x, y, 10.4, 0.4, 13.4, -1, 1.2) <= 1) return [[38, 34, 32]];
 	return null;
 }
 
-function paintParrotWing(x: number, y: number): [Rgb, number?] | null {
-	if (y < 0 || y > 30) return null;
-	const chord = 9.4 - y * 0.12;
-	if (Math.abs(x) > chord) return null;
+function paintParrotWing(u: number, v: number): [Rgb, number?] | null {
+	// Rounded wing: scalloped scarlet coverts over long blue flight feathers.
+	const depth = 26 - Math.abs(u - 2) * 0.55;
+	if (v > depth || v < 0 || Math.abs(u - 2) > 9.6) return null;
+	const flight = v > depth - 12 - Math.abs(Math.sin(u * 1.1)) * 2;
 
-	if (y < 8) return [[244, 198, 62]];
-	if (y > 22) return [[64, 104, 168]];
-	const row = Math.floor(y / 4);
-	// Feather scallops ripple across the coverts.
-	const arc = Math.sin(x * 1.15 + row * 1.7) > 0.6 ? -0.08 : 0;
-	const shade = 0.44 + (y / 30) * 0.3 + (row % 2 ? -0.04 : 0.06) + arc;
-	return [tone(PARROT, shade)];
+	if (flight) {
+		const feather = Math.abs(((v - 2) % 5.4) - 2.7) < 0.5;
+		const tip = mix(PAR_BLUE, [30, 44, 86], (v - depth + 12) / 12);
+		return [feather ? mix(tip, PAR_RED_DARK, 0.3) : tip, 1];
+	}
+
+	// Coverts: red scallops with darker edges.
+	const row = Math.floor(v / 5);
+	const scallop =
+		Math.sin(u * 1.2 + row * 2.1) > 0.3
+			? mix(PAR_RED, PAR_RED_DARK, 0.3)
+			: mix(PAR_RED, [226, 96, 86], 0.35);
+	// Yellow shoulder patch.
+	if (u > 3 && v < 9) return [mix(PAR_YELLOW, PAR_RED, v / 12), 1];
+	return [scallop, 1];
 }
 
-function paintParrotTail(x: number, y: number): [Rgb, number?] | null {
-	if (ellipse(x, y, -6, 0, 12, 4.4) > 1) return null;
-	if (x < -12) return [[64, 104, 168]];
-	return [tone(PARROT, 0.52 + (x + 18) * 0.02)];
+function paintParrotTail(u: number, v: number): [Rgb, number?] | null {
+	// Graduated red feathers fading to blue tips.
+	const half = 4.6 - Math.max(0, -u - 6) * 0.1;
+	if (Math.abs(v) > half) return null;
+	if (u < -16 || u > 2) return null;
+	const tip = clamp((-u - 2) / 13, 0, 1);
+	const feather = Math.abs(v % 2.2) < 0.4 && u < -6;
+	return [mix(mix(PAR_RED, PAR_RED_DARK, tip * 0.6), PAR_BLUE, tip * 0.55 + (feather ? 0.15 : 0)), 1];
 }
 
 function paintCockatooBody(x: number, y: number): [Rgb, number?] | null {
@@ -997,65 +1010,17 @@ export function creatureBounds(art: CreatureArt): CreatureBounds {
 }
 
 function buildButterfly(): CreatureArt | null {
-	// The ported landing monarch: a 64-unit body with antennae, fuzz and
-	// ringed abdomen, and the two-lobed 40×56 wing with veins, bands and spots.
-	const body = renderSprite(52, 30, 26, 15, paintButterflyBody);
-	const wing = renderSprite(40, 56, 20, 28, paintButterflyWing);
+	// The Great Mormon: cream forewings with black veins and spotted margins,
+	// red hindwing spots, swallowtail tails, and a slender dark body.
+	const body = renderSprite(48, 18, 24, 9, paintButterflyBody);
+	const wing = renderSprite(56, 26, 28, 0, paintButterflyWing);
 	if (!body || !wing) return null;
 	return {
 		body,
-		bodyW: 52,
-		bodyH: 30,
+		bodyW: 48,
+		bodyH: 18,
 		wing,
-		wingW: 40,
-		wingH: 56,
-		hingeX: 0,
-		hingeY: 0,
-		tail: null,
-		tailX: 0,
-		tailY: 0,
-		crest: null,
-		crestX: 0,
-		crestY: 0,
-		alpha: 1,
-		glow: false
-	};
-}
-
-function buildDragonfly(): CreatureArt | null {
-	const body = renderSprite(46, 16, 23, 8, paintDragonflyBody);
-	const wing = renderSprite(26, 46, 13, 0, paintDragonflyWing);
-	if (!body || !wing) return null;
-	return {
-		body,
-		bodyW: 46,
-		bodyH: 16,
-		wing,
-		wingW: 26,
-		wingH: 46,
-		hingeX: 2,
-		hingeY: 0,
-		tail: null,
-		tailX: 0,
-		tailY: 0,
-		crest: null,
-		crestX: 0,
-		crestY: 0,
-		alpha: 1,
-		glow: false
-	};
-}
-
-function buildBat(): CreatureArt | null {
-	const body = renderSprite(26, 22, 13, 11, paintBatBody);
-	const wing = renderSprite(20, 26, 10, 0, paintBatWing);
-	if (!body || !wing) return null;
-	return {
-		body,
-		bodyW: 26,
-		bodyH: 22,
-		wing,
-		wingW: 20,
+		wingW: 56,
 		wingH: 26,
 		hingeX: 0,
 		hingeY: 0,
@@ -1070,17 +1035,70 @@ function buildBat(): CreatureArt | null {
 	};
 }
 
-function buildEagle(): CreatureArt | null {
-	const body = renderSprite(42, 22, 21, 11, paintEagleBody);
-	const wing = renderSprite(22, 38, 11, 0, paintEagleWing);
+function buildDragonfly(): CreatureArt | null {
+	// Long striped abdomen, and the four-panel sunset wings hinged slightly
+	// forward of centre.
+	const body = renderSprite(44, 14, 30, 7, paintDragonflyBody);
+	const wing = renderSprite(28, 32, 14, 0, paintDragonflyWing);
 	if (!body || !wing) return null;
 	return {
 		body,
-		bodyW: 42,
-		bodyH: 22,
+		bodyW: 44,
+		bodyH: 14,
 		wing,
-		wingW: 22,
-		wingH: 38,
+		wingW: 28,
+		wingH: 32,
+		hingeX: 2,
+		hingeY: 0,
+		tail: null,
+		tailX: 0,
+		tailY: 0,
+		crest: null,
+		crestX: 0,
+		crestY: 0,
+		alpha: 1,
+		glow: false
+	};
+}
+
+function buildBat(): CreatureArt | null {
+	// The broad, scalloped membrane spans forward and back of the shoulders.
+	const body = renderSprite(32, 12, 16, 6, paintBatBody);
+	const wing = renderSprite(36, 30, 18, 0, paintBatWing);
+	if (!body || !wing) return null;
+	return {
+		body,
+		bodyW: 32,
+		bodyH: 12,
+		wing,
+		wingW: 36,
+		wingH: 30,
+		hingeX: 0,
+		hingeY: 0,
+		tail: null,
+		tailX: 0,
+		tailY: 0,
+		crest: null,
+		crestX: 0,
+		crestY: 0,
+		alpha: 1,
+		glow: false
+	};
+}
+
+function buildEagle(): CreatureArt | null {
+	// White head, yellow beak, brown body and the white fan tail — with the
+	// long, deep flight wings reaching forward and back of the shoulders.
+	const body = renderSprite(58, 16, 29, 8, paintEagleBody);
+	const wing = renderSprite(30, 36, 15, 0, paintEagleWing);
+	if (!body || !wing) return null;
+	return {
+		body,
+		bodyW: 58,
+		bodyH: 16,
+		wing,
+		wingW: 30,
+		wingH: 36,
 		hingeX: 1,
 		hingeY: 0,
 		tail: null,
@@ -1095,16 +1113,17 @@ function buildEagle(): CreatureArt | null {
 }
 
 function buildCrow(): CreatureArt | null {
-	const body = renderSprite(36, 18, 18, 9, paintCrowBody);
-	const wing = renderSprite(20, 32, 10, 0, paintCrowWing);
+	// Raven from above: layered fingered wings, fanned tail, sturdy beak.
+	const body = renderSprite(48, 14, 24, 7, paintCrowBody);
+	const wing = renderSprite(28, 34, 14, 0, paintCrowWing);
 	if (!body || !wing) return null;
 	return {
 		body,
-		bodyW: 36,
-		bodyH: 18,
+		bodyW: 48,
+		bodyH: 14,
 		wing,
-		wingW: 20,
-		wingH: 32,
+		wingW: 28,
+		wingH: 34,
 		hingeX: 0,
 		hingeY: 0,
 		tail: null,
@@ -1119,21 +1138,23 @@ function buildCrow(): CreatureArt | null {
 }
 
 function buildParrot(): CreatureArt | null {
-	const body = renderSprite(30, 16, 15, 8, paintParrotBody);
-	const wing = renderSprite(18, 30, 9, 0, paintParrotWing);
-	const tail = renderSprite(26, 12, 13, 6, paintParrotTail);
+	// Scarlet body, yellow crown, scalloped wing with blue flight feathers,
+	// and the long graduated tail trailing behind.
+	const body = renderSprite(34, 16, 17, 8, paintParrotBody);
+	const wing = renderSprite(22, 32, 11, 0, paintParrotWing);
+	const tail = renderSprite(32, 12, 16, 6, paintParrotTail);
 	if (!body || !wing || !tail) return null;
 	return {
 		body,
-		bodyW: 30,
+		bodyW: 34,
 		bodyH: 16,
 		wing,
-		wingW: 18,
-		wingH: 30,
+		wingW: 22,
+		wingH: 32,
 		hingeX: 0,
 		hingeY: 0,
 		tail,
-		tailX: -11,
+		tailX: -6,
 		tailY: 0,
 		crest: null,
 		crestX: 0,
