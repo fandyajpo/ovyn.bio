@@ -171,7 +171,10 @@
 		overflow: hidden;
 		padding: max(1.25rem, env(safe-area-inset-top)) max(1.25rem, env(safe-area-inset-right))
 			max(1.5rem, env(safe-area-inset-bottom)) max(1.25rem, env(safe-area-inset-left));
-		background: var(--color-background);
+		/* A translucent veil so the liquid-metal backdrop reads through. */
+		background: color-mix(in srgb, var(--color-background) 72%, transparent);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
 		transition: transform 620ms cubic-bezier(0.2, 0.7, 0.2, 1), opacity 620ms ease;
 	}
 

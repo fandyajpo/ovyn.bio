@@ -124,17 +124,14 @@ snail: a generated spiral shell with growth rings and ambient occlusion, a
 translucent muscular foot, four independently swaying tentacles and a small
 behaviour system that crawls, explores, rests and goes alert at its own pace,
 turning away from the edges and settling in place when motion is reduced.
-The landing, the sign-in page, the account overview and the activity dashboard sit on a calm WebGL liquid-metal backdrop in
-both themes: black base with a violet ribbon and copper-gold highlights in dark
+The whole site sits on a calm WebGL liquid-metal backdrop in both themes:
+black base with a violet ribbon and copper-gold highlights in dark
 mode, bone base with a blue ribbon and orange highlights in light mode. The
 motion runs slow and dim and holds a still frame for visitors who prefer reduced
-motion. Cards on the liquid pages read as frosted
-glass: a thinner token-driven surface veil plus a backdrop blur,
-so the liquid shows through without taking the text with it. Every other page wears
-a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
-it, so the dark palette glows lime and the cream palette warms into gold, pink
-and teal; public profiles keep their own backgrounds and opt out. A faint tile of
-rounded lines and pixel blocks textures every page background in both themes. The
+motion. Cards read as frosted
+glass over it: a thinner token-driven surface veil plus a backdrop blur,
+so the liquid shows through without taking the text with it. Public
+profiles keep their own user-styled backgrounds and opt out. The
 landing keeps the dark navy mockup palette for its controls, which follows the
 theme toggle, plus a sparse pulsing pixel field
 behind the hero that fades clear of the headline, and the snail roaming only the
