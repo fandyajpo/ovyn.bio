@@ -259,7 +259,6 @@
 		</div>
 
 		<Reveal delay={150} class="landing-profile-stage relative mx-auto w-full lg:max-w-none">
-			<div class="landing-orbit landing-orbit--stage" style={`--parallax-y: ${parallaxY * 0.35}px`} aria-hidden="true"></div>
 			<LandingDemo name={pageName} />
 		</Reveal>
 	</div>

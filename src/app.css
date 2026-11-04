@@ -201,10 +201,6 @@ html[data-theme='light'] .sticker--dark {
 	color: var(--color-foreground);
 }
 
-html[data-theme='light'] .mobile-menu-icon {
-	color: var(--color-on-accent);
-}
-
 html[data-theme='light'] .ovyn-card {
 	border-color: var(--color-divider);
 	box-shadow: 3px 3px 0 rgb(137 94 37 / 14%);
@@ -1132,21 +1128,6 @@ html[data-theme='light'] body {
 	backdrop-filter: blur(14px);
 }
 
-.landing-profile-orbit {
-	position: absolute;
-	inset: 0.2rem 0.2rem 0.2rem 1.5rem;
-	border: 1px solid color-mix(in srgb, var(--color-pop-pink) 17%, transparent);
-	border-radius: 50%;
-	transform: translate3d(0, var(--parallax-y, 0), 0) rotate(-12deg) scale(0.86, 1.04);
-	pointer-events: none;
-}
-
-.profile-live { display: inline-flex; align-items: center; gap: 0.45rem; color: var(--color-muted); font-size: 0.63rem; font-weight: 600; letter-spacing: 0.14em; }
-.avatar-orbit { position: absolute; z-index: -1; inset: -0.65rem; border: 1px solid color-mix(in srgb, var(--color-accent) 36%, transparent); border-radius: 50%; }
-.orbit-caption { position: absolute; z-index: 3; border-radius: 999px; background: var(--color-surface-raised); padding: 0.5rem 0.8rem; color: var(--color-muted); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.13em; }
-.orbit-caption--one { top: 0; right: 0; transform: rotate(5deg); }
-.orbit-caption--two { bottom: 0.3rem; left: 0.3rem; transform: rotate(-5deg); }
-
 .brand-ribbon {
 	display: flex;
 	flex-wrap: wrap;
@@ -1234,7 +1215,6 @@ html[data-theme='light'] body {
 	.landing-profile-stage { min-height: 25rem; }
 	.landing-profile-preview { margin-left: 0.5rem; border-radius: 1.5rem; }
 	.feature-row { grid-template-columns: 2rem 1fr auto; gap: 0.65rem; }
-	.orbit-caption { font-size: 0.52rem; }
 }
 
 

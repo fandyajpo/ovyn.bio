@@ -477,18 +477,6 @@
 		transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
 	}
 
-	.mobile-menu-icon {
-		display: grid;
-		width: 2.5rem;
-		height: 2.5rem;
-		flex: 0 0 auto;
-		place-items: center;
-		border-radius: 0.8rem;
-		background: var(--nav-accent);
-		color: var(--color-background);
-		font-size: 1.1rem;
-	}
-
 	.mobile-menu-label {
 		min-width: 0;
 		flex: 1;
