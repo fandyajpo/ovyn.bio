@@ -52,6 +52,13 @@ function capsule(x: number, y: number, x0: number, y0: number, x1: number, y1: n
 	return Math.hypot(x - (x0 + dx * t), y - (y0 + dy * t)) / halfWidth;
 }
 
+/**
+ * Sprites are painted at twice their final grid and box-downsampled, so the
+ * fine details (veins, feather rows, scale arcs) survive at any display size
+ * and edges get a gentle anti-alias instead of a hard stair.
+ */
+const SUPER_SAMPLE = 2;
+
 function renderSprite(
 	width: number,
 	height: number,
@@ -66,20 +73,57 @@ function renderSprite(
 	const context = canvas.getContext('2d');
 	if (!context) return null;
 
+	const ss = SUPER_SAMPLE;
+	const sw = width * ss;
+	const sh = height * ss;
+
+	// 1. Paint at the supersampled grid; coordinates stay in sprite space.
+	const sample = new Float32Array(sw * sh * 4);
+	const covered = new Uint8Array(sw * sh);
+	for (let sy = 0; sy < sh; sy += 1) {
+		for (let sx = 0; sx < sw; sx += 1) {
+			const hit = paint((sx + 0.5) / ss - originX, (sy + 0.5) / ss - originY);
+			if (!hit) continue;
+			const offset = (sy * sw + sx) * 4;
+			sample[offset] = hit[0][0];
+			sample[offset + 1] = hit[0][1];
+			sample[offset + 2] = hit[0][2];
+			sample[offset + 3] = hit[1] ?? 255;
+			covered[sy * sw + sx] = 1;
+		}
+	}
+
+	// 2. Box-downsample into the final canvas, weighted by alpha.
 	const image = context.createImageData(width, height);
 	const filled = new Uint8Array(width * height);
-
 	for (let py = 0; py < height; py += 1) {
 		for (let px = 0; px < width; px += 1) {
-			const hit = paint(px + 0.5 - originX, py + 0.5 - originY);
-			if (!hit) continue;
-			const offset = (py * width + px) * 4;
-			const colour = hit[0];
-			image.data[offset] = colour[0];
-			image.data[offset + 1] = colour[1];
-			image.data[offset + 2] = colour[2];
-			image.data[offset + 3] = hit[1] ?? 255;
-			filled[py * width + px] = 1;
+			let red = 0;
+			let green = 0;
+			let blue = 0;
+			let alphaSum = 0;
+			let weight = 0;
+			for (let dy = 0; dy < ss; dy += 1) {
+				for (let dx = 0; dx < ss; dx += 1) {
+					const sampleIndex = (py * ss + dy) * sw + (px * ss + dx);
+					if (!covered[sampleIndex]) continue;
+					const offset = sampleIndex * 4;
+					const alpha = sample[offset + 3] ?? 0;
+					red += (sample[offset] ?? 0) * alpha;
+					green += (sample[offset + 1] ?? 0) * alpha;
+					blue += (sample[offset + 2] ?? 0) * alpha;
+					alphaSum += alpha;
+					weight += 1;
+				}
+			}
+			if (weight === 0 || alphaSum === 0) continue;
+			const index = py * width + px;
+			const offset = index * 4;
+			image.data[offset] = Math.round(red / alphaSum);
+			image.data[offset + 1] = Math.round(green / alphaSum);
+			image.data[offset + 2] = Math.round(blue / alphaSum);
+			image.data[offset + 3] = Math.round(alphaSum / weight);
+			filled[index] = 1;
 		}
 	}
 
@@ -99,6 +143,8 @@ function renderSprite(
 					!filled[index + width];
 				if (!edge) continue;
 				const offset = index * 4;
+				// Anti-aliased silhouette pixels stay soft; only solid pixels ink over.
+				if ((image.data[offset + 3] ?? 0) < 150) continue;
 				image.data[offset] = outline[0];
 				image.data[offset + 1] = outline[1];
 				image.data[offset + 2] = outline[2];
@@ -327,10 +373,15 @@ function paintButterflyWing(x: number, y: number): [Rgb, number?] | null {
 	if (hind <= 1 && fore > 1) shade -= 0.08;
 	if (radius > 18 && grain(x, y) > 0.86) shade += 0.1;
 	if (grain(x, y) > 0.95) shade -= 0.08;
+	// Scale bands give the wing its layered monarch texture.
+	const band = (radius - 5) % 5.6;
+	if (radius > 7 && band < 0.55) shade -= 0.09;
 
 	const colour = tone(MONARCH, shade);
-	// Creamy spots near the outer edge.
+	// Creamy spots ringed along the outer margin, like the landing butterfly.
 	if (radius > 13 && Math.abs(deltaAround(angle, 0.5)) < 0.12) return [CREAM];
+	if (radius > 15 && Math.abs(deltaAround(angle, -0.6)) < 0.1) return [CREAM];
+	if (radius > 17 && Math.abs(deltaAround(angle, 0.78)) < 0.1) return [CREAM];
 	return [colour];
 }
 
@@ -342,7 +393,9 @@ function paintDragonflyBody(x: number, y: number): [Rgb, number?] | null {
 	const abdomen = capsule(x, y, -21, 0, 7, 0, 2.9);
 	if (abdomen <= 1) {
 		const ring = Math.floor((x + 21) / 3.4) % 2 === 0 ? 0.08 : 0;
-		const shade = 0.5 + (1 - abdomen) * 0.2 + ring + (grain(x, y) - 0.5) * 0.06;
+		// A metallic dorsal stripe catches the light along the top.
+		const dorsal = y < -1.4 ? 0.12 : 0;
+		const shade = 0.5 + (1 - abdomen) * 0.2 + ring + dorsal + (grain(x, y) - 0.5) * 0.06;
 		return [tone(DRAGONFLY_BODY, shade)];
 	}
 	if (ellipse(x, y, 10, 0, 5.4, 4.6) <= 1) return [tone(DRAGONFLY_BODY, 0.62)];
@@ -369,15 +422,20 @@ function paintDragonflyWing(x: number, y: number): [Rgb, number?] | null {
 
 function paintBatBody(x: number, y: number): [Rgb, number?] | null {
 	if (ellipse(x, y, 0, 0, 8.4, 6.4) <= 1) {
-		const shade = 0.42 + (1 - ellipse(x, y, 0, 0, 8.4, 6.4)) * 0.3 + (grain(x, y) - 0.5) * 0.12;
+		// A faint fur collar around the shoulders.
+		const fur = x > 1.2 && Math.abs(y) < 4.6 && grain(x, y) > 0.55 ? 0.07 : 0;
+		const shade = 0.42 + (1 - ellipse(x, y, 0, 0, 8.4, 6.4)) * 0.3 + fur + (grain(x, y) - 0.5) * 0.12;
 		return [tone(BAT_BODY, shade)];
 	}
 	if (ellipse(x, y, 6.4, 0, 3.6, 3.4) <= 1) {
 		if (ellipse(x, y, 8.4, -0.8, 0.9, 0.9) <= 1 || ellipse(x, y, 8.4, 1.6, 0.9, 0.9) <= 1) return [EYE_DARK];
 		return [tone(BAT_BODY, 0.62)];
 	}
-	// Tall ears.
+	// Tall ears with a warm inner membrane.
 	if (ellipse(x, y, 4.6, -5, 1.9, 4.4, -0.25) <= 1 || ellipse(x, y, 4.6, 5, 1.9, 4.4, 0.25) <= 1) {
+		if (ellipse(x, y, 4.6, -4.9, 0.9, 3, -0.25) <= 1 || ellipse(x, y, 4.6, 4.9, 0.9, 3, 0.25) <= 1) {
+			return [[138, 94, 92]];
+		}
 		return [tone(BAT_BODY, 0.76)];
 	}
 	// Tiny feet trailing behind.
@@ -412,8 +470,10 @@ function paintEagleBody(x: number, y: number): [Rgb, number?] | null {
 		return [tone(EAGLE_HEAD, 0.55 + (1 - ellipse(x, y, 11, -1.6, 5.4, 4.6)) * 0.35)];
 	}
 	if (capsule(x, y, 15.4, -0.4, 18.6, -1.8, 1.1) <= 1) return [BEAK];
-	// White wedge tail.
-	if (Math.abs(y) < 4.6 && x > -22 && x < -12) return [tone(EAGLE_HEAD, 0.6)];
+	// White wedge tail with separated feathers.
+	if (Math.abs(y) < 4.6 && x > -22 && x < -12) {
+		return [tone(EAGLE_HEAD, Math.round(x) % 3 === 0 ? 0.44 : 0.6)];
+	}
 	if (capsule(x, y, -10, -3, -10, 3, 1.4) <= 1) return [tone(EAGLE_HEAD, 0.5)];
 	return null;
 }
@@ -441,7 +501,9 @@ function paintCrowBody(x: number, y: number): [Rgb, number?] | null {
 	if (ellipse(x, y, -3, 0, 11.4, 4.8) <= 1) {
 		const sheen = Math.sin(x * 0.7 + y * 0.4) > 0.55 ? 0.1 : 0;
 		const shade = 0.42 + (1 - ellipse(x, y, -3, 0, 11.4, 4.8)) * 0.24 + sheen;
-		return [tone(CROW, shade)];
+		const colour = tone(CROW, shade);
+		// An oil-sheen flash of teal across the shoulder feathers.
+		return sheen > 0 ? [mix(colour, [88, 148, 140], 0.4)] : [colour];
 	}
 	if (ellipse(x, y, 9.4, 0, 4, 3.8) <= 1) {
 		if (ellipse(x, y, 11, -1.2, 0.9, 0.9) <= 1) return [EYE_LIGHT];
@@ -485,7 +547,9 @@ function paintParrotWing(x: number, y: number): [Rgb, number?] | null {
 	if (y < 8) return [[244, 198, 62]];
 	if (y > 22) return [[64, 104, 168]];
 	const row = Math.floor(y / 4);
-	const shade = 0.44 + (y / 30) * 0.3 + (row % 2 ? -0.04 : 0.06);
+	// Feather scallops ripple across the coverts.
+	const arc = Math.sin(x * 1.15 + row * 1.7) > 0.6 ? -0.08 : 0;
+	const shade = 0.44 + (y / 30) * 0.3 + (row % 2 ? -0.04 : 0.06) + arc;
 	return [tone(PARROT, shade)];
 }
 
@@ -523,16 +587,21 @@ function paintCockatooCrest(x: number, y: number): [Rgb, number?] | null {
 	const spread = 2 + y * 0.55;
 	if (Math.abs(x) > spread) return null;
 	if (Math.abs(x) < 0.9) return [[128, 116, 104]];
-	return [[244, 206, 74]];
+	// The crest splits into soft barbs.
+	return Math.round((x + spread) / 1.8) % 2 === 0 ? [[230, 190, 62]] : [[246, 210, 82]];
 }
 
 function paintFishBody(x: number, y: number): [Rgb, number?] | null {
 	const body = ellipse(x, y, 0, 0, 19, 6.4);
 	if (body <= 1) {
 		const belly = y > 1 ? 0.14 : -0.06;
-		const shade = 0.5 + (1 - body) * 0.22 + belly + (grain(x, y) - 0.5) * 0.08;
+		// Overlapping scale arcs ripple back from the gills.
+		const scaleArc = x < 9 && Math.abs((Math.hypot(x + 7, y) * 2) % 4.6 - 2.3) < 0.5 ? -0.09 : 0;
+		const shade = 0.5 + (1 - body) * 0.22 + belly + scaleArc + (grain(x, y) - 0.5) * 0.08;
 		return [tone(FISH, shade)];
 	}
+	// A small dorsal fin.
+	if (ellipse(x, y, 1, -6.8, 4.6, 1.7) <= 1) return [tone(FISH, 0.52), 232];
 	if (ellipse(x, y, 14, -1.4, 1.8, 1.8) <= 1) return [EYE_DARK];
 	if (ellipse(x, y, 14, -1.4, 1, 1) <= 1) return [EYE_LIGHT];
 	if (ellipse(x, y, 12.6, 3.8, 3.4, 2.4) <= 1) return [tone(FISH, 0.72)];
@@ -555,10 +624,16 @@ function paintFishTail(x: number, y: number): [Rgb, number?] | null {
 }
 
 function paintDragonBody(x: number, y: number): [Rgb, number?] | null {
+	// A ridge of little dorsal spikes along the back.
+	if (y < -4.2 && y > -7 && Math.abs(((x + 11) % 4.4) - 2.2) < 1.1 && ellipse(x, y, -2, 0, 12.4, 7.4) > 1) {
+		return [tone(DRAGON, 0.74)];
+	}
 	const body = ellipse(x, y, -2, 0, 11, 6.4);
 	if (body <= 1) {
 		const belly = y > 2 ? 0.18 : 0;
-		const shade = 0.44 + (1 - body) * 0.26 + belly + (grain(x, y) - 0.5) * 0.08;
+		// Segmented belly plates.
+		const plate = y > 2.4 && Math.floor((x + 13) / 3.2) % 2 === 0 ? -0.08 : 0;
+		const shade = 0.44 + (1 - body) * 0.26 + belly + plate + (grain(x, y) - 0.5) * 0.08;
 		return [tone(DRAGON, shade)];
 	}
 	if (ellipse(x, y, 9, 0, 4.6, 4.4) <= 1) {
@@ -614,6 +689,10 @@ function paintPterosaurWing(x: number, y: number): [Rgb, number?] | null {
 	// Arm strut plus the long flight finger.
 	if (Math.abs(x) < 0.8) return [tone(PTEROSAUR, 0.32)];
 	if (capsule(x, y, 0, 0, 8.4, 22, 0.7) <= 1) return [tone(PTEROSAUR, 0.42)];
+	// Membrane rays fan back from the wing finger.
+	if (capsule(x, y, 8.4, 22, -5.1, 40, 0.45) <= 1 || capsule(x, y, 8.4, 22, 5.1, 40, 0.45) <= 1) {
+		return [tone(PTEROSAUR, 0.46), 244];
+	}
 	if (Math.abs(y - Math.round(y)) < 0.2 && Math.round(y) % 8 === 0) return [tone(PTEROSAUR, 0.38)];
 	return [tone(PTEROSAUR, 0.54 + (y / 40) * 0.22), 244];
 }
@@ -625,7 +704,10 @@ function paintQuetzBody(x: number, y: number): [Rgb, number?] | null {
 		return [tone(QUETZ, shade)];
 	}
 	// Very long neck and beak.
-	if (capsule(x, y, 2, 0, 16, -1, 2.2) <= 1) return [tone(QUETZ, 0.58)];
+	if (capsule(x, y, 2, 0, 16, -1, 2.2) <= 1) {
+		// Ringed neck feathers.
+		return x > 3 && x < 14 && Math.round(x) % 3 === 0 ? [tone(QUETZ, 0.44)] : [tone(QUETZ, 0.58)];
+	}
 	if (ellipse(x, y, 6, -0.4, 3.6, 3.2) <= 1) {
 		if (ellipse(x, y, 7.4, -1, 0.9, 0.9) <= 1) return [EYE_DARK];
 		return [tone(QUETZ, 0.66)];
@@ -659,7 +741,9 @@ function paintGhostBody(x: number, y: number): [Rgb, number?] | null {
 	}
 	if (sheet > 1) return null;
 
-	const shade = 0.58 + (1 - sheet) * 0.3 + (grain(x, y) - 0.5) * 0.05;
+	// A deeper core reads as the ghost's gathered centre.
+	const core = ellipse(x, y, -2, -1, 8, 9) <= 1 ? -0.1 : 0;
+	const shade = 0.58 + (1 - sheet) * 0.3 + core + (grain(x, y) - 0.5) * 0.05;
 	if (ellipse(x, y, 8.4, -2, 1.5, 2) <= 1 || ellipse(x, y, 2, -2, 1.5, 2) <= 1) return [EYE_DARK, 235];
 	if (ellipse(x, y, 5, 4.6, 1.6, 1) <= 1) return [mix(GHOST[1] ?? INK, EYE_DARK, 0.4), 220];
 	return [tone(GHOST, shade), 185];
