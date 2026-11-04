@@ -121,7 +121,6 @@
 						<p class="profile-overline">ovyn / personal space</p>
 						<h1>{displayName}{#if data.cosmetics?.badgeUrl}<ProfileBadge label="ovyn profile badge" src={data.cosmetics.badgeUrl} />{/if}{#if data.isPremium}<span class="premium-profile-mark" aria-label="ovyn Premium member">premium</span>{/if}</h1>
 						<p class="profile-handle" style={p.usernameColor ? `color: ${p.usernameColor}` : undefined}>@{p.slug}</p>
-						{#if data.discord}<p class="profile-discord">Discord · {data.discord.username}</p>{/if}
 					</div>
 				</div>
 			</header>
@@ -324,7 +323,6 @@
 
 	.profile-handle { margin-top: 0.5rem; color: var(--color-accent); font-size: 1rem; }
 	.premium-profile-mark { display: inline-flex; margin-left: 0.4rem; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent); border-radius: 999px; background: var(--color-accent-soft); color: var(--color-accent); font-family: var(--font-mono); font-size: 0.55rem; padding: 0.15rem 0.5rem; vertical-align: middle; }
-	.profile-discord { margin-top: 0.5rem; color: var(--color-muted); font-size: 0.8rem; }
 	.profile-about { max-width: 54rem; margin-top: clamp(2.5rem, 8vw, 6rem); }
 	.profile-about p { color: color-mix(in srgb, var(--color-foreground) 82%, var(--color-muted)); font-size: clamp(1.1rem, 2.7vw, 1.65rem); line-height: 1.75; white-space: pre-wrap; }
 	.profile-audio { width: min(100%, 28rem); margin-top: 2rem; }

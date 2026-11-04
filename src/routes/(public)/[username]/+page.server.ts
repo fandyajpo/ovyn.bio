@@ -39,7 +39,6 @@ export const load: PageServerLoad = async (event) => {
 		return {
 			private: true,
 			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', usernameColor: null, backgroundTexture: 'none', blocks: [], creatures: { version: 1, list: [] } },
-			discord: null,
 			avatarUrl: null,
 			bannerUrl: null,
 			bannerIsVideo: false,
@@ -87,7 +86,6 @@ export const load: PageServerLoad = async (event) => {
 	return {
 		private: false,
 		profile: safeProfile,
-		discord: row.discord ? { username: row.discord.username, globalName: row.discord.globalName } : null,
 		avatarUrl,
 		bannerUrl,
 		bannerIsVideo,
