@@ -196,4 +196,12 @@
 			padding-inline: max(1.25rem, env(safe-area-inset-left)) max(1.25rem, env(safe-area-inset-right));
 		}
 	}
+
+	/* Phones keep room below the content for the fixed help bubble and the
+	   floating menu pill, so the last buttons never sit underneath them. */
+	@media (max-width: 39.999rem) {
+		.page-content {
+			padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+		}
+	}
 </style>
