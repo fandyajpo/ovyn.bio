@@ -77,7 +77,7 @@
 	<main class="profile-private-state">
 		<div class="private-orbit" aria-hidden="true"></div>
 		<p class="profile-overline">ovyn / private space</p>
-		<h1>This corner is private.</h1>
+		<h1>This corner is private</h1>
 		<p>The owner has chosen to keep this page to themselves.</p>
 	</main>
 {:else}
@@ -161,7 +161,7 @@
 
 			{#if data.guild}
 				<section class="profile-circle" aria-label="Community">
-					<p class="profile-overline">THEIR CIRCLE</p>
+					<p class="profile-overline">their circle</p>
 					<a href="/guild/{data.guild.slug}">{data.guild.name}<span aria-hidden="true">↗</span></a>
 				</section>
 			{/if}
@@ -319,10 +319,13 @@
 		font-weight: 600;
 		letter-spacing: -0.055em;
 		line-height: 1.08;
+		/* A long single-word display name must wrap, never overflow. */
+		overflow-wrap: anywhere;
 	}
 
 	.profile-handle { margin-top: 0.5rem; color: var(--color-accent); font-size: 1rem; }
-	.premium-profile-mark { display: inline-flex; margin-left: 0.4rem; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent); border-radius: 999px; background: var(--color-accent-soft); color: var(--color-accent); font-family: var(--font-mono); font-size: 0.55rem; padding: 0.15rem 0.5rem; vertical-align: middle; }
+	/* The h1 flex gap already separates the mark, so no extra margin. */
+	.premium-profile-mark { display: inline-flex; align-items: center; border: 1px solid color-mix(in srgb, var(--color-accent) 30%, transparent); border-radius: 999px; background: var(--color-accent-soft); color: var(--color-accent); font-family: var(--font-mono); font-size: 0.6rem; padding: 0.15rem 0.5rem; }
 	.profile-about { max-width: 54rem; margin-top: clamp(2.5rem, 8vw, 6rem); }
 	.profile-about p { color: color-mix(in srgb, var(--color-foreground) 82%, var(--color-muted)); font-size: clamp(1.1rem, 2.7vw, 1.65rem); line-height: 1.75; white-space: pre-wrap; }
 	.profile-audio { width: min(100%, 28rem); margin-top: 2rem; }
@@ -347,8 +350,6 @@
 	}
 
 	.profile-links a span,
-	.profile-circle a span { color: var(--color-accent); }
-
 	.profile-circle a span { color: var(--color-accent); }
 
 	.profile-links .profile-link {
