@@ -14,72 +14,96 @@ import { db } from '#lib/server/db';
 import * as schema from '#lib/server/db/schema';
 import { provisionUser } from '#lib/server/services/profiles';
 
-const discordClientId = DISCORD_CLIENT_ID;
-const discordClientSecret = DISCORD_CLIENT_SECRET;
-const googleClientId = GOOGLE_CLIENT_ID;
-const googleClientSecret = GOOGLE_CLIENT_SECRET;
+function createAuth() {
+	const discordClientId = DISCORD_CLIENT_ID;
+	const discordClientSecret = DISCORD_CLIENT_SECRET;
+	const googleClientId = GOOGLE_CLIENT_ID;
+	const googleClientSecret = GOOGLE_CLIENT_SECRET;
 
-if (!BETTER_AUTH_SECRET) {
-	throw new Error('BETTER_AUTH_SECRET must be set');
-}
+	if (!BETTER_AUTH_SECRET) {
+		throw new Error('BETTER_AUTH_SECRET must be set');
+	}
 
-const socialProviders = {
-	...(discordClientId && discordClientSecret
-		? {
-				discord: {
-					clientId: discordClientId,
-					clientSecret: discordClientSecret,
-					// Identity only - we never require the user's email.
-					scope: ['identify']
+	const socialProviders = {
+		...(discordClientId && discordClientSecret
+			? {
+					discord: {
+						clientId: discordClientId,
+						clientSecret: discordClientSecret,
+						// Identity only - we never require the user's email.
+						scope: ['identify']
+					}
 				}
+			: {}),
+		...(googleClientId && googleClientSecret
+			? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
+			: {})
+	};
+
+	if (Object.keys(socialProviders).length === 0) {
+		throw new Error('Configure Discord or Google OAuth credentials to enable sign-in');
+	}
+
+	return betterAuth({
+		// SvelteKit 3 doesn't populate process.env from .env - pass explicitly.
+		secret: BETTER_AUTH_SECRET,
+		baseURL: BETTER_AUTH_URL,
+		database: drizzleAdapter(db, { provider: 'pg', schema }),
+		// OAuth providers are optional individually; password sign-in stays disabled.
+		emailAndPassword: { enabled: false },
+		socialProviders,
+		// Discord accounts without email use a stable placeholder address.
+		mapProfileToUser: (profile: { id: string; email?: string | null }) => ({
+			email: profile.email ?? `${profile.id}@oauth.ovyn.me`,
+			emailVerified: false
+		}),
+		user: {
+			additionalFields: {
+				status: { type: 'string', defaultValue: 'active', input: false }
 			}
-		: {}),
-	...(googleClientId && googleClientSecret
-		? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
-		: {})
-};
-
-if (Object.keys(socialProviders).length === 0) {
-	throw new Error('Configure Discord or Google OAuth credentials to enable sign-in');
-}
-
-export const auth = betterAuth({
-	// SvelteKit 3 doesn't populate process.env from .env - pass explicitly.
-	secret: BETTER_AUTH_SECRET,
-	baseURL: BETTER_AUTH_URL,
-	database: drizzleAdapter(db, { provider: 'pg', schema }),
-	// OAuth providers are optional individually; password sign-in stays disabled.
-	emailAndPassword: { enabled: false },
-	socialProviders,
-	// Discord accounts without email use a stable placeholder address.
-	mapProfileToUser: (profile: { id: string; email?: string | null }) => ({
-		email: profile.email ?? `${profile.id}@oauth.ovyn.me`,
-		emailVerified: false
-	}),
-	user: {
-		additionalFields: {
-			status: { type: 'string', defaultValue: 'active', input: false }
-		}
-	},
-	databaseHooks: {
-		session: {
-			// Provision / refresh identity data after sign-in.
-			create: {
-				after: async (session) => {
-					try {
-						await provisionUser(session.userId);
-					} catch (err) {
-						// Never block sign-in on provisioning failures.
-						console.error('provisionUser failed', err);
+		},
+		databaseHooks: {
+			session: {
+				// Provision / refresh identity data after sign-in.
+				create: {
+					after: async (session) => {
+						try {
+							await provisionUser(session.userId);
+						} catch (err) {
+							// Never block sign-in on provisioning failures.
+							console.error('provisionUser failed', err);
+						}
 					}
 				}
 			}
-		}
-	},
-	advanced: {
-		database: { joins: true }
-	},
-	plugins: [sveltekitCookies(getRequestEvent)]
+		},
+		advanced: {
+			database: { joins: true }
+		},
+		plugins: [sveltekitCookies(getRequestEvent)]
+	});
+}
+
+type Auth = ReturnType<typeof createAuth>;
+
+let cached: Auth | null = null;
+
+export function getAuth(): Auth {
+	if (!cached) cached = createAuth();
+	return cached;
+}
+
+/**
+ * Lazy auth handle: betterAuth is created on first use, not at module load, so
+ * prerendering and builds never need the auth credentials - the design env.ts
+ * documents. Every property access forwards to the real instance.
+ */
+export const auth: Auth = new Proxy({} as Auth, {
+	get(_target, prop) {
+		const instance = getAuth();
+		const value = Reflect.get(instance, prop, instance);
+		return typeof value === 'function' ? value.bind(instance) : value;
+	}
 });
 
-export type AuthSession = typeof auth.$Infer.Session;
+export type AuthSession = Auth['$Infer']['Session'];
