@@ -124,7 +124,7 @@ snail: a generated spiral shell with growth rings and ambient occlusion, a
 translucent muscular foot, four independently swaying tentacles and a small
 behaviour system that crawls, explores, rests and goes alert at its own pace,
 turning away from the edges and settling in place when motion is reduced.
-The landing, the sign-in page and the dashboard sit on a calm WebGL liquid-metal backdrop in
+The landing, the sign-in page, the account overview and the activity dashboard sit on a calm WebGL liquid-metal backdrop in
 both themes: black base with a violet ribbon and copper-gold highlights in dark
 mode, bone base with a blue ribbon and orange highlights in light mode. The
 motion runs slow and dim and holds a still frame for visitors who prefer reduced

@@ -1434,10 +1434,11 @@ html[data-theme='light'] body {
 
 /*
  * Liquid-metal backdrop: the LiquidBackground canvas (mounted from
- * +layout.svelte) is the page background on the landing, the sign-in page and
- * the dashboard, in both themes — black with a violet ribbon and copper-gold
- * highlights in dark mode, bone with a blue ribbon and orange highlights in
- * light mode — so the frame paints nothing over it there. Every other page
+ * +layout.svelte) is the page background on the landing, the sign-in page,
+ * the account overview and the activity dashboard, in both themes — black
+ * with a violet ribbon and copper-gold highlights in dark mode, bone with a
+ * blue ribbon and orange highlights in light mode — so the frame paints
+ * nothing over it there. Every other page
  * keeps its painted aurora; cards and surfaces stay token-driven and float
  * above either backdrop. Public profiles never mount the canvas and keep
  * their own user-styled backdrops.
@@ -1490,8 +1491,9 @@ html[data-theme='light'] .app-frame[data-liquid='true'] {
 	-webkit-backdrop-filter: blur(10px);
 }
 
-/* The dashboard's cards float over the liquid the same way. The sidebar and
-   the page chrome stay as they are, so the workspace keeps its shape. */
+/* The cards on the workspace's liquid pages float over the liquid the same
+   way. The sidebar and the page chrome stay as they are, so the workspace
+   keeps its shape. */
 .app-frame[data-liquid='true'] .ovyn-surface {
 	background: color-mix(in srgb, var(--color-surface) 55%, transparent);
 	backdrop-filter: blur(12px);
