@@ -1,19 +1,6 @@
 import { z } from 'zod';
 
-export const CREATURE_IDS = [
-	'butterfly',
-	'dragonfly',
-	'bat',
-	'eagle',
-	'crow',
-	'parrot',
-	'cockatoo',
-	'flying-fish',
-	'baby-dragon',
-	'pterosaur',
-	'quetzalcoatlus',
-	'ghost'
-] as const;
+export const CREATURE_IDS = ['butterfly'] as const;
 
 export type CreatureSpecies = (typeof CREATURE_IDS)[number];
 
@@ -25,21 +12,10 @@ export const CREATURE_CATALOG: readonly {
 	group: CreatureGroup;
 	blurb: string;
 }[] = [
-	{ id: 'butterfly', name: 'Butterfly', group: 'insects', blurb: 'Drifts and hovers on slow, painted wings.' },
-	{ id: 'dragonfly', name: 'Dragonfly', group: 'insects', blurb: 'Quick darts, sudden stops, glassy wings.' },
-	{ id: 'bat', name: 'Bat', group: 'animals', blurb: 'Erratic, banking flight with membrane wings.' },
-	{ id: 'eagle', name: 'Eagle', group: 'animals', blurb: 'Wide, patient circles between long glides.' },
-	{ id: 'crow', name: 'Crow', group: 'animals', blurb: 'Steady beats, short glides, sharp turns.' },
-	{ id: 'parrot', name: 'Parrot', group: 'animals', blurb: 'Fast, colourful flight with a trailing tail.' },
-	{ id: 'cockatoo', name: 'Cockatoo', group: 'animals', blurb: 'A bright crest, soft wings, bouncy glides.' },
-	{ id: 'flying-fish', name: 'Flying fish', group: 'animals', blurb: 'Skims the air on wide silver fins.' },
-	{ id: 'baby-dragon', name: 'Baby dragon', group: 'fantasy', blurb: 'A small dragon, playful and proud.' },
-	{ id: 'pterosaur', name: 'Pterosaur', group: 'fantasy', blurb: 'Leathery wings, long beak, easy glides.' },
-	{ id: 'quetzalcoatlus', name: 'Quetzalcoatlus', group: 'fantasy', blurb: 'Enormous wings, a slow majestic soar.' },
-	{ id: 'ghost', name: 'Ghost', group: 'fantasy', blurb: 'Floats, fades and glows, never in a hurry.' }
+	{ id: 'butterfly', name: 'Butterfly', group: 'insects', blurb: 'Drifts and hovers on slow, painted wings.' }
 ];
 
-export const CREATURE_LIMIT = 6;
+export const CREATURE_LIMIT = 1;
 
 export const CREATURE_SIZE = { min: 0.6, max: 2.4, step: 0.05 } as const;
 

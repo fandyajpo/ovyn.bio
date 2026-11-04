@@ -20,13 +20,12 @@ export type CreatureProfile = {
 	weights: Partial<Record<FlightState, number>>;
 };
 
+// The butterfly is the flock: the landing monarch, at landing presence.
+// Its sprite canvas spans ~224 art pixels when the wings spread, so the
+// profile scale keeps it at the landing's ~134 px on-page wingspan at size 1.
 export const CREATURE_PROFILES: Record<CreatureSpecies, CreatureProfile> = {
-	// Scales are tuned against the doubled sprite canvases: the butterfly is the
-	// ported landing monarch (renders ~110 px tall at size 1, like the landing),
-	// and every other species keeps roughly its previous on-page presence with
-	// twice the pixel detail.
 	butterfly: {
-		scale: 1,
+		scale: 0.6,
 		speed: [16, 30],
 		glideSpeed: 9,
 		acceleration: 18,
@@ -36,137 +35,5 @@ export const CREATURE_PROFILES: Record<CreatureSpecies, CreatureProfile> = {
 		bob: 3.4,
 		bank: 0.28,
 		weights: { flying: 0.3, hovering: 0.22, exploring: 0.28, gliding: 0.1, resting: 0.1 }
-	},
-	dragonfly: {
-		scale: 0.75,
-		speed: [46, 86],
-		glideSpeed: 26,
-		acceleration: 95,
-		turnRate: 3.6,
-		wingRate: [22, 30],
-		wingRange: [0.5, 1],
-		bob: 1.6,
-		bank: 0.16,
-		weights: { flying: 0.3, hovering: 0.2, accelerating: 0.2, exploring: 0.2, turning: 0.1 }
-	},
-	bat: {
-		scale: 0.7,
-		speed: [40, 70],
-		glideSpeed: 24,
-		acceleration: 60,
-		turnRate: 3,
-		wingRate: [6, 9],
-		wingRange: [0.15, 1],
-		bob: 2.5,
-		bank: 0.5,
-		weights: { flying: 0.35, exploring: 0.3, accelerating: 0.2, turning: 0.15 }
-	},
-	eagle: {
-		scale: 0.62,
-		speed: [26, 40],
-		glideSpeed: 22,
-		acceleration: 12,
-		turnRate: 0.6,
-		wingRate: [1.6, 2.4],
-		wingRange: [0.55, 1],
-		bob: 1.5,
-		bank: 0.35,
-		weights: { gliding: 0.45, flying: 0.2, exploring: 0.2, turning: 0.15 }
-	},
-	crow: {
-		scale: 0.65,
-		speed: [34, 55],
-		glideSpeed: 20,
-		acceleration: 30,
-		turnRate: 1.6,
-		wingRate: [4, 6],
-		wingRange: [0.3, 1],
-		bob: 1.2,
-		bank: 0.3,
-		weights: { flying: 0.35, gliding: 0.2, exploring: 0.25, turning: 0.2 }
-	},
-	parrot: {
-		scale: 0.7,
-		speed: [40, 65],
-		glideSpeed: 22,
-		acceleration: 45,
-		turnRate: 2.6,
-		wingRate: [8, 11],
-		wingRange: [0.2, 1],
-		bob: 1.8,
-		bank: 0.35,
-		weights: { flying: 0.3, accelerating: 0.25, exploring: 0.25, hovering: 0.1, turning: 0.1 }
-	},
-	cockatoo: {
-		scale: 0.68,
-		speed: [30, 50],
-		glideSpeed: 16,
-		acceleration: 28,
-		turnRate: 1.8,
-		wingRate: [5, 7],
-		wingRange: [0.3, 1],
-		bob: 2.2,
-		bank: 0.4,
-		weights: { flying: 0.3, gliding: 0.2, hovering: 0.15, exploring: 0.2, turning: 0.15 }
-	},
-	'flying-fish': {
-		scale: 0.65,
-		speed: [30, 50],
-		glideSpeed: 26,
-		acceleration: 22,
-		turnRate: 0.9,
-		wingRate: [2, 3.2],
-		wingRange: [0.6, 1],
-		bob: 1.4,
-		bank: 0.2,
-		weights: { gliding: 0.5, flying: 0.2, exploring: 0.2, turning: 0.1 }
-	},
-	'baby-dragon': {
-		scale: 0.7,
-		speed: [26, 45],
-		glideSpeed: 15,
-		acceleration: 30,
-		turnRate: 2.2,
-		wingRate: [4.5, 7],
-		wingRange: [0.2, 1],
-		bob: 2,
-		bank: 0.45,
-		weights: { flying: 0.3, hovering: 0.15, exploring: 0.25, accelerating: 0.2, turning: 0.1 }
-	},
-	pterosaur: {
-		scale: 0.62,
-		speed: [28, 46],
-		glideSpeed: 22,
-		acceleration: 18,
-		turnRate: 0.9,
-		wingRate: [2.2, 3.4],
-		wingRange: [0.5, 1],
-		bob: 1.6,
-		bank: 0.3,
-		weights: { gliding: 0.4, flying: 0.25, exploring: 0.2, turning: 0.15 }
-	},
-	quetzalcoatlus: {
-		scale: 0.55,
-		speed: [16, 28],
-		glideSpeed: 12,
-		acceleration: 8,
-		turnRate: 0.45,
-		wingRate: [1.1, 1.8],
-		wingRange: [0.6, 1],
-		bob: 1,
-		bank: 0.2,
-		weights: { gliding: 0.5, flying: 0.2, exploring: 0.2, turning: 0.1 }
-	},
-	ghost: {
-		scale: 0.68,
-		speed: [7, 16],
-		glideSpeed: 4,
-		acceleration: 4,
-		turnRate: 0.35,
-		wingRate: [0, 0],
-		wingRange: [0, 0],
-		bob: 6,
-		bank: 0.15,
-		weights: { hovering: 0.3, exploring: 0.3, resting: 0.2, flying: 0.2 }
 	}
 };
