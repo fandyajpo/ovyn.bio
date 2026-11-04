@@ -27,7 +27,7 @@
 </svelte:head>
 
 <div class="mx-auto flex min-h-[65svh] max-w-md flex-col items-center justify-center gap-6 py-16 text-center">
-	<p class="landing-eyebrow justify-center">YOUR SPACE IS WAITING</p>
+	<p class="landing-eyebrow justify-center">your space is waiting</p>
 	<div>
 		<h1 class="text-3xl font-semibold tracking-tight">Welcome to ovyn</h1>
 		<p class="mt-3 text-neutral-400">Sign in and make a corner of the internet your own.</p>
