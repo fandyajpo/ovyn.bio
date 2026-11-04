@@ -1,13 +1,11 @@
 import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { profileBackgroundSchema, profileUsernameColorSchema } from '#lib/schemas/profile';
-import { creatureConfigSchema, parseCreatureConfig } from '#lib/schemas/creatures';
 import {
 	getProfileByUserId,
 	setProfileAudioKey,
 	setProfileBackground,
 	setProfileBackgroundKey,
-	setProfileCreatures,
 	setProfileCursorKey,
 	setProfileUsernameColor
 } from '#lib/server/services/profiles';
@@ -66,32 +64,6 @@ export const actions: Actions = {
 			if (err instanceof AppError) return fail(err.status, { error: err.message });
 			console.error(err);
 			return fail(500, { error: 'Could not save your background' });
-		}
-	},
-
-	creatures: async ({ request, locals }) => {
-		if (!locals.user) redirect(302, '/login');
-
-		let raw: unknown;
-		try {
-			raw = JSON.parse(String((await request.formData()).get('config') ?? ''));
-		} catch {
-			return fail(422, { error: 'Could not read the creature setup' });
-		}
-
-		const parsed = creatureConfigSchema.safeParse(raw);
-		if (!parsed.success) {
-			return fail(422, { error: 'Pick valid creatures, sizes and motion settings' });
-		}
-
-		try {
-			await rateLimit(`profile-creatures:${locals.user.id}`, 30, 60_000);
-			await setProfileCreatures(locals.user.id, parseCreatureConfig(parsed.data));
-			return { ok: 'Living creatures saved.' };
-		} catch (err) {
-			if (err instanceof AppError) return fail(err.status, { error: err.message });
-			console.error(err);
-			return fail(500, { error: 'Could not save your creatures' });
 		}
 	},
 

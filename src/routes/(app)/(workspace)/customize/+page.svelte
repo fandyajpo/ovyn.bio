@@ -5,11 +5,9 @@
   import Card from "#lib/components/ui/Card.svelte";
   import Checkbox from "#lib/components/ui/Checkbox.svelte";
   import ColorPicker from "#lib/components/ui/ColorPicker.svelte";
-  import CreaturePicker from "#lib/components/CreaturePicker.svelte";
   import Select from "#lib/components/ui/Select.svelte";
   import UploadButton from "#lib/components/UploadButton.svelte";
   import { PROFILE_BACKGROUND_TEXTURE_OPTIONS } from "#lib/schemas/profile";
-  import { parseCreatureConfig } from "#lib/schemas/creatures";
 
   let {
     data,
@@ -18,9 +16,6 @@
   const textureOptions = PROFILE_BACKGROUND_TEXTURE_OPTIONS.map((option) => ({
     ...option,
   }));
-  const creatureSettings = $derived(
-    parseCreatureConfig(data.profile.creatures).list,
-  );
   const coverIsVideo = $derived(
     /\.(mp4|webm)$/i.test(data.profile.bannerKey ?? ""),
   );
@@ -284,8 +279,6 @@
       >
     {/if}
   </Card>
-
-  <CreaturePicker initial={creatureSettings} />
 
   <a href="/{data.profile.slug}" class="text-sm text-lime-300 hover:underline"
     >Preview my public page ↗</a

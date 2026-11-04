@@ -151,8 +151,8 @@ site: solid headline text instead of gradient tricks, sentence-case mono
 captions instead of uppercase eyebrows, no decorative glyphs, neutral shadows
 instead of coloured sticker glows, no parallax orbit rings, and sentence-case
 headings held at 600 weight. The exceptions are deliberate: the calm liquid
-backdrop on the landing and sign-in pages and the living pixel creatures stay
-because they are ovyn's own signature.
+backdrop on the landing and sign-in pages and the pixel mascots stay because
+they are ovyn's own signature.
 
 ## Interface kit
 
@@ -267,18 +267,6 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
   add it at the end, and a disabled sortable parked at the list's length makes
   the end drop zone a real insertion point. A cancelled drag restores the order
   it started from.
-- **Living creatures** - the customize page lets an owner add the animated
-  butterfly to their public page, with size, movement and animation sliders
-  and an on/off switch. `src/lib/creatures` holds the shared flight
-  simulation and the procedural pixel sprites - the butterfly is the same
-  landing monarch ported into the system - and wings are animated per frame
-  rather than swapped as still images. Only the configuration is stored, in
-  a `creatures` JSON column on the profile, and the public page renders the
-  exact saved list inside the profile canvas. One canvas and one animation
-  loop run every creature, paint at 40fps, pause off-screen or in a hidden
-  tab, cap themselves on small or low-core devices, and draw a still frame
-  when motion is reduced. The layer is pointer-transparent and sits beneath
-  the page content, so links and buttons stay untouched.
 - **Onboarding and page help** - a new account finishes a two-step, full-screen
   onboarding (who you are, how you found ovyn) before the workspace opens; the
   answers are stored on the profile and the welcome step animates into the

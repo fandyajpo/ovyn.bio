@@ -8,7 +8,6 @@ import { recordProfileView } from '#lib/server/services/engagement';
 import { presignDownload } from '#lib/server/storage';
 import { getUserPlan } from '#lib/server/services/billing';
 import { runInBackground } from '#lib/server/utils/background';
-import { parseCreatureConfig } from '#lib/schemas/creatures';
 
 export const load: PageServerLoad = async (event) => {
 	const { params, locals } = event;
@@ -26,7 +25,6 @@ export const load: PageServerLoad = async (event) => {
 		backgroundFixed: row.profile.backgroundFixed,
 		visibility: row.profile.visibility,
 		blocks: row.profile.blocks ?? [],
-		creatures: parseCreatureConfig(row.profile.creatures),
 		createdAt: row.profile.createdAt
 	};
 	const bannerIsVideo = /\.(mp4|webm)$/i.test(row.profile.bannerKey ?? '');
@@ -38,7 +36,7 @@ export const load: PageServerLoad = async (event) => {
 	if (row.profile.visibility === 'private' && !isOwner) {
 		return {
 			private: true,
-			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', usernameColor: null, backgroundTexture: 'none', blocks: [], creatures: { version: 1, list: [] } },
+			profile: { ...safeProfile, displayName: null, bio: null, theme: 'default', usernameColor: null, backgroundTexture: 'none', blocks: [] },
 			avatarUrl: null,
 			bannerUrl: null,
 			bannerIsVideo: false,

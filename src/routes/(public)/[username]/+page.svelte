@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Avatar from '#lib/components/ui/Avatar.svelte';
-	import CreatureLayer from '#lib/components/CreatureLayer.svelte';
 	import LinkProviderIcon from '#lib/components/LinkProviderIcon.svelte';
 	import ProfileBadge from '#lib/components/ProfileBadge.svelte';
 	import TemplateBlocks from '#lib/components/TemplateBlocks.svelte';
@@ -100,7 +99,6 @@
 			<img src={data.cosmetics.wallpaperUrl} alt="" class="profile-wallpaper" />
 		{/if}
 		<div class="profile-atmosphere" aria-hidden="true"></div>
-		<CreatureLayer settings={p.creatures.list} />
 		<div class="profile-canvas-inner">
 			<header class="profile-intro">
 				{#if data.bannerUrl}
