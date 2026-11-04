@@ -2,7 +2,6 @@ import { fail, redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { profileIdentitySchema, profileVisibilitySchema } from '#lib/schemas/profile';
 import {
-	getDiscordAccountByUserId,
 	getProfileByUserId,
 	setProfileAvatar,
 	setProfileVisibility,
@@ -17,14 +16,13 @@ import { rateLimit } from '#lib/server/utils/rate-limit';
 export const load: PageServerLoad = async ({ locals }) => {
 	if (!locals.user) redirect(302, '/login');
 	const profile = await getProfileByUserId(locals.user.id);
-	const [owned, discord, bannerUrl, uploadedAvatarUrl] = await Promise.all([
+	const [owned, bannerUrl, uploadedAvatarUrl] = await Promise.all([
 		listOwnedByKind(locals.user.id),
-		getDiscordAccountByUserId(locals.user.id),
 		profile.bannerKey ? presignDownload(profile.bannerKey) : null,
 		profile.avatarKey ? presignDownload(profile.avatarKey) : null
 	]);
 
-	return { profile, discord, owned, bannerUrl, avatarUrl: uploadedAvatarUrl };
+	return { profile, owned, bannerUrl, avatarUrl: uploadedAvatarUrl };
 };
 
 export const actions: Actions = {

@@ -144,9 +144,6 @@
 		<div class="min-w-0">
 			<p class="truncate font-medium text-neutral-100">{displayName}</p>
 			<p class="font-mono text-xs text-neutral-500">ovyn.me/{data.profile.slug}</p>
-			{#if data.discord}
-				<p class="font-mono text-xs text-neutral-600">discord: {data.discord.username}</p>
-			{/if}
 			<a href="/account/settings" class="mt-1 inline-block text-xs text-neutral-500 hover:text-neutral-300">
 				Sign-in details · Account settings
 			</a>
