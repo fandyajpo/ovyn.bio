@@ -14,7 +14,11 @@ export default defineConfig({
 		sveltekit({
 			adapter: adapter({
 				runtime: 'nodejs22.x',
-				regions: ['iad1', 'sfo1', 'sin1'],
+				// One function region only: listing several (multi-region failover)
+				// needs Vercel Pro, and Hobby deployments fail with "upgrade_required"
+				// at the patchBuild step. sin1 (Singapore) is the closest region to
+				// Indonesia and the Neon database.
+				regions: ['sin1'],
 				maxDuration: 15
 			})
 		})
