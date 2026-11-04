@@ -960,11 +960,6 @@ html[data-theme='light'] .sticker--lilac {
 
 .landing-hero { min-height: min(47rem, calc(100svh - 4rem)); }
 .landing-hero h1 { font-family: var(--font-display); }
-.landing-gradient {
-	background: linear-gradient(105deg, var(--color-accent) 4%, var(--color-pop-pink) 54%, var(--color-pop-blue) 96%);
-	background-clip: text;
-	color: transparent;
-}
 
 /*
  * Page gradient theme: one soft aurora runs down every page, with a 4px pixel
@@ -1111,13 +1106,6 @@ html[data-theme='light'] body {
 
 /* Decorative rings are clipped by their own wrapper, never by the hero, so
    card shadows keep their soft edges. */
-.landing-orbit-clip {
-	position: absolute;
-	z-index: -1;
-	inset: 0;
-	overflow: hidden;
-	pointer-events: none;
-}
 
 /* Public profiles keep a quiet backdrop of their own instead of the aurora. */
 .app-frame[data-profile-page='true'] {
@@ -1130,20 +1118,6 @@ html[data-theme='light'] body {
 	background-size: auto, auto, 96px 96px;
 }
 
-.landing-orbit {
-	position: absolute;
-	z-index: -1;
-	width: min(56vw, 38rem);
-	aspect-ratio: 1;
-	border: 1px solid color-mix(in srgb, var(--color-accent) 13%, transparent);
-	border-radius: 50%;
-	pointer-events: none;
-	transform: translate3d(0, var(--parallax-y, 0), 0);
-	will-change: transform;
-}
-
-.landing-orbit--one { top: -19rem; right: -12rem; }
-.landing-orbit--two { bottom: -20rem; left: -16rem; width: min(46vw, 30rem); border-color: color-mix(in srgb, var(--color-pop-pink) 12%, transparent); }
 .status-dot { display: inline-block; width: 0.45rem; height: 0.45rem; flex: 0 0 auto; border-radius: 50%; background: var(--color-accent); box-shadow: 0 0 16px color-mix(in srgb, var(--color-accent) 55%, transparent); }
 
 .landing-profile-stage { min-height: 28rem; }
@@ -1195,14 +1169,11 @@ html[data-theme='light'] body {
 .feature-index { padding-top: 0.2rem; color: var(--color-muted); font-size: 0.7rem; letter-spacing: 0.1em; }
 .feature-row h3 { font-size: 1.1rem; font-weight: 500; }
 .feature-row p { max-width: 37rem; margin-top: 0.4rem; color: var(--color-muted); font-size: 0.85rem; line-height: 1.7; }
-.feature-symbol { color: var(--color-accent); font-size: 1.15rem; }
-.feature-symbol--pink { color: var(--color-pop-pink); }
-.feature-symbol--blue { color: var(--color-pop-blue); }
 
 .community-strip { border-block: 1px solid var(--color-divider); }
 .community-strip div { display: grid; gap: 0.25rem; }
 .community-strip strong { font-size: 1.8rem; font-weight: 500; letter-spacing: -0.04em; }
-.community-strip span { color: var(--color-muted); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+.community-strip span { color: var(--color-muted); font-size: 0.7rem; letter-spacing: 0.12em; }
 
 .plan-card {
 	border: 1px solid var(--color-divider);
@@ -1362,11 +1333,9 @@ html[data-theme='light'] body {
 }
 
 .status-dot { animation: landing-status-pulse 3200ms ease-in-out infinite; }
-.feature-row .feature-symbol { transition: transform 240ms ease; }
 .plan-card .plan-price { transition: transform 240ms ease; }
 
 @media (hover: hover) and (pointer: fine) {
-	.feature-row:hover .feature-symbol { transform: translate3d(0, -2px, 0) rotate(8deg); }
 	.plan-card:hover .plan-price { transform: translate3d(0, -1px, 0); }
 	.landing-profile-preview a:hover { transform: translate3d(0, -1px, 0); }
 	.faq-item:not(.is-open):hover .faq-toggle { transform: scale(1.12); }
@@ -1377,10 +1346,8 @@ html[data-theme='light'] body {
 	.ovyn-reveal[data-stagger='true'] [data-reveal-item],
 	.status-dot { animation: none !important; }
 
-	.feature-row .feature-symbol,
 	.plan-card .plan-price { transition: none !important; }
 
-	.feature-row:hover .feature-symbol,
 	.plan-card:hover .plan-price,
 	.landing-profile-preview a:hover,
 	.faq-item:not(.is-open):hover .faq-toggle,
@@ -1402,7 +1369,6 @@ html[data-theme='light'] body {
 	font-size: 0.68rem;
 	font-weight: 600;
 	letter-spacing: 0.07em;
-	text-transform: uppercase;
 }
 
 .landing-pill em {
@@ -1412,13 +1378,6 @@ html[data-theme='light'] body {
 	font-size: 0.62rem;
 }
 
-.landing-orbit--stage {
-	top: -25%;
-	right: -18%;
-	width: min(70%, 30rem);
-	border-color: color-mix(in srgb, var(--color-pop-blue) 16%, transparent);
-}
-
 .create-card {
 	height: 100%;
 	border: 1px solid var(--color-divider);
@@ -1426,17 +1385,6 @@ html[data-theme='light'] body {
 	background: color-mix(in srgb, var(--color-surface) 88%, transparent);
 	padding: 1.15rem 1.15rem 1.3rem;
 	transition: transform 220ms ease, border-color 220ms ease;
-}
-
-.create-glyph {
-	display: grid;
-	width: 2.2rem;
-	height: 2.2rem;
-	place-items: center;
-	border-radius: 0.75rem;
-	background: var(--color-accent-soft);
-	color: var(--color-accent);
-	font-size: 1rem;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1524,8 +1472,7 @@ html[data-theme='light'] body {
 	color: var(--color-accent);
 	font-size: 0.58rem;
 	font-weight: 600;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
+	letter-spacing: 0.02em;
 }
 
 .landing-end-link {
@@ -1570,25 +1517,25 @@ html[data-theme='light'] body {
 .app-frame[data-onboarding='true'] .page-content { padding: 0; }
 .app-frame[data-onboarding='true'] .page-container { max-width: none; }
 
-/* Onboarding runs edge to edge, without the site chrome */
-.app-frame[data-onboarding='true'] .page-content { padding: 0; }
-.app-frame[data-onboarding='true'] .page-container { max-width: none; }
+/* Type rhythm: headings and stats stay at 600; bold maps to semibold. */
+.font-bold { font-weight: 600; }
 
 /*
  * Liquid-metal backdrop: the LiquidBackground canvas (mounted from
- * +layout.svelte) is the page background in both themes — black with a violet
- * ribbon and copper-gold highlights in dark mode, bone with a blue ribbon and
- * orange highlights in light mode — so the frame paints nothing over it. These
- * rules sit last so they also win over the landing theme blocks; cards and
- * surfaces stay token-driven and float above the liquid. Public profiles never
- * mount the canvas and keep their own user-styled backdrops.
+ * +layout.svelte) is the page background on the landing and the sign-in page,
+ * in both themes — black with a violet ribbon and copper-gold highlights in
+ * dark mode, bone with a blue ribbon and orange highlights in light mode — so
+ * the frame paints nothing over it there. Every other page keeps its painted
+ * aurora; cards and surfaces stay token-driven and float above either
+ * backdrop. Public profiles never mount the canvas and keep their own
+ * user-styled backdrops.
  */
-html[data-theme='dark'] .app-frame:not([data-profile-page='true']) {
+html[data-theme='dark'] .app-frame[data-liquid='true'] {
 	background-color: transparent;
 	background-image: none;
 }
 
-html[data-theme='light'] .app-frame:not([data-profile-page='true']) {
+html[data-theme='light'] .app-frame[data-liquid='true'] {
 	background-color: transparent;
 	background-image: none;
 }

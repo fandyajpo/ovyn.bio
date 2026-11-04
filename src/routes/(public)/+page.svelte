@@ -31,12 +31,9 @@
 		};
 	});
 
-	let scrollY = $state(0);
-	const parallaxY = $derived(Math.min(scrollY * 0.12, 110));
-
 	// The landing is a small playground: the headline cycles, you can type your
 	// own name into the demo, and the primary button leans toward the cursor.
-	const headlines = ['impossible to ignore.', 'one link, all of you on it.', 'unmistakably yours.'];
+	const headlines = ['impossible to ignore', 'one link, all of you on it', 'unmistakably yours'];
 
 	let headlineIndex = $state(0);
 	const headline = $derived(headlines[headlineIndex] ?? headlines[0] ?? '');
@@ -164,33 +161,27 @@
 	];
 	const creates = [
 		{
-			icon: '✦',
 			title: 'Personal brand',
 			copy: 'A page that looks designed, with your name, your colours and the things you actually care about.',
 			tag: 'profile'
 		},
 		{
-			icon: '◉',
 			title: 'A circle',
 			copy: 'Find and keep the people who get you, with a circle that starts from your own page.',
 			tag: 'community'
 		},
 		{
-			icon: '◇',
 			title: 'Flex',
 			copy: 'Badges, frames, wallpapers and layouts that say something without shouting.',
 			tag: 'cosmetics'
 		},
 		{
-			icon: '✳',
 			title: 'Expression',
 			copy: 'Backgrounds, textures, audio, a cursor and a layout builder, all in your own taste.',
 			tag: 'customise'
 		}
 	];
 </script>
-
-<svelte:window bind:scrollY />
 
 <svelte:head>
 	<title>ovyn - your space on the internet</title>
@@ -205,10 +196,6 @@
 </svelte:head>
 
 <section class="landing-hero relative isolate">
-	<div class="landing-orbit-clip" aria-hidden="true">
-		<div class="landing-orbit landing-orbit--one" style={`--parallax-y: ${parallaxY}px`}></div>
-		<div class="landing-orbit landing-orbit--two" style={`--parallax-y: ${-parallaxY * 0.55}px`}></div>
-	</div>
 	<PixelField />
 	<PixelButterfly />
 	<div class="landing-snail-range" aria-hidden="true">
@@ -217,7 +204,7 @@
 	<div class="relative grid items-center gap-12 py-10 sm:py-16 lg:grid-cols-[1.1fr_.9fr] lg:gap-16 lg:py-20">
 		<div class="landing-hero-copy flex flex-col items-start gap-6">
 			<Reveal>
-				<p class="landing-eyebrow"><span class="status-dot"></span> YOUR SPACE. YOUR PEOPLE.</p>
+				<p class="landing-eyebrow"><span class="status-dot"></span> Your space, your people</p>
 			</Reveal>
 			<Reveal delay={70}>
 				<h1 class="max-w-3xl text-5xl font-semibold leading-[1.04] tracking-[-0.06em] sm:text-6xl lg:text-7xl">
@@ -225,7 +212,7 @@
 					<span class="landing-line">
 						{#each headlines as line (line)}
 							<span
-								class="landing-gradient landing-line-text"
+								class="landing-line-text"
 								class:is-active={line === headline}
 								aria-hidden={line === headline ? undefined : 'true'}
 							>{line}</span>
@@ -285,7 +272,7 @@
 <section id="create" class="landing-section py-14 sm:py-20">
 	<Reveal>
 		<div class="max-w-2xl">
-			<p class="landing-eyebrow">WHAT YOU CAN CREATE</p>
+			<p class="landing-eyebrow">What you can create</p>
 			<h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">One page. Everything you are.</h2>
 			<p class="mt-3 text-sm leading-7 text-neutral-400">
 				A personal brand that looks intentional, a circle that feels close, and enough flex to show what you love.
@@ -296,8 +283,7 @@
 		{#each creates as item, index (item.title)}
 			<Reveal delay={index * 70}>
 				<article class="create-card">
-					<span class="create-glyph" aria-hidden="true">{item.icon}</span>
-					<h3 class="mt-4 font-medium text-neutral-100">{item.title}</h3>
+					<h3 class="font-medium text-neutral-100">{item.title}</h3>
 					<p class="mt-2 text-sm leading-6 text-neutral-400">{item.copy}</p>
 					<p class="mt-4 font-mono text-[10px] uppercase tracking-wider text-neutral-500">{item.tag}</p>
 				</article>
@@ -309,20 +295,20 @@
 <section id="features" class="landing-section grid gap-8 py-16 sm:py-24 md:grid-cols-[.75fr_1.25fr]">
 	<Reveal>
 		<div class="max-w-sm">
-			<p class="landing-eyebrow">A HOME THAT FEELS LIKE YOU</p>
+			<p class="landing-eyebrow">A home that feels like you</p>
 			<h2 class="mt-4 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">Your identity,<br />with room to grow.</h2>
 			<p class="mt-4 text-sm leading-7 text-neutral-400">One simple link that feels like your own little corner of the internet.</p>
 		</div>
 	</Reveal>
 	<div class="feature-list">
 		<Reveal delay={50}>
-			<article class="feature-row"><span class="feature-index">01</span><div><h3>Show your style</h3><p>Backgrounds, color, profile effects and little details that make your page instantly yours.</p></div><span class="feature-symbol" aria-hidden="true">✳</span></article>
+			<article class="feature-row"><span class="feature-index">01</span><div><h3>Show your style</h3><p>Backgrounds, color, profile effects and little details that make your page instantly yours.</p></div></article>
 		</Reveal>
 		<Reveal delay={110}>
-			<article class="feature-row"><span class="feature-index">02</span><div><h3>Bring your links together</h3><p>Your socials, projects and favorite places, all collected in one shareable profile.</p></div><span class="feature-symbol feature-symbol--pink" aria-hidden="true">↗</span></article>
+			<article class="feature-row"><span class="feature-index">02</span><div><h3>Bring your links together</h3><p>Your socials, projects and favorite places, all collected in one shareable profile.</p></div></article>
 		</Reveal>
 		<Reveal delay={170}>
-			<article class="feature-row"><span class="feature-index">03</span><div><h3>Find your people</h3><p>Discover communities and circles that make your corner feel a little less alone.</p></div><span class="feature-symbol feature-symbol--blue" aria-hidden="true">◌</span></article>
+			<article class="feature-row"><span class="feature-index">03</span><div><h3>Find your people</h3><p>Discover communities and circles that make your corner feel a little less alone.</p></div></article>
 		</Reveal>
 	</div>
 </section>
@@ -340,7 +326,7 @@
 <section id="plans" class="landing-section py-16 sm:py-24">
 	<Reveal>
 		<div class="mx-auto mb-10 max-w-xl text-center">
-			<p class="landing-eyebrow justify-center">SIMPLE PLANS, NO SURPRISES</p>
+			<p class="landing-eyebrow justify-center">Simple plans, no surprises</p>
 			<h2 class="mt-4 text-3xl font-semibold tracking-tight sm:text-4xl">Start free. Add more when you need it.</h2>
 			<p class="mt-3 text-sm leading-7 text-neutral-400">A great page starts free. Add Premium for Rp 30.000 a month when you want the full creative toolkit.</p>
 		</div>
@@ -348,7 +334,7 @@
 	<div class="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
 		<Reveal class="h-full">
 			<article class="plan-card h-full">
-				<div class="flex items-center justify-between gap-3"><h3>Free</h3><span class="plan-mark">ALWAYS FREE</span></div>
+				<div class="flex items-center justify-between gap-3"><h3>Free</h3><span class="plan-mark">always free</span></div>
 				<p class="plan-price">Rp 0 <span>forever</span></p>
 				<ul>{#each freeFeatures as feature (feature)}<li><span aria-hidden="true">✓</span>{feature}</li>{/each}</ul>
 				<Button href="/login" variant="secondary" class="mt-7 w-full">Create your page</Button>
@@ -356,10 +342,10 @@
 		</Reveal>
 		<Reveal delay={100} class="h-full">
 			<article class="plan-card plan-card--premium h-full">
-				<div class="flex items-center justify-between gap-3"><h3>Premium</h3><span class="premium-mark">30 DAYS</span></div>
+				<div class="flex items-center justify-between gap-3"><h3>Premium</h3><span class="premium-mark">30 days</span></div>
 				<p class="plan-price">Rp 30.000 <span>per month</span></p>
 				<p class="mb-5 text-sm text-neutral-400">Everything in Free, plus room to make your profile unmistakably yours.</p>
-				<ul>{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✦</span>{feature}</li>{/each}</ul>
+				<ul>{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✓</span>{feature}</li>{/each}</ul>
 				<p class="plan-rollout-note">Layouts, the Premium badge and cursor effects are live now. Fonts, widgets, SEO, typewriter text, aliases and extra preferences are in development.</p>
 				<Button href="/upgrade" class="mt-7 w-full">Explore Premium</Button>
 			</article>
@@ -370,7 +356,7 @@
 <section id="faq" class="landing-section grid gap-8 py-16 sm:py-24 md:grid-cols-[.75fr_1.25fr]">
 	<Reveal>
 		<div class="max-w-sm">
-			<p class="landing-eyebrow">GOOD TO KNOW</p>
+			<p class="landing-eyebrow">Good to know</p>
 			<h2 class="mt-4 text-3xl font-semibold tracking-tight">A few quick things.</h2>
 			<p class="mt-3 text-sm leading-7 text-neutral-400">The short version, before you make this place yours.</p>
 		</div>
@@ -404,8 +390,8 @@
 	<section class="landing-end relative py-14 text-center sm:py-20">
 		<div class="landing-end-ring" aria-hidden="true"></div>
 		<div class="relative mx-auto flex max-w-2xl flex-col items-center gap-5">
-			<p class="landing-eyebrow justify-center" data-reveal-item style="--reveal-order: 0">YOUR TAB IS OPEN</p>
-			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark.</h2>
+			<p class="landing-eyebrow justify-center" data-reveal-item style="--reveal-order: 0">Your tab is open</p>
+			<h2 class="text-4xl font-semibold tracking-tight sm:text-5xl" data-reveal-item style="--reveal-order: 1">Make your mark</h2>
 			<p class="max-w-xl text-neutral-400" data-reveal-item style="--reveal-order: 2">Claim a name, shape your space, and let your people find you.</p>
 			<p class="landing-end-link" data-reveal-item style="--reveal-order: 3">
 				<span>ovyn.me/</span>

@@ -94,7 +94,6 @@
 								checked={persona === option.value}
 								onchange={() => (persona = option.value)}
 							/>
-							<span class="persona-icon" aria-hidden="true">{option.icon}</span>
 							<span class="persona-copy">
 								<strong>{option.label}</strong>
 								<span>{option.description}</span>
@@ -268,8 +267,7 @@
 		color: var(--color-accent);
 		font-family: var(--font-mono);
 		font-size: 0.66rem;
-		letter-spacing: 0.2em;
-		text-transform: uppercase;
+		letter-spacing: 0.1em;
 	}
 
 	.onboarding-panel h1 {
@@ -322,18 +320,6 @@
 	.source-card.is-selected {
 		border-color: color-mix(in srgb, var(--color-accent) 62%, transparent);
 		background: var(--color-accent-soft);
-	}
-
-	.persona-icon {
-		display: grid;
-		width: 2.25rem;
-		height: 2.25rem;
-		flex: 0 0 auto;
-		place-items: center;
-		border-radius: 0.75rem;
-		background: color-mix(in srgb, var(--color-accent) 16%, var(--color-surface));
-		color: var(--color-accent);
-		font-size: 1rem;
 	}
 
 	.persona-copy { display: grid; gap: 0.15rem; }

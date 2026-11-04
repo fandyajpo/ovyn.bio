@@ -189,8 +189,7 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.62rem;
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.admin-sidebar-close {

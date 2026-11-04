@@ -48,11 +48,11 @@
 	let mobileMenuPanel = $state<HTMLElement | undefined>(undefined);
 
 	const links = $derived([
-		{ href: '/#features', label: 'Features', icon: '✦', tone: 'blue' },
-		{ href: '/discover', label: 'Discover', icon: '✳', tone: 'blue' },
-		{ href: '/shop', label: 'Shop', icon: '◇', tone: 'pink' },
-		{ href: '/#plans', label: 'Plans', icon: '＋', tone: 'lilac' },
-		{ href: '/#faq', label: 'FAQ', icon: '?', tone: 'lilac' }
+		{ href: '/#features', label: 'Features', tone: 'blue' },
+		{ href: '/discover', label: 'Discover', tone: 'blue' },
+		{ href: '/shop', label: 'Shop', tone: 'pink' },
+		{ href: '/#plans', label: 'Plans', tone: 'lilac' },
+		{ href: '/#faq', label: 'FAQ', tone: 'lilac' }
 	]);
 
 	function isActive(href: string) {
@@ -180,7 +180,6 @@
 				{#each links as link (link.href)}
 					{@const active = isActive(link.href)}
 					<a href={link.href} class="mobile-menu-link" data-tone={link.tone} aria-current={active ? 'page' : undefined} onclick={closeMenus}>
-						<span class="mobile-menu-icon" aria-hidden="true">{link.icon}</span>
 						<span class="mobile-menu-label">{link.label}</span>
 						<span class="mobile-menu-arrow" aria-hidden="true">↗</span>
 					</a>
@@ -286,8 +285,7 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.58rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		letter-spacing: 0.06em;
 	}
 
 	.desktop-navigation {
@@ -357,7 +355,7 @@
 		border-radius: 0.9rem;
 		background: var(--color-surface);
 		color: var(--color-foreground);
-		box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-pop-blue) 22%, transparent);
+		box-shadow: 3px 3px 0 rgb(0 0 0 / 22%);
 		transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 	}
 
@@ -365,7 +363,7 @@
 	.mobile-menu-toggle[aria-expanded='true'] {
 		border-color: color-mix(in srgb, var(--color-pop-pink) 52%, transparent);
 		background: var(--color-surface-raised);
-		box-shadow: 3px 3px 0 color-mix(in srgb, var(--color-pop-pink) 30%, transparent);
+		box-shadow: 3px 3px 0 rgb(0 0 0 / 30%);
 	}
 
 	.menu-glyph,
@@ -525,8 +523,7 @@
 		color: var(--color-muted);
 		font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 		font-size: 0.65rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		letter-spacing: 0.06em;
 	}
 
 	.mobile-account-links {

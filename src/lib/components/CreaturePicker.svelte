@@ -197,8 +197,7 @@
 		color: var(--color-muted);
 		font-size: 0.66rem;
 		font-weight: 600;
-		letter-spacing: 0.06em;
-		text-transform: uppercase;
+		letter-spacing: 0.03em;
 	}
 
 	.creature-slider input[type='range'] {

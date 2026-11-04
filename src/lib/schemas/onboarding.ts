@@ -6,21 +6,19 @@ import {
 } from './profile-links';
 
 export const ONBOARDING_PERSONAS = [
-	{ value: 'artist', label: 'Artist', description: 'you make things and want them seen', icon: '✦' },
+	{ value: 'artist', label: 'Artist', description: 'you make things and want them seen' },
 	{
 		value: 'content_creator',
 		label: 'Content creator',
-		description: 'you post everywhere and build an audience',
-		icon: '◉'
+		description: 'you post everywhere and build an audience'
 	},
 	{
 		value: 'entrepreneur',
 		label: 'Entrepreneur',
-		description: 'you sell something and need a home for it',
-		icon: '◇'
+		description: 'you sell something and need a home for it'
 	},
-	{ value: 'lone_wolf', label: 'Lone wolf', description: 'you keep it quiet and still want a corner', icon: '☾' },
-	{ value: 'human', label: 'Human', description: 'you are here, and that is enough', icon: '☺' }
+	{ value: 'lone_wolf', label: 'Lone wolf', description: 'you keep it quiet and still want a corner' },
+	{ value: 'human', label: 'Human', description: 'you are here, and that is enough' }
 ] as const;
 
 export type OnboardingPersona = (typeof ONBOARDING_PERSONAS)[number]['value'];

@@ -265,8 +265,7 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.page-block-code pre {
@@ -312,8 +311,7 @@
 		color: var(--color-accent);
 		font-size: 0.62rem;
 		font-weight: 600;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.page-block-embed-url {

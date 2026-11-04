@@ -456,7 +456,7 @@
 	.block-field,
 	.builder-field { display: grid; gap: 0.3rem; }
 	.block-field > span,
-	.builder-field > span { color: var(--color-muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+	.builder-field > span { color: var(--color-muted); font-size: 0.68rem; font-weight: 600; letter-spacing: 0.03em; }
 
 	.block-input,
 	.builder-input {
@@ -561,8 +561,7 @@
 		color: var(--color-muted);
 		font-size: 0.68rem;
 		font-weight: 600;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
+		letter-spacing: 0.03em;
 	}
 
 	.block-note { color: var(--color-muted); font-size: 0.78rem; }

@@ -235,7 +235,7 @@
 		color: var(--color-foreground);
 		font-family: var(--font-mono);
 		font-size: 0.8rem;
-		text-transform: uppercase;
+		letter-spacing: 0.02em;
 	}
 
 	.color-hex:focus { outline: none; border-color: color-mix(in srgb, var(--color-accent) 55%, transparent); }

@@ -28,22 +28,28 @@
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
 	const isAdminPage = $derived(page.route.id?.includes('(app)/admin') ?? false);
 	const isOnboarding = $derived(page.route.id?.includes('(app)/onboarding') ?? false);
+	// The liquid-metal backdrop is a deliberate landing and sign-in moment;
+	// every other page keeps its painted aurora background.
+	const isLiquidPage = $derived(isLanding || page.url.pathname === '/login');
 	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage && !isOnboarding);
 </script>
 
 <QueryClientProvider client={queryClient}>
-	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
+	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-liquid={isLiquidPage ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
-		<!-- The liquid-metal canvas is the site background. Profiles keep their own
-			user-styled backgrounds. Dark mode: black base, violet ribbon, copper-gold
-			highlights. Light mode: bone base, blue ribbon, orange highlights. -->
-		{#if !isProfilePage}
+		<!-- The liquid-metal canvas is the background of the landing and the sign-in
+			page only; every other page keeps its painted aurora. Dark mode: black
+			base, violet ribbon, copper-gold highlights. Light mode: bone base, blue
+			ribbon, orange highlights. Motion runs slow and dim so it reads as an
+			ambient surface, not a showpiece. -->
+		{#if isLiquidPage}
 			<LiquidBackground
 				baseColor={themeState.value === 'light' ? '#ebe7dc' : '#000000'}
 				colorA={themeState.value === 'light' ? '#5b8af5' : '#2b0a4d'}
 				colorB={themeState.value === 'light' ? '#e8853c' : '#c98a4a'}
 				rimColor={themeState.value === 'light' ? '#f6c9a8' : '#f2b8d9'}
-				intensity={themeState.value === 'light' ? 0.9 : 1}
+				speed={0.06}
+				intensity={themeState.value === 'light' ? 0.7 : 0.8}
 			/>
 		{/if}
 		{#if showsSiteChrome}<Nav />{/if}

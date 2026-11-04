@@ -64,7 +64,7 @@
 			</div>
 
 			<div class="demo-badge demo-piece" style="--i: 5">
-				<span aria-hidden="true">✦</span> verified vibes
+				verified vibes
 			</div>
 		</div>
 	</div>
@@ -130,9 +130,9 @@
 		gap: 0.35rem;
 		color: var(--color-muted);
 		font-family: var(--font-mono);
+		font-family: var(--font-mono);
 		font-size: 0.55rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.demo-page {
@@ -272,8 +272,7 @@
 		color: var(--color-muted);
 		font-size: 0.61rem;
 		font-weight: 600;
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.demo-piece,

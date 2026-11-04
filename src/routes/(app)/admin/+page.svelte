@@ -46,14 +46,13 @@
 	<section aria-label="Monetization overview">
 		<div class="mb-3 flex items-center justify-between gap-3">
 			<h2 class="font-[family-name:var(--font-display)] text-xl font-semibold">At a glance</h2>
-			<span class="hidden font-mono text-[10px] uppercase tracking-widest text-neutral-600 sm:inline">LIVE SNAPSHOT</span>
+			<span class="hidden font-mono text-[10px] tracking-widest text-neutral-600 sm:inline">live snapshot</span>
 		</div>
 		<div class="responsive-grid-container">
 			<div class="adaptive-stats grid gap-3 sm:gap-4">
 				<Card class="border-pop-blue/25 bg-[#151d20]/80 p-4 sm:p-5">
 					<div class="flex items-start justify-between gap-3">
-						<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Catalog items</p>
-						<span class="grid size-9 place-items-center rounded-xl bg-pop-blue/15 text-lg text-pop-blue" aria-hidden="true">◇</span>
+						<p class="font-mono text-[10px] tracking-wider text-neutral-400">Catalog items</p>
 					</div>
 					<p class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">{data.overview.products}</p>
 					<p class="mt-1 text-xs text-neutral-500">{data.overview.activeProducts} available to customers</p>
@@ -61,8 +60,7 @@
 
 				<Card class="border-lime-300/25 bg-lime-300/[0.04] p-4 sm:p-5">
 					<div class="flex items-start justify-between gap-3">
-						<p class="font-mono text-[10px] uppercase tracking-wider text-neutral-400">Active listings</p>
-						<span class="grid size-9 place-items-center rounded-xl bg-lime-300/15 text-lg text-lime-300" aria-hidden="true">✳</span>
+						<p class="font-mono text-[10px] tracking-wider text-neutral-400">Active listings</p>
 					</div>
 					<p class="mt-3 font-[family-name:var(--font-display)] text-3xl font-bold">{data.overview.activeProducts}</p>
 					<p class="mt-1 text-xs text-neutral-500">{data.overview.products - data.overview.activeProducts} paused</p>
@@ -105,7 +103,6 @@
 
 			{#if data.overview.recentOrders.length === 0}
 				<div class="p-8 text-center sm:p-10">
-					<span class="mx-auto grid size-12 place-items-center rounded-2xl bg-pop-blue/10 text-2xl text-pop-blue" aria-hidden="true">◇</span>
 					<p class="mt-4 font-medium text-neutral-200">No orders yet</p>
 					<p class="mt-1 text-sm text-neutral-500">New sales will show up here.</p>
 				</div>

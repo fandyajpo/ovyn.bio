@@ -184,15 +184,14 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.62rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		letter-spacing: 0.06em;
 	}
 
 	.workspace-plan-pill--premium { border-color: color-mix(in srgb, var(--color-accent) 36%, transparent); color: var(--color-accent); }
 	.workspace-user-summary { display: flex; align-items: center; gap: 0.8rem; border-bottom: 1px solid var(--color-divider); padding: 0.25rem 0 1rem; margin-bottom: 1rem; }
 	.workspace-nav-grid { display: grid; gap: 1rem; }
 	.workspace-nav-section { display: grid; align-content: start; gap: 0.2rem; }
-	.workspace-nav-section h2 { padding: 0.35rem 0.7rem; color: var(--color-muted); font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; }
+	.workspace-nav-section h2 { padding: 0.35rem 0.7rem; color: var(--color-muted); font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.06em; }
 
 	.workspace-link {
 		display: flex;

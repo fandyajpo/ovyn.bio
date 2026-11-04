@@ -63,7 +63,7 @@
 			</div>
 			<p class="text-3xl font-semibold">Rp 30.000 <span class="text-sm font-normal text-neutral-500">per month</span></p>
 			<ul class="plan-feature-list">
-				{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✦</span>{feature}</li>{/each}
+				{#each premiumFeatures as feature (feature)}<li><span aria-hidden="true">✓</span>{feature}</li>{/each}
 			</ul>
 			<p class="plan-rollout-note">Layouts, the Premium badge and cursor effects are live now. Fonts, widgets, SEO, typewriter text, aliases and extra preferences are in development.</p>
 			{#if data.products.length === 0}

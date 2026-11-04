@@ -186,8 +186,7 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.6rem;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.cosmetic-preview-kind {
@@ -197,8 +196,7 @@
 		color: var(--color-muted);
 		font-family: var(--font-mono);
 		font-size: 0.55rem;
-		letter-spacing: 0.16em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 		opacity: 0.8;
 	}
 </style>

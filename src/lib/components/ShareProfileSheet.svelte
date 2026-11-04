@@ -173,8 +173,7 @@
 		color: var(--color-accent);
 		font-family: var(--font-mono);
 		font-size: 0.66rem;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	.share-preview-name {
