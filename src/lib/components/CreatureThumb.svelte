@@ -11,7 +11,7 @@
 
 	let {
 		species,
-		size = 36
+		size = 48
 	}: { species: CreatureSetting['id']; size?: number } = $props();
 
 	// One shared preview box for every species, so the collection reads as a set.

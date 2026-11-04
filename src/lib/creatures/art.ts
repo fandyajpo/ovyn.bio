@@ -53,11 +53,13 @@ function capsule(x: number, y: number, x0: number, y0: number, x1: number, y1: n
 }
 
 /**
- * Sprites are painted at twice their final grid and box-downsampled, so the
+ * Sprites are painted at twice their logical grid and box-downsampled, so the
  * fine details (veins, feather rows, scale arcs) survive at any display size
  * and edges get a gentle anti-alias instead of a hard stair.
  */
 const SUPER_SAMPLE = 2;
+/** Render resolution multiplier: every logical sprite pixel becomes 2×2 canvas pixels. */
+const SPRITE_SCALE = 2;
 
 function renderSprite(
 	width: number,
@@ -68,21 +70,22 @@ function renderSprite(
 	outline: Rgb | null = INK
 ): HTMLCanvasElement | null {
 	const canvas = document.createElement('canvas');
-	canvas.width = width;
-	canvas.height = height;
+	canvas.width = width * SPRITE_SCALE;
+	canvas.height = height * SPRITE_SCALE;
 	const context = canvas.getContext('2d');
 	if (!context) return null;
 
 	const ss = SUPER_SAMPLE;
-	const sw = width * ss;
-	const sh = height * ss;
+	const sw = canvas.width * ss;
+	const sh = canvas.height * ss;
+	const unit = ss * SPRITE_SCALE;
 
-	// 1. Paint at the supersampled grid; coordinates stay in sprite space.
+	// 1. Paint at the supersampled grid; coordinates stay in sprite units.
 	const sample = new Float32Array(sw * sh * 4);
 	const covered = new Uint8Array(sw * sh);
 	for (let sy = 0; sy < sh; sy += 1) {
 		for (let sx = 0; sx < sw; sx += 1) {
-			const hit = paint((sx + 0.5) / ss - originX, (sy + 0.5) / ss - originY);
+			const hit = paint((sx + 0.5) / unit - originX, (sy + 0.5) / unit - originY);
 			if (!hit) continue;
 			const offset = (sy * sw + sx) * 4;
 			sample[offset] = hit[0][0];
@@ -94,10 +97,10 @@ function renderSprite(
 	}
 
 	// 2. Box-downsample into the final canvas, weighted by alpha.
-	const image = context.createImageData(width, height);
-	const filled = new Uint8Array(width * height);
-	for (let py = 0; py < height; py += 1) {
-		for (let px = 0; px < width; px += 1) {
+	const image = context.createImageData(canvas.width, canvas.height);
+	const filled = new Uint8Array(canvas.width * canvas.height);
+	for (let py = 0; py < canvas.height; py += 1) {
+		for (let px = 0; px < canvas.width; px += 1) {
 			let red = 0;
 			let green = 0;
 			let blue = 0;
@@ -117,7 +120,7 @@ function renderSprite(
 				}
 			}
 			if (weight === 0 || alphaSum === 0) continue;
-			const index = py * width + px;
+			const index = py * canvas.width + px;
 			const offset = index * 4;
 			image.data[offset] = Math.round(red / alphaSum);
 			image.data[offset + 1] = Math.round(green / alphaSum);
@@ -128,19 +131,19 @@ function renderSprite(
 	}
 
 	if (outline) {
-		for (let py = 0; py < height; py += 1) {
-			for (let px = 0; px < width; px += 1) {
-				const index = py * width + px;
+		for (let py = 0; py < canvas.height; py += 1) {
+			for (let px = 0; px < canvas.width; px += 1) {
+				const index = py * canvas.width + px;
 				if (!filled[index]) continue;
 				const edge =
 					px === 0 ||
 					py === 0 ||
-					px === width - 1 ||
-					py === height - 1 ||
+					px === canvas.width - 1 ||
+					py === canvas.height - 1 ||
 					!filled[index - 1] ||
 					!filled[index + 1] ||
-					!filled[index - width] ||
-					!filled[index + width];
+					!filled[index - canvas.width] ||
+					!filled[index + canvas.width];
 				if (!edge) continue;
 				const offset = index * 4;
 				// Anti-aliased silhouette pixels stay soft; only solid pixels ink over.
@@ -155,11 +158,11 @@ function renderSprite(
 		// A second pass adds volume: a warm rim on the lit side, a cool contact
 		// edge on the shadow side, and a soft inner occlusion band.
 		const filledAt = (px: number, py: number) =>
-			px >= 0 && py >= 0 && px < width && py < height && filled[py * width + px] === 1;
+			px >= 0 && py >= 0 && px < canvas.width && py < canvas.height && filled[py * canvas.width + px] === 1;
 
-		for (let py = 0; py < height; py += 1) {
-			for (let px = 0; px < width; px += 1) {
-				const index = py * width + px;
+		for (let py = 0; py < canvas.height; py += 1) {
+			for (let px = 0; px < canvas.width; px += 1) {
+				const index = py * canvas.width + px;
 				if (!filled[index]) continue;
 
 				const offset = index * 4;
@@ -221,20 +224,6 @@ export type CreatureArt = {
 	glow: boolean;
 };
 
-const MONARCH: Palette = [
-	[68, 30, 12],
-	[118, 46, 14],
-	[168, 74, 20],
-	[204, 104, 32],
-	[232, 138, 58],
-	[248, 178, 102]
-];
-const MONARCH_BODY: Palette = [
-	[34, 24, 18],
-	[52, 36, 24],
-	[74, 50, 30],
-	[96, 64, 36]
-];
 const DRAGONFLY_BODY: Palette = [
 	[20, 42, 48],
 	[30, 68, 76],
@@ -337,52 +326,155 @@ const GHOST: Palette = [
 	[212, 208, 230],
 	[240, 238, 250]
 ];
-const CREAM: Rgb = [238, 224, 186];
 const HORN: Rgb = [222, 208, 174];
 const BEAK: Rgb = [226, 168, 58];
 
-function paintButterflyBody(x: number, y: number): [Rgb, number?] | null {
-	if (ellipse(x, y, -2, 0, 16, 4.2) <= 1) {
-		const seg = Math.sin(x * 1.4) > 0.3 ? 0.12 : 0;
-		const shade = 0.42 + (1 - Math.abs(y) / 4.2) * 0.34 + seg + (grain(x, y) - 0.5) * 0.08;
-		return [tone(MONARCH_BODY, shade)];
+// ---------------------------------------------------------------------------
+// The landing butterfly, ported. Its wing and body painters are the quality
+// bar every species in this flock aims at, so the monarch itself joins it.
+// ---------------------------------------------------------------------------
+
+const MONARCH_WING_INK: Rgb = [34, 22, 12];
+const MONARCH_WING_DARK: Rgb = [154, 64, 24];
+const MONARCH_WING_MID: Rgb = [214, 104, 40];
+const MONARCH_WING_LIGHT: Rgb = [244, 146, 66];
+const MONARCH_WING_PALE: Rgb = [255, 186, 112];
+const MONARCH_WING_SPOT: Rgb = [255, 232, 190];
+const MONARCH_VEIN_ANGLES = [-1.15, -0.85, -0.55, -0.28, 0.02, 0.32, 0.62];
+const MONARCH_WING_SPOTS: Array<[number, number]> = [
+	[20, -0.95],
+	[22, -0.62],
+	[18, -1.18],
+	[15, 0.38],
+	[18, 0.66],
+	[11, -0.18]
+];
+const MONARCH_BODY_TONE: Rgb = [62, 40, 22];
+const MONARCH_BODY_DARK: Rgb = [38, 24, 14];
+const MONARCH_BODY_LIGHT: Rgb = [112, 74, 40];
+
+/** The landing butterfly's wing: two lobes around the hinge, in hinge-relative units. */
+function monarchWing(x: number, ly: number): [Rgb, number?] | null {
+	if (!insideMonarchWing(x, ly)) return null;
+
+	const edge =
+		!insideMonarchWing(x - 1, ly) || !insideMonarchWing(x + 1, ly) || !insideMonarchWing(x, ly - 1) || !insideMonarchWing(x, ly + 1);
+	if (edge) return [MONARCH_WING_INK];
+
+	const radius = Math.hypot(x, ly);
+	const angle = Math.atan2(ly, x);
+	const fore = ellipse(x, ly, 17, -12, 20, 12, -0.4);
+	const hind = ellipse(x, ly, 12, 6, 15, 11, 0.3);
+
+	let base: Rgb = radius < 9 ? MONARCH_WING_DARK : radius < 17 ? MONARCH_WING_MID : MONARCH_WING_LIGHT;
+
+	// Veins radiate from the hinge, fanning across the wing.
+	if (radius > 5 && MONARCH_VEIN_ANGLES.some((candidate) => Math.abs(deltaAround(angle, candidate)) < 0.028)) {
+		return [mix(MONARCH_WING_INK, [255, 250, 240], 0.14)];
 	}
-	if (ellipse(x, y, 15, 0, 3.4, 3.4) <= 1) return [tone(MONARCH_BODY, 0.7)];
-	if (capsule(x, y, 14, -1.6, 21, -7.4, 0.6) <= 1) return [tone(MONARCH_BODY, 0.5)];
-	if (capsule(x, y, 14, 1.6, 21, 7.4, 0.6) <= 1) return [tone(MONARCH_BODY, 0.5)];
-	return null;
+
+	// Concentric scale bands give the wing its layered texture.
+	const band = (radius - 6) % 6.5;
+	if (radius > 8 && band >= 0 && band < 0.6) base = mix(base, MONARCH_WING_DARK, 0.16);
+
+	// Cream spots ringed along the wing edge.
+	for (const [spotRadius, spotAngle] of MONARCH_WING_SPOTS) {
+		if (Math.abs(radius - spotRadius) < 1.4 && Math.abs(deltaAround(angle, spotAngle)) < 0.1) {
+			return [MONARCH_WING_SPOT];
+		}
+	}
+
+	if (hind <= 1 && fore > 1) base = mix(base, MONARCH_WING_DARK, 0.08);
+	if (ly < -4 && grain(x, ly) > 0.87) base = MONARCH_WING_PALE;
+	if (radius > 23 && grain(x, ly) > 0.55) base = mix(base, [255, 250, 240], 0.12);
+	if (grain(x, ly) > 0.94) base = mix(base, MONARCH_WING_DARK, 0.1);
+
+	return [base];
+}
+
+function insideMonarchWing(x: number, ly: number) {
+	return (
+		ellipse(x, ly, 17, -12, 20, 12, -0.4) <= 1 || ellipse(x, ly, 12, 6, 15, 11, 0.3) <= 1
+	);
 }
 
 function paintButterflyWing(x: number, y: number): [Rgb, number?] | null {
-	const fore = ellipse(x, y, 1.5, 11, 12.4, 13, -0.22);
-	const hind = ellipse(x, y, -3.5, 21, 8.6, 8.2, 0.12);
-	if (fore > 1 && hind > 1) return null;
+	// The landing wing spans ±28 around its hinge; the sprite canvas starts at
+	// the hinge, so the shape sits shifted down (fore lobe near the top, hind
+	// lobe below) and the engine folds it around the creature's centre line.
+	return monarchWing(x, y - 28);
+}
 
-	const score = Math.min(fore, hind);
-	const radius = Math.hypot(x, y);
-	const angle = Math.atan2(y, x);
+function segHit(x: number, y: number, x0: number, y0: number, x1: number, y1: number): boolean {
+	const dx = x1 - x0;
+	const dy = y1 - y0;
+	const lengthSq = dx * dx + dy * dy;
+	const t = lengthSq === 0 ? 0 : clamp(((x - x0) * dx + (y - y0) * dy) / lengthSq, 0, 1);
+	return Math.hypot(x - (x0 + dx * t), y - (y0 + dy * t)) <= 0.6;
+}
 
-	// Dark veins fan out from the hinge.
-	for (let index = 0; index < 7; index += 1) {
-		const vein = -1.05 + index * 0.32;
-		const delta = Math.atan2(Math.sin(angle - vein), Math.cos(angle - vein));
-		if (radius > 3 && Math.abs(delta) < 0.045) return [MONARCH_BODY[0] ?? INK];
+/**
+ * The landing body, rotated into flight orientation: the landing builds it
+ * head-up, so landing (x, y) maps to sprite (y, -x) — antennae forward,
+ * abdomen trailing, wings attaching along the dorsal centre line.
+ */
+function paintButterflyBody(x: number, y: number): [Rgb, number?] | null {
+	const ly = -x;
+	const lx = y;
+
+	// Abdomen: tapering segments with visible rings.
+	if (ly >= 6 && ly <= 24) {
+		const half = Math.max(1, Math.round(4 - ((ly - 6) / 18) * 2.6));
+		if (Math.abs(lx) <= half) {
+			const rim = Math.abs(lx) === half || ly === 24;
+			const ring = ly % 4 === 0;
+			const fuzz = grain(ly, lx) > 0.7;
+			return [rim ? MONARCH_BODY_DARK : ring || fuzz ? MONARCH_BODY_LIGHT : MONARCH_BODY_TONE, 1];
+		}
+		return null;
 	}
 
-	let shade = 0.5 + (1 - score) * 0.32 - radius * 0.012;
-	if (hind <= 1 && fore > 1) shade -= 0.08;
-	if (radius > 18 && grain(x, y) > 0.86) shade += 0.1;
-	if (grain(x, y) > 0.95) shade -= 0.08;
-	// Scale bands give the wing its layered monarch texture.
-	const band = (radius - 5) % 5.6;
-	if (radius > 7 && band < 0.55) shade -= 0.09;
+	// Thorax: the fuzzy middle the wings attach to.
+	if (ly >= -6 && ly <= 6) {
+		const half = ly < -3 || ly > 3 ? 4 : 5;
+		if (Math.abs(lx) <= half) {
+			const rim = Math.abs(lx) === half;
+			return [rim ? MONARCH_BODY_DARK : grain(ly, lx) > 0.7 ? MONARCH_BODY_LIGHT : MONARCH_BODY_TONE, 1];
+		}
+		return null;
+	}
 
-	const colour = tone(MONARCH, shade);
-	// Creamy spots ringed along the outer margin, like the landing butterfly.
-	if (radius > 13 && Math.abs(deltaAround(angle, 0.5)) < 0.12) return [CREAM];
-	if (radius > 15 && Math.abs(deltaAround(angle, -0.6)) < 0.1) return [CREAM];
-	if (radius > 17 && Math.abs(deltaAround(angle, 0.78)) < 0.1) return [CREAM];
-	return [colour];
+	// Head and compound eyes.
+	if (ly >= -15 && ly <= -6) {
+		const half = ly < -13 || ly > -8 ? 2 : 4;
+		if (Math.abs(lx) <= half) {
+			if (ly === -12 && Math.abs(lx) === 2) return [MONARCH_WING_SPOT, 1];
+			if (ly === -11 && Math.abs(lx) === 2) return [MONARCH_BODY_DARK, 1];
+			return [Math.abs(lx) === half ? MONARCH_BODY_DARK : MONARCH_BODY_TONE, 1];
+		}
+		return null;
+	}
+
+	// Antennae: two segments each, curving outward, with tiny clubs.
+	for (const side of [-1, 1] as const) {
+		if (segHit(x, y, 14, side, 21, side * 4) || segHit(x, y, 21, side * 4, 26, side * 9)) {
+			return [MONARCH_BODY_DARK, 1];
+		}
+		if (Math.hypot(x - 26, y - side * 9) <= 1.1) return [MONARCH_WING_SPOT, 1];
+	}
+
+	// Six delicate legs trailing beneath the body.
+	for (const side of [-1, 1] as const) {
+		for (const [a, b, c, d] of [
+			[3, 4, -3, 9],
+			[-1, 5, -9, 10],
+			[-5, 4, -13, 8]
+		] as const) {
+			if (segHit(x, y, a, side * b, c, side * d)) return [MONARCH_BODY_DARK, 1];
+		}
+	}
+
+	return null;
 }
 
 function deltaAround(a: number, b: number) {
@@ -772,8 +864,23 @@ export function getCreatureArt(species: CreatureSpecies): CreatureArt | null {
 	if (existing) return existing;
 	const built = builders[species]();
 	if (!built) return null;
-	cache.set(species, built);
-	return built;
+	// The painters work in logical sprite units; renderSprite doubled the canvas,
+	// so every anchor scales with it.
+	const scaled: CreatureArt = {
+		...built,
+		bodyW: built.bodyW * SPRITE_SCALE,
+		bodyH: built.bodyH * SPRITE_SCALE,
+		wingW: built.wingW * SPRITE_SCALE,
+		wingH: built.wingH * SPRITE_SCALE,
+		hingeX: built.hingeX * SPRITE_SCALE,
+		hingeY: built.hingeY * SPRITE_SCALE,
+		tailX: built.tailX * SPRITE_SCALE,
+		tailY: built.tailY * SPRITE_SCALE,
+		crestX: built.crestX * SPRITE_SCALE,
+		crestY: built.crestY * SPRITE_SCALE
+	};
+	cache.set(species, scaled);
+	return scaled;
 }
 
 type Box = { minX: number; minY: number; maxX: number; maxY: number };
@@ -890,16 +997,18 @@ export function creatureBounds(art: CreatureArt): CreatureBounds {
 }
 
 function buildButterfly(): CreatureArt | null {
-	const body = renderSprite(44, 18, 22, 9, paintButterflyBody);
-	const wing = renderSprite(26, 28, 13, 0, paintButterflyWing);
+	// The ported landing monarch: a 64-unit body with antennae, fuzz and
+	// ringed abdomen, and the two-lobed 40×56 wing with veins, bands and spots.
+	const body = renderSprite(52, 30, 26, 15, paintButterflyBody);
+	const wing = renderSprite(40, 56, 20, 28, paintButterflyWing);
 	if (!body || !wing) return null;
 	return {
 		body,
-		bodyW: 44,
-		bodyH: 18,
+		bodyW: 52,
+		bodyH: 30,
 		wing,
-		wingW: 26,
-		wingH: 28,
+		wingW: 40,
+		wingH: 56,
 		hingeX: 0,
 		hingeY: 0,
 		tail: null,

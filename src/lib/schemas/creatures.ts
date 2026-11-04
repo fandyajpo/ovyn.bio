@@ -41,7 +41,7 @@ export const CREATURE_CATALOG: readonly {
 
 export const CREATURE_LIMIT = 6;
 
-export const CREATURE_SIZE = { min: 0.6, max: 1.8, step: 0.05 } as const;
+export const CREATURE_SIZE = { min: 0.6, max: 2.4, step: 0.05 } as const;
 
 export const creatureSettingSchema = z.object({
 	id: z.enum(CREATURE_IDS),
