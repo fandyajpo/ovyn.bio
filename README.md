@@ -128,10 +128,8 @@ The whole site sits on a calm WebGL liquid-metal backdrop in both themes:
 black base with a violet ribbon and copper-gold highlights in dark
 mode, bone base with a blue ribbon and orange highlights in light mode. The
 motion runs slow and dim and holds a still frame for visitors who prefer reduced
-motion. A faint tile of rounded lines and pixel dots is laid directly
-over the liquid, so every page keeps its printed, stepped surface; cards
-read as frosted
-glass over it: a thinner token-driven surface veil plus a backdrop blur,
+motion. Cards read as frosted
+glass over the liquid: a thinner token-driven surface veil plus a backdrop blur,
 so the liquid shows through without taking the text with it. Public
 profiles keep their own user-styled backgrounds and opt out. The
 landing keeps the dark navy mockup palette for its controls, which follows the
