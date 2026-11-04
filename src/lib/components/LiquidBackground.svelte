@@ -155,13 +155,13 @@
 		// Fresnel-style rim glow just inside and outside the ribbon's edge.
 		float rim = smoothstep(width * 0.55, width, d) * (1.0 - smoothstep(width, width * 1.5, d));
 
-		vec3 body = u_colorA * (0.35 + 0.65 * diffuse);
+		vec3 body = u_colorA * (0.5 + 0.5 * diffuse);
 		vec3 copper = u_colorB;
 
 		// The page colour shows through wherever the ribbon isn't, with a
 		// whisper of the surface variation so it never reads as flat paint.
 		vec3 col = mix(u_base * (0.96 + 0.08 * clamp(r.x * 0.5 + 0.5, 0.0, 1.0)), body, ribbonMask);
-		col += copper * specular * ribbonMask * 1.3;
+		col += copper * specular * ribbonMask * 1.6;
 		col += copper * pow(clamp(r.x * 0.5 + 0.5, 0.0, 1.0), 3.0) * ribbonMask * 0.4;
 		col += u_rim * rim * (0.35 + 0.4 * ribbonMask);
 		col += vec3(1.0, 0.97, 0.9) * specular * ribbonMask * 0.4;

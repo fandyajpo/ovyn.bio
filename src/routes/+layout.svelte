@@ -49,7 +49,7 @@
 				colorB={themeState.value === 'light' ? '#e8853c' : '#c98a4a'}
 				rimColor={themeState.value === 'light' ? '#f6c9a8' : '#f2b8d9'}
 				speed={0.06}
-				intensity={themeState.value === 'light' ? 0.7 : 0.8}
+				intensity={themeState.value === 'light' ? 0.85 : 1}
 			/>
 		{/if}
 		{#if showsSiteChrome}<Nav />{/if}
