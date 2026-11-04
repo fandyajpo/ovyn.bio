@@ -51,6 +51,9 @@
 				speed={0.06}
 				intensity={themeState.value === 'light' ? 0.7 : 0.8}
 			/>
+			<!-- A faint tile of rounded lines and pixel dots, laid directly over
+				the liquid so the whole site keeps its printed, stepped surface. -->
+			<div class="page-texture" aria-hidden="true"></div>
 		{/if}
 		{#if showsSiteChrome}<Nav />{/if}
 

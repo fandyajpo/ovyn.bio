@@ -1452,6 +1452,23 @@ html[data-theme='light'] .app-frame[data-liquid='true'] {
 }
 
 /*
+ * Page texture: one faint tile of rounded lines and pixel dots laid
+ * directly over the liquid, so the whole site keeps its printed, stepped
+ * surface instead of a bare canvas. Sits above the liquid canvas (same
+ * negative layer, later in the DOM) and below every content element, and is
+ * pointer-transparent. Public profiles keep their own background textures
+ * and never render this layer.
+ */
+.app-frame[data-liquid='true'] .page-texture {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background-image: var(--texture-tile);
+	background-size: 96px 96px;
+}
+
+/*
  * Liquid glass: cards read as frosted panes over the liquid everywhere it
  * runs — a thinner veil of the surface colour plus a backdrop blur that
  * keeps the ribbon calm behind text. Both themes; the veil is token-driven
