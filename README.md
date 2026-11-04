@@ -128,7 +128,9 @@ The landing and the sign-in page sit on a calm WebGL liquid-metal backdrop in
 both themes: black base with a violet ribbon and copper-gold highlights in dark
 mode, bone base with a blue ribbon and orange highlights in light mode. The
 motion runs slow and dim and holds a still frame for visitors who prefer reduced
-motion. Every other page wears
+motion. The landing's cards, plan panels and FAQ rows read as frosted
+glass over it: a thinner token-driven surface veil plus a backdrop blur,
+so the liquid shows through without taking the text with it. Every other page wears
 a soft aurora gradient built from the theme tokens, with a 4px pixel grain over
 it, so the dark palette glows lime and the cream palette warms into gold, pink
 and teal; public profiles keep their own backgrounds and opt out. A faint tile of
