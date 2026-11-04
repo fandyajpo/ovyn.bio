@@ -28,20 +28,20 @@
 	const isWorkspacePage = $derived(page.route.id?.includes('(workspace)') ?? false);
 	const isAdminPage = $derived(page.route.id?.includes('(app)/admin') ?? false);
 	const isOnboarding = $derived(page.route.id?.includes('(app)/onboarding') ?? false);
-	// The liquid-metal backdrop is a deliberate landing and sign-in moment;
-	// every other page keeps its painted aurora background.
-	const isLiquidPage = $derived(isLanding || page.url.pathname === '/login');
+	// The liquid-metal backdrop is a deliberate landing, sign-in and dashboard
+	// moment; every other page keeps its painted aurora background.
+	const isLiquidPage = $derived(isLanding || page.url.pathname === '/login' || page.url.pathname === '/dashboard');
 	const showsSiteChrome = $derived(!isProfilePage && !isWorkspacePage && !isAdminPage && !isOnboarding);
 </script>
 
 <QueryClientProvider client={queryClient}>
 	<div class="app-frame" data-landing={isLanding ? 'true' : 'false'} data-liquid={isLiquidPage ? 'true' : 'false'} data-profile-page={isProfilePage ? 'true' : 'false'} data-workspace-page={isWorkspacePage ? 'true' : 'false'} data-admin-page={isAdminPage ? 'true' : 'false'} data-onboarding={isOnboarding ? 'true' : 'false'}>
 		<a class="skip-link" href="#main-content">Skip to content</a>
-		<!-- The liquid-metal canvas is the background of the landing and the sign-in
-			page only; every other page keeps its painted aurora. Dark mode: black
-			base, violet ribbon, copper-gold highlights. Light mode: bone base, blue
-			ribbon, orange highlights. Motion runs slow and dim so it reads as an
-			ambient surface, not a showpiece. -->
+		<!-- The liquid-metal canvas is the background of the landing, the sign-in
+			page and the dashboard; every other page keeps its painted aurora. Dark
+			mode: black base, violet ribbon, copper-gold highlights. Light mode: bone
+			base, blue ribbon, orange highlights. Motion runs slow and dim so it
+			reads as an ambient surface, not a showpiece. -->
 		{#if isLiquidPage}
 			<LiquidBackground
 				baseColor={themeState.value === 'light' ? '#ebe7dc' : '#000000'}

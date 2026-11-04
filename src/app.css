@@ -1434,13 +1434,13 @@ html[data-theme='light'] body {
 
 /*
  * Liquid-metal backdrop: the LiquidBackground canvas (mounted from
- * +layout.svelte) is the page background on the landing and the sign-in page,
- * in both themes — black with a violet ribbon and copper-gold highlights in
- * dark mode, bone with a blue ribbon and orange highlights in light mode — so
- * the frame paints nothing over it there. Every other page keeps its painted
- * aurora; cards and surfaces stay token-driven and float above either
- * backdrop. Public profiles never mount the canvas and keep their own
- * user-styled backdrops.
+ * +layout.svelte) is the page background on the landing, the sign-in page and
+ * the dashboard, in both themes — black with a violet ribbon and copper-gold
+ * highlights in dark mode, bone with a blue ribbon and orange highlights in
+ * light mode — so the frame paints nothing over it there. Every other page
+ * keeps its painted aurora; cards and surfaces stay token-driven and float
+ * above either backdrop. Public profiles never mount the canvas and keep
+ * their own user-styled backdrops.
  */
 html[data-theme='dark'] .app-frame[data-liquid='true'] {
 	background-color: transparent;
@@ -1453,11 +1453,11 @@ html[data-theme='light'] .app-frame[data-liquid='true'] {
 }
 
 /*
- * Landing glass: the liquid runs behind the landing, so its cards read as
+ * Liquid glass: on the pages that sit over the liquid backdrop, cards read as
  * frosted panes instead of painted panels — a thinner veil of the surface
  * colour plus a backdrop blur that keeps the ribbon calm behind text. Both
  * themes; the veil is token-driven so the navy and the bone palettes both
- * keep their contrast. Login keeps its own card; this block is landing only.
+ * keep their contrast.
  */
 .app-frame[data-landing='true'] .demo-frame,
 .app-frame[data-landing='true'] .create-card,
@@ -1488,4 +1488,12 @@ html[data-theme='light'] .app-frame[data-liquid='true'] {
 	background: color-mix(in srgb, var(--color-surface) 60%, transparent);
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
+}
+
+/* The dashboard's cards float over the liquid the same way. The sidebar and
+   the page chrome stay as they are, so the workspace keeps its shape. */
+.app-frame[data-liquid='true'] .ovyn-surface {
+	background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+	backdrop-filter: blur(12px);
+	-webkit-backdrop-filter: blur(12px);
 }
