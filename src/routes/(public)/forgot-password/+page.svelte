@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { forgotPassword } from '#lib/auth-client';
+	import { requestPasswordReset } from '#lib/auth-client';
 	import Button from '#lib/components/ui/Button.svelte';
 	import Card from '#lib/components/ui/Card.svelte';
 	import Input from '#lib/components/ui/Input.svelte';
@@ -14,7 +14,7 @@
 		if (loading) return;
 		loading = true;
 		error = null;
-		const { error: err } = await forgotPassword({
+		const { error: err } = await requestPasswordReset({
 			email: email.trim(),
 			redirectTo: `${window.location.origin}/reset-password`
 		});
