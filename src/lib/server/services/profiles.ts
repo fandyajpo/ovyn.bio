@@ -51,7 +51,7 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
  */
 async function ensureProfile(userId: string, fallbackName: string): Promise<void> {
 	const [authUser] = await db
-		.select({ name: user.name })
+		.select({ name: user.name, username: user.username })
 		.from(user)
 		.where(eq(user.id, userId))
 		.limit(1);
@@ -65,7 +65,8 @@ async function ensureProfile(userId: string, fallbackName: string): Promise<void
 			.insert(profiles)
 			.values({
 				userId,
-				slug: await availableSlug(tx, authUser.name || fallbackName),
+				// A credential sign-up already picked a slug-safe username; prefer it.
+				slug: await availableSlug(tx, authUser.username || authUser.name || fallbackName),
 				displayName: authUser.name || fallbackName
 			})
 			.onConflictDoNothing({ target: profiles.userId });

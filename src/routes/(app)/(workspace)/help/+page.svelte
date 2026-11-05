@@ -5,7 +5,7 @@
 	const topics = [
 		{
 			title: 'Your account and profile',
-				body: 'Sign in with Discord or Google. Your ovyn display name, unique username, bio and avatar are editable independently of your sign-in identity.',
+				body: 'Sign in with an email or username and password, Discord or Google. Your ovyn display name, unique username, bio and avatar are editable independently of your sign-in identity.',
 				link: '/account/settings',
 				label: 'Account settings'
 		},

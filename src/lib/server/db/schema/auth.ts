@@ -1,13 +1,14 @@
 import { relations } from 'drizzle-orm';
-import { boolean, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, index, pgTable, text, timestamp, uniqueIndex } from 'drizzle-orm/pg-core';
 
 /**
  * Standalone Better Auth core tables. Better Auth manages these - do not add
  * app-specific tables here; they belong in ./app.ts.
  * `status` is an additional field declared in the auth config.
  *
- * Discord and Google both sign in through the same rows: one `user` row plus
- * one `account` row per provider, so a person can link either or both.
+ * Discord, Google and email/password all sign in through the same rows: one
+ * `user` row plus one `account` row per provider, so a person can link any
+ * or all of them.
  */
 export const user = pgTable('user', {
 	id: text('id').primaryKey(),
@@ -15,11 +16,16 @@ export const user = pgTable('user', {
 	/** Discord accounts may not share an email, so this can be a placeholder. */
 	email: text('email').unique(),
 	emailVerified: boolean('email_verified').notNull().default(false),
+	/** Set only for email/password accounts (Better Auth username plugin). */
+	username: text('username'),
+	displayUsername: text('display_username'),
 	image: text('image'),
 	status: text('status').notNull().default('active'),
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
-});
+}, (t) => [
+	uniqueIndex('user_username_unique').on(t.username)
+]);
 
 export const session = pgTable('session', {
 	id: text('id').primaryKey(),

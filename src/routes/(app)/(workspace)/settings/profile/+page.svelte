@@ -146,7 +146,7 @@
       Profile settings
     </h1>
     <p class="mt-1 text-neutral-400">
-      Sign in with Discord or Google, then make your ovyn profile your own.
+      Sign in with email or a username, Discord or Google, then make your ovyn profile your own.
     </p>
   </div>
 

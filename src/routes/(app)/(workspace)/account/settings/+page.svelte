@@ -29,7 +29,7 @@
 				{#if data.discord?.discordId}<p class="mt-1 font-mono text-[10px] text-neutral-600">Discord ID · {data.discord.discordId}</p>{/if}
 			</div>
 		</div>
-		<p class="mt-3 text-sm text-neutral-500">Discord or Google protects your sign-in. Your ovyn username, display name, bio and profile picture stay yours to customize.</p>
+		<p class="mt-3 text-sm text-neutral-500">Your email or username and password, Discord or Google protect your sign-in. Your ovyn username, display name, bio and profile picture stay yours to customize.</p>
 		<Button variant="secondary" onclick={logout} class="mt-4">Sign out</Button>
 	</section>
 

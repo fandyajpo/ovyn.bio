@@ -14,7 +14,7 @@
 		{
 			title: '2. Your account',
 			paragraphs: [
-				'You sign in with Discord or Google. You are responsible for keeping that account secure, and for everything done through your ovyn account.',
+				'You sign in with an email or username and a password, or with Discord or Google. You are responsible for keeping those credentials secure, and for everything done through your ovyn account.',
 				'You must be at least 13 years old, or the minimum age required where you live, to use ovyn.',
 				'Your ovyn display name, username and bio are yours to edit. Usernames are unique, cannot impersonate another person or a member of the ovyn team, and cannot use names reserved for platform routes.'
 			]

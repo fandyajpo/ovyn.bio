@@ -148,7 +148,7 @@
 		},
 		{
 			question: 'How do I sign in?',
-			answer: 'Use Discord or Google. Your ovyn username, display name, bio and public page stay yours to customize.'
+			answer: 'Use an email or username with a password, Discord or Google. Your ovyn username, display name, bio and public page stay yours to customize.'
 		},
 		{
 			question: 'Can I start for free?',
@@ -228,7 +228,7 @@
 			<Reveal delay={210}>
 				<div class="flex flex-wrap items-center gap-3">
 					<span class="landing-magnetic" bind:this={magnetEl}>
-						<Button href="/login" onpointermove={moveMagnet} onpointerleave={resetMagnet}>Get started with Discord or Google</Button>
+						<Button href="/login" onpointermove={moveMagnet} onpointerleave={resetMagnet}>Get started - email, Discord or Google</Button>
 					</span>
 					<Button href="/discover" variant="ghost">Find your circle <span aria-hidden="true">↗</span></Button>
 				</div>
@@ -401,7 +401,7 @@
 				</span>
 			</p>
 			<div class="flex flex-wrap justify-center gap-3" data-reveal-item style="--reveal-order: 4">
-				<Button href="/login">Continue with Discord or Google</Button>
+				<Button href="/login">Create your corner</Button>
 				<Button href="/discover" variant="ghost">Meet the community</Button>
 			</div>
 		</div>

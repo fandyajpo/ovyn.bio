@@ -13,7 +13,7 @@
 		{
 			title: '1. What we collect',
 			list: [
-				'Account identity from Discord or Google: your provider user id, username, display name, avatar and, when the provider shares it, your email.',
+				'Account identity: your email address and password (hashed) when you sign in with credentials, or your provider user id, username, display name, avatar and, when the provider shares it, your email when you sign in with Discord or Google.',
 				'Profile details you create: username, display name, bio, theme, visibility and social links.',
 				'Media you upload: avatar, banner, wallpaper, audio, cursor and cosmetic artwork, stored in object storage.',
 				'Purchase records for cosmetics and Premium, including order amounts, payment status and the DOKU reference. Card and bank details never reach ovyn.',
@@ -39,7 +39,7 @@
 		{
 			title: '4. Who else sees it',
 			list: [
-				'Discord or Google, when you choose to sign in with them.',
+				'Discord or Google, when you choose to sign in with them. Password sign-ins reach no third party.',
 				'DOKU, to create and confirm your payment.',
 				'Neon, for the database and object storage, and Vercel, for hosting. Both act as infrastructure providers for ovyn.',
 				'Anyone you share a public profile with. Private profiles hide their content, media and links from visitors.'

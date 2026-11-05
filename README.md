@@ -14,7 +14,7 @@ Personal profiles, guild discovery, and membership with one strict rule: **one g
 | Hosting | Vercel (`@sveltejs/adapter-vercel`, Node runtime) |
 | Database | Neon PostgreSQL (pooled connection for app, direct for migrations) |
 | ORM | Drizzle ORM |
-| Auth | Standalone Better Auth - Discord and optional Google OAuth |
+| Auth | Standalone Better Auth - email/password, Discord and optional Google OAuth |
 | Storage | Neon Object Storage (S3-compatible, presigned uploads) |
 | Payments | DOKU Direct API (SNAP, server-side only) |
 | Validation | Zod 4 |
@@ -66,8 +66,9 @@ pnpm run db:seed-shop
 
 `db:reset` is destructive and only runs with the flag. It drops the `public`
 and `drizzle` schemas, plus the legacy `neon_auth` schema when it still exists.
-Discord and Google both sign in through the same `user` and `account` tables,
-so after a reset you only need the OAuth credentials, not any provider-specific
+Email/password, Discord and Google all sign in through the same `user` and
+`account` tables, so after a reset you only need the OAuth credentials (or
+nothing at all, for credential sign-ins), not any provider-specific
 database setup.
 
 ## Environment variables
@@ -166,14 +167,17 @@ Terms of Service (`/terms`) and Privacy Policy (`/privacy`) are public pages lin
 
 ## Key architecture notes
 
-- **Auth** is standalone Better Auth (`src/lib/server/auth`) with Discord and
-  Google OAuth sign-in (no email/password). Discord requests identity only;
+- **Auth** is standalone Better Auth (`src/lib/server/auth`) with credential
+  sign-in (email or username plus password, via the username plugin) plus
+  Discord and Google OAuth. Discord requests identity only;
   Google OAuth credentials are optional until configured. It stores
   users/sessions/OAuth accounts in our own `user`, `session`, `account`,
   `verification` tables via the Drizzle adapter, runs the catch-all
   `/api/auth/[...all]` route, and populates `locals.user` in the server hook.
-  Discord accounts without an email get a stable OAuth placeholder via
-  `mapProfileToUser`. Duplicate accounts for the same Discord ID are prevented
+  Credential sign-ups pick an ovyn-slug-safe username that also seeds the
+  profile slug. Discord accounts without an email get a stable OAuth
+  placeholder via `mapProfileToUser`. Duplicate accounts for the same Discord
+  ID are prevented
   by the unique `(provider, accountId)` pairing. Discord identity
   seeds new profiles, while profile username, display name, bio and uploaded
   avatar are ovyn-owned and remain editable. An uploaded avatar overrides the
