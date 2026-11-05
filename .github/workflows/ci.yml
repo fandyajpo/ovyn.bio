@@ -12,7 +12,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          # pnpm-workspace.yaml uses pnpm 10 settings (allowBuilds, overrides);
+          # pnpm 9 rejects the file with "packages field missing or empty".
+          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 22
