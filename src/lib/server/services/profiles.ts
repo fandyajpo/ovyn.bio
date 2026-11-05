@@ -28,8 +28,11 @@ async function fetchDiscordUser(accessToken: string): Promise<DiscordUser> {
 	return res.json();
 }
 
-async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
-	const base = normalizeSlug(discordUsername) || 'ovyn';
+async function availableSlug(tx: Tx, seed: string): Promise<string> {
+	// 29 chars leaves room for `-NN` suffixes and stays within the 32-char slug limit.
+	const base = normalizeSlug(seed).slice(0, 29) || 'ovyn';
+	// Reserved route names can never be a profile slug (isValidSlug refuses them),
+	// so they start suffixed like every other taken candidate.
 	let candidate = isValidSlug(base) ? base : `${base}-1`;
 
 	for (let i = 1; i < 50; i++) {
@@ -42,7 +45,27 @@ async function availableSlug(tx: Tx, discordUsername: string): Promise<string> {
 		candidate = `${base}-${i + 1}`;
 	}
 	// Practically unreachable; fall back to a random suffix.
-	return `${base}-${crypto.randomUUID().slice(0, 8)}`;
+	return `${base.slice(0, 23)}-${crypto.randomUUID().slice(0, 8)}`;
+}
+
+const SLUG_RETRY_ATTEMPTS = 5;
+
+/**
+ * Slug selection is check-then-insert, so two first sign-ins can race the same
+ * candidate and the loser hits the slug unique constraint. Postgres aborts the
+ * whole transaction on that error, so the run retries from scratch and re-picks
+ * the next free slug.
+ */
+async function withSlugRetry(run: () => Promise<void>): Promise<void> {
+	for (let attempt = 0; attempt < SLUG_RETRY_ATTEMPTS; attempt++) {
+		try {
+			await run();
+			return;
+		} catch (err) {
+			if (!isUniqueViolation(err, 'profiles_slug_unique')) throw err;
+		}
+	}
+	throw new Error('Profile provisioning failed after repeated slug collisions');
 }
 
 /**
@@ -57,20 +80,22 @@ async function ensureProfile(userId: string, fallbackName: string): Promise<void
 		.limit(1);
 	if (!authUser) return;
 
-	await db.transaction(async (tx) => {
-		await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
-		const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1);
-		if (profile) return;
-		await tx
-			.insert(profiles)
-			.values({
-				userId,
-				// A credential sign-up already picked a slug-safe username; prefer it.
-				slug: await availableSlug(tx, authUser.username || authUser.name || fallbackName),
-				displayName: authUser.name || fallbackName
-			})
-			.onConflictDoNothing({ target: profiles.userId });
-	});
+	await withSlugRetry(() =>
+		db.transaction(async (tx) => {
+			await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+			const [profile] = await tx.select({ id: profiles.id }).from(profiles).where(eq(profiles.userId, userId)).limit(1);
+			if (profile) return;
+			await tx
+				.insert(profiles)
+				.values({
+					userId,
+					// A credential sign-up already picked a slug-safe username; prefer it.
+					slug: await availableSlug(tx, authUser.username || authUser.name || fallbackName),
+					displayName: authUser.name || fallbackName
+				})
+				.onConflictDoNothing({ target: profiles.userId });
+		})
+	);
 }
 
 /**
@@ -116,30 +141,32 @@ export async function provisionUser(userId: string): Promise<void> {
 		return;
 	}
 
-	await db.transaction(async (tx) => {
-		// Lock the account row so two concurrent sign-ins don't race.
-		await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
+	await withSlugRetry(() =>
+		db.transaction(async (tx) => {
+			// Lock the account row so two concurrent sign-ins don't race.
+			await tx.execute(sql`SELECT id FROM "account" WHERE id = ${acc.id} FOR UPDATE`);
 
-		await tx
-			.insert(discordAccounts)
-			.values({
-				userId,
-				discordId: discordUser.id,
-				username: discordUser.username,
-				globalName: discordUser.global_name
-			})
-			.onConflictDoNothing({ target: discordAccounts.discordId });
+			await tx
+				.insert(discordAccounts)
+				.values({
+					userId,
+					discordId: discordUser.id,
+					username: discordUser.username,
+					globalName: discordUser.global_name
+				})
+				.onConflictDoNothing({ target: discordAccounts.discordId });
 
-		await tx
-			.insert(profiles)
-			.values({
-				userId,
-				slug: await availableSlug(tx, discordUser.username),
-				displayName: discordUser.global_name ?? discordUser.username,
-				bio: discordUser.bio
-			})
-			.onConflictDoNothing({ target: profiles.userId });
-	});
+			await tx
+				.insert(profiles)
+				.values({
+					userId,
+					slug: await availableSlug(tx, discordUser.username),
+					displayName: discordUser.global_name ?? discordUser.username,
+					bio: discordUser.bio
+				})
+				.onConflictDoNothing({ target: profiles.userId });
+		})
+	);
 }
 
 /** Save user-owned profile details; the unique database constraint is the race-safe final username check. */

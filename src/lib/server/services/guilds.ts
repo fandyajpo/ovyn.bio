@@ -16,6 +16,9 @@ type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 type Role = 'owner' | 'officer' | 'member';
 
+/** Maximum members per circle, the owner included. */
+export const MAX_GUILD_MEMBERS = 10;
+
 export type GuildInput = {
 	name: string;
 	slug?: string;
@@ -57,6 +60,21 @@ async function currentMembership(tx: Tx, userId: string) {
 /** Serialize concurrent membership writes by locking the user row. */
 async function lockUserForMembership(tx: Tx, userId: string): Promise<void> {
 	await tx.execute(sql`SELECT id FROM "user" WHERE id = ${userId} FOR UPDATE`);
+}
+
+/**
+ * Enforce the member cap. Locking the guild row serializes concurrent
+ * joins/accepts on the same circle, so the count-then-insert pair is race-safe.
+ */
+export async function assertGuildCapacity(tx: Tx, guildId: string): Promise<void> {
+	await tx.execute(sql`SELECT id FROM "guilds" WHERE id = ${guildId} FOR UPDATE`);
+	const [row] = await tx
+		.select({ total: count() })
+		.from(guildMembers)
+		.where(eq(guildMembers.guildId, guildId));
+	if (Number(row?.total ?? 0) >= MAX_GUILD_MEMBERS) {
+		throw new ConflictError(`This circle is full (${MAX_GUILD_MEMBERS} members max)`);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -194,6 +212,8 @@ export async function joinGuild(userId: string, slug: string) {
 		if (guild.visibility !== 'public') {
 			throw new ForbiddenError('This circle is private. You need an invitation to join.');
 		}
+
+		await assertGuildCapacity(tx, guild.id);
 
 		try {
 			await tx.insert(guildMembers).values({ userId, guildId: guild.id, role: 'member' });

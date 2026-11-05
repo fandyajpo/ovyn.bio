@@ -4,6 +4,7 @@ import { guildInvitations, guildMembers, guilds } from '#lib/server/db/schema';
 import { user } from '#lib/server/db/schema/auth';
 import { profiles } from '#lib/server/db/schema';
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from '#lib/server/utils/errors';
+import { assertGuildCapacity } from './guilds';
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -60,6 +61,9 @@ export async function createInvitation(
 
 		const [guild] = await tx.select().from(guilds).where(eq(guilds.id, actor.guildId)).limit(1);
 		if (!guild || guild.status !== 'active') throw new NotFoundError('Circle not found');
+
+		// Pointless to invite into a full circle; the accept-time check remains the authority.
+		await assertGuildCapacity(tx, guild.id);
 
 		try {
 			const [invitation] = await tx
@@ -185,6 +189,9 @@ export async function acceptInvitation(
 			.where(and(eq(guilds.id, invitation.guildId), eq(guilds.status, 'active')))
 			.limit(1);
 		if (!guild) throw new NotFoundError('This circle no longer exists');
+
+		// The guild-row lock serializes against joins/invites, so the cap holds under races.
+		await assertGuildCapacity(tx, guild.id);
 
 		await tx.insert(guildMembers).values({ userId: inviteeId, guildId: guild.id, role: 'member' });
 		await tx
