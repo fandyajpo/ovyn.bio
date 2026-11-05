@@ -20,6 +20,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Type + lint gate. Builds need no service credentials (lazy handles).
+      # Type + lint gate, then the unit suite. Builds need no service
+      # credentials (lazy handles).
       - run: pnpm run check
+      - run: pnpm run test
       - run: pnpm run build

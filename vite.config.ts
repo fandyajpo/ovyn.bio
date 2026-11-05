@@ -4,10 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite-plus';
 
 // SvelteKit 3: configuration lives here, not in svelte.config.js.
-// Vite+ (vite-plus) drives dev, build and preview. SvelteKit and the plugins
-// import `vite`, which the pnpm override in pnpm-workspace.yaml points at the
-// Vite+ core, and Vite+ ships no test runner setup here because the project has
-// no test suite.
+// Vite+ (vite-plus) drives dev, build and preview, and its bundled vitest
+// runner picks this config up for the starter suite in src/lib/**/*.test.ts.
 export default defineConfig({
 	plugins: [
 		tailwindcss(),
