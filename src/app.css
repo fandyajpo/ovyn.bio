@@ -1031,6 +1031,21 @@ html[data-theme='light'] .app-frame[data-landing='true'] {
 	}
 }
 
+/* Sign-in page: the left column holds the form, the right frosted stage is the
+   landing mascots' playground. Hidden under lg so phones stay compact. */
+.login-stage {
+	height: 100%;
+	min-height: 34rem;
+}
+
+.login-stage-caption {
+	position: absolute;
+	left: 1.75rem;
+	bottom: 1.5rem;
+	justify-content: flex-start;
+	text-transform: lowercase;
+}
+
 /* One background for the document: the frame paints the aurora, so the body
    must not paint a second, different gradient behind it. */
 body,
