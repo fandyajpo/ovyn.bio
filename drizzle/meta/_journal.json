@@ -106,6 +106,13 @@
       "when": 1793680000000,
       "tag": "0014_add_user_username",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793690000000,
+      "tag": "0015_slug_history_and_refunded_orders",
+      "breakpoints": true
     }
   ]
 }

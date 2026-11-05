@@ -69,6 +69,15 @@
 								<button type="submit" name="tier" value="default" class="plan-action plan-action--ghost" disabled={!row.overrideTier}>Use purchases</button>
 							</div>
 						</form>
+
+						<form method="POST" action="?/setStatus" class="plan-buttons mt-2">
+							<input type="hidden" name="userId" value={row.id} />
+							{#if row.status === 'suspended'}
+								<button type="submit" name="status" value="active" class="plan-action">Restore account</button>
+							{:else}
+								<button type="submit" name="status" value="suspended" class="plan-action plan-action--danger">Suspend account</button>
+							{/if}
+						</form>
 					</article>
 				{/each}
 			</div>
@@ -89,6 +98,7 @@
 								<td class="px-5 py-3 align-top">
 									<span class="block font-medium text-neutral-100">{row.displayName || row.name}</span>
 									<span class="mt-0.5 block text-xs text-neutral-500">{row.slug ? `@${row.slug}` : 'No public page'}{#if row.email} · {row.email}{/if}</span>
+									{#if row.status === 'suspended'}<span class="mt-1 inline-block rounded-full border border-red-900/60 px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-wider text-red-300">suspended</span>{/if}
 								</td>
 								<td class="px-5 py-3 align-top"><Badge tone={row.effectiveTier === 'premium' ? 'lilac' : 'neutral'} size="xs">{row.effectiveTier}</Badge></td>
 								<td class="px-5 py-3 align-top text-neutral-400">
@@ -104,6 +114,14 @@
 											<button type="submit" name="tier" value="free" class="plan-action" disabled={row.overrideTier === 'free'}>Free</button>
 											<button type="submit" name="tier" value="default" class="plan-action plan-action--ghost" disabled={!row.overrideTier}>Use purchases</button>
 										</div>
+									</form>
+									<form method="POST" action="?/setStatus" class="plan-buttons mt-2">
+										<input type="hidden" name="userId" value={row.id} />
+										{#if row.status === 'suspended'}
+											<button type="submit" name="status" value="active" class="plan-action">Restore account</button>
+										{:else}
+											<button type="submit" name="status" value="suspended" class="plan-action plan-action--danger">Suspend account</button>
+										{/if}
 									</form>
 								</td>
 							</tr>
@@ -174,6 +192,17 @@
 	.plan-action--ghost {
 		background: transparent;
 		color: var(--color-muted);
+	}
+
+	.plan-action--danger {
+		border-color: rgba(248, 113, 113, 0.4);
+		color: #fca5a5;
+	}
+
+	.plan-action--danger:hover:not(:disabled) {
+		border-color: #f87171;
+		background: rgba(127, 29, 29, 0.25);
+		color: #fecaca;
 	}
 
 	@media (prefers-reduced-motion: reduce) {

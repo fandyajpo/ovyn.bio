@@ -37,5 +37,10 @@ export const variables = defineEnvVars({
 	DOKU_PRIVATE_KEY: { schema: z.string().optional() },
 	DOKU_PARTNER_SERVICE_ID: { schema: z.string().optional() },
 	DOKU_ENV: { schema: z.string().optional() },
-	DOKU_BASE_URL: { schema: z.string().optional() }
+	DOKU_BASE_URL: { schema: z.string().optional() },
+
+	// Transactional mail (Resend). Optional: when unset, verification and
+	// password-reset emails are skipped with a log entry instead of failing.
+	RESEND_API_KEY: { schema: z.string().optional() },
+	MAIL_FROM: { schema: z.string().optional() }
 });

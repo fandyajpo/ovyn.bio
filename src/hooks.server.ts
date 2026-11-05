@@ -1,5 +1,8 @@
 import type { Handle } from '@sveltejs/kit/hooks';
+import { eq } from 'drizzle-orm';
 import { auth } from '#lib/server/auth';
+import { db } from '#lib/server/db';
+import { session as sessionTable } from '#lib/server/db/schema';
 import { recordReferral } from '#lib/server/services/engagement';
 
 // Auth requests are handled by the /api/auth/[...all]/+server.ts route.
@@ -15,6 +18,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
 
 	if (session) {
+		// Suspended accounts lose access immediately: the session row is removed,
+		// so every later request and auth endpoint refuses it too.
+		if (session.user.status === 'suspended') {
+			try {
+				await db.delete(sessionTable).where(eq(sessionTable.token, session.session.token));
+			} catch (err) {
+				console.error('Failed to revoke a suspended session', err);
+			}
+			event.locals.user = null;
+			return resolve(event);
+		}
+
 		event.locals.user = {
 			id: session.user.id,
 			name: session.user.name,

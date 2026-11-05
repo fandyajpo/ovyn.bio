@@ -180,13 +180,16 @@ const SNAP_STATUS_TO_PAYMENT: Record<string, PaymentStatus> = {
 	'06': 'failed'
 };
 
-const PAYMENT_TO_ORDER: Record<PaymentStatus, 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled'> = {
+const PAYMENT_TO_ORDER: Record<PaymentStatus, 'pending' | 'paid' | 'failed' | 'expired' | 'cancelled' | 'refunded'> = {
 	pending: 'pending',
 	succeeded: 'paid',
 	failed: 'failed',
 	expired: 'expired',
 	cancelled: 'cancelled',
-	refunded: 'paid'
+	// A refund revokes what the order bought: refunded plan orders stop
+	// counting as 'paid' in computeUserPlan, so access ends at the refund.
+	// Granted cosmetics are kept (revoking equipped cosmetics is lossy).
+	refunded: 'refunded'
 };
 
 type ApplyStatusInput = {
@@ -207,7 +210,11 @@ async function applyStatus(tx: Tx, input: ApplyStatusInput): Promise<'applied' |
 
 	if (!payment) throw new NotFoundError('Payment not found');
 	if (payment.status === input.paymentStatus) return 'ignored';
-	if (payment.status === 'succeeded' || payment.status === 'refunded') return 'ignored';
+	// Terminal guards: a refunded payment never changes again, and a succeeded
+	// one may only move to 'refunded' (DOKU status '04'), never back to
+	// pending/failed/cancelled via a replayed notification.
+	if (payment.status === 'refunded') return 'ignored';
+	if (payment.status === 'succeeded' && input.paymentStatus !== 'refunded') return 'ignored';
 
 	await tx
 		.update(payments)
@@ -302,9 +309,16 @@ export async function syncPaymentStatus(orderId: string, userId?: string) {
 	if (row.order.status !== 'pending') return row.order.status;
 	if (Date.now() - row.payment.createdAt.getTime() < 60_000) return row.order.status;
 
+	// checkVirtualAccountStatus wants the VA reference number: the payment
+	// code minus the 8-digit company code (BIN). Only the BCA VA flow exists.
+	if (!row.payment.paymentCode || row.payment.paymentMethod !== PAYMENT_CHANNEL) {
+		console.error('Cannot sync payment status without a BCA virtual account code', orderId);
+		return row.order.status;
+	}
+
 	const status = await checkVirtualAccountStatus(
-		row.payment.paymentCode!,
-		row.payment.paymentCode!.slice(8)
+		row.payment.paymentCode,
+		row.payment.paymentCode.slice(8)
 	);
 	const paymentStatus = status.latestTransactionStatus
 		? SNAP_STATUS_TO_PAYMENT[status.latestTransactionStatus]

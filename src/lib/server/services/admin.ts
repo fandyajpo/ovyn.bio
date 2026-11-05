@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { and, count, desc, eq, gte, isNotNull, sql } from 'drizzle-orm';
 import { OVYN_ADMIN_DISCORD_IDS, OVYN_ADMIN_EMAILS } from '$app/env/private';
 import { db } from '#lib/server/db';
-import { cosmetics, discordAccounts, orders, payments, products, profiles, user } from '#lib/server/db/schema';
-import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
+import { cosmetics, discordAccounts, orders, payments, products, profiles, session, user } from '#lib/server/db/schema';
+import { ConflictError, ForbiddenError, isUniqueViolation, NotFoundError, ValidationError } from '#lib/server/utils/errors';
 import type { AdminCreateProduct, AdminUpdateProduct } from '#lib/schemas/admin';
 import { deleteReplacedObject } from '#lib/server/storage';
 
@@ -273,5 +273,28 @@ export async function updateCatalogProduct(input: AdminUpdateProduct): Promise<v
 
 	if (replacedAssetKey && replacedAssetKey !== input.assetKey) {
 		await deleteReplacedObject(replacedAssetKey);
+	}
+}
+
+/**
+ * Suspend or restore an account. Suspended users lose access on their next
+ * request (the hook revokes their sessions), and all sessions are revoked
+ * here immediately so even /api/auth endpoints refuse them.
+ */
+export async function setAccountStatus(targetUserId: string, status: 'active' | 'suspended'): Promise<void> {
+	const [target] = await db
+		.select({ id: user.id })
+		.from(user)
+		.where(eq(user.id, targetUserId))
+		.limit(1);
+	if (!target) throw new NotFoundError('Account not found');
+
+	await db
+		.update(user)
+		.set({ status, updatedAt: new Date() })
+		.where(eq(user.id, targetUserId));
+
+	if (status === 'suspended') {
+		await db.delete(session).where(eq(session.userId, targetUserId));
 	}
 }

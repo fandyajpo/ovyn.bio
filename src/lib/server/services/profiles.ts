@@ -1,7 +1,7 @@
 import { and, desc, eq, sql } from 'drizzle-orm';
 import { db } from '#lib/server/db';
 import { account, user } from '#lib/server/db/schema/auth';
-import { discordAccounts, profiles } from '#lib/server/db/schema';
+import { discordAccounts, profileSlugHistory, profiles } from '#lib/server/db/schema';
 import { ConflictError, isUniqueViolation, NotFoundError, ValidationError } from '../utils/errors';
 import { isValidSlug, normalizeSlug } from '../utils/slug';
 import { deleteReplacedObject } from '#lib/server/storage';
@@ -41,7 +41,13 @@ async function availableSlug(tx: Tx, seed: string): Promise<string> {
 			.from(profiles)
 			.where(eq(profiles.slug, candidate))
 			.limit(1);
-		if (!existing) return candidate;
+		// Retired slugs stay reserved so old public links never break.
+		const [claimed] = await tx
+			.select({ slug: profileSlugHistory.slug })
+			.from(profileSlugHistory)
+			.where(eq(profileSlugHistory.slug, candidate))
+			.limit(1);
+		if (!existing && !claimed) return candidate;
 		candidate = `${base}-${i + 1}`;
 	}
 	// Practically unreachable; fall back to a random suffix.
@@ -169,7 +175,12 @@ export async function provisionUser(userId: string): Promise<void> {
 	);
 }
 
-/** Save user-owned profile details; the unique database constraint is the race-safe final username check. */
+/**
+ * Save user-owned profile details; the unique database constraint is the race-safe
+ * final username check. The previous slug lands in profile_slug_history so existing
+ * links keep resolving, and a freed slug stays reserved while its history row
+ * exists (except for the profile reclaiming it, which drops the row).
+ */
 export async function updateProfileIdentity(
 	userId: string,
 	input: { username: string; displayName: string; bio: string | null }
@@ -177,6 +188,25 @@ export async function updateProfileIdentity(
 	if (!isValidSlug(input.username)) throw new ValidationError('Choose a valid username');
 
 	try {
+		const [current] = await db
+			.select({ id: profiles.id, slug: profiles.slug })
+			.from(profiles)
+			.where(eq(profiles.userId, userId))
+			.limit(1);
+		if (!current) throw new NotFoundError('Profile not found');
+
+		if (current.slug !== input.username) {
+			// A slug another profile retired cannot be claimed.
+			const [claimed] = await db
+				.select({ profileId: profileSlugHistory.profileId })
+				.from(profileSlugHistory)
+				.where(eq(profileSlugHistory.slug, input.username))
+				.limit(1);
+			if (claimed && claimed.profileId !== current.id) {
+				throw new ConflictError('That username was used recently. Pick another one.');
+			}
+		}
+
 		const [updated] = await db
 			.update(profiles)
 			.set({
@@ -188,6 +218,19 @@ export async function updateProfileIdentity(
 			.where(eq(profiles.userId, userId))
 			.returning();
 		if (!updated) throw new NotFoundError('Profile not found');
+
+		if (current.slug !== updated.slug) {
+			await db
+				.insert(profileSlugHistory)
+				.values({ profileId: updated.id, slug: current.slug })
+				.onConflictDoNothing({ target: profileSlugHistory.slug });
+		}
+		// If the new slug was retired by this same profile earlier, drop its
+		// history row so the reclaimed slug is live and claimable again.
+		await db
+			.delete(profileSlugHistory)
+			.where(and(eq(profileSlugHistory.profileId, updated.id), eq(profileSlugHistory.slug, updated.slug)));
+
 		return updated;
 	} catch (err) {
 		if (isUniqueViolation(err, 'profiles_slug_unique')) {
@@ -195,6 +238,17 @@ export async function updateProfileIdentity(
 		}
 		throw err;
 	}
+}
+
+/** The slug a retired profile URL points to today, for 301 redirects. */
+export async function getSlugRedirect(slug: string): Promise<string | null> {
+	const [row] = await db
+		.select({ currentSlug: profiles.slug })
+		.from(profileSlugHistory)
+		.innerJoin(profiles, eq(profiles.id, profileSlugHistory.profileId))
+		.where(eq(profileSlugHistory.slug, slug))
+		.limit(1);
+	return row?.currentSlug ?? null;
 }
 
 export async function checkUsernameAvailability(userId: string, rawUsername: string) {
@@ -206,7 +260,19 @@ export async function checkUsernameAvailability(userId: string, rawUsername: str
 		.from(profiles)
 		.where(eq(profiles.slug, username))
 		.limit(1);
-	return { username, valid: true, available: !existing || existing.userId === userId };
+	// Retired slugs stay reserved, unless the live profile carrying the same
+	// slug belongs to the caller (they are re-checking their own identity).
+	const [claimed] = await db
+		.select({ profileId: profileSlugHistory.profileId })
+		.from(profileSlugHistory)
+		.where(eq(profileSlugHistory.slug, username))
+		.limit(1);
+	const liveIsOwn = Boolean(existing && existing.userId === userId);
+	return {
+		username,
+		valid: true,
+		available: (!existing || liveIsOwn) && (!claimed || liveIsOwn)
+	};
 }
 
 /** The file currently attached to a profile column, for cleanup after a replace. */

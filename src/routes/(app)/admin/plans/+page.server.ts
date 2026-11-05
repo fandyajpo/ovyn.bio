@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 import { requirePlatformAdmin } from '#lib/server/admin';
 import { listAdminPlanUsers, setPlanOverride } from '#lib/server/services/plan-overrides';
+import { setAccountStatus } from '#lib/server/services/admin';
 import { AppError } from '#lib/server/utils/errors';
 
 const TIERS = ['free', 'premium', 'default'] as const;
@@ -59,6 +60,33 @@ export const actions: Actions = {
 			}
 			console.error(err);
 			return fail(500, { error: 'Could not change that plan' });
+		}
+	},
+
+	setStatus: async ({ request, locals }) => {
+		await requirePlatformAdmin(locals.user?.id);
+		const adminId = locals.user?.id;
+		if (!adminId) return fail(403, { error: 'Admin access required' });
+
+		const data = await request.formData();
+		const userId = String(data.get('userId') ?? '').trim();
+		const status = data.get('status') === 'suspended' ? 'suspended' : 'active';
+
+		if (!userId) return fail(422, { error: 'Invalid account' });
+		if (userId === adminId) return fail(422, { error: 'You cannot suspend your own account' });
+
+		try {
+			await setAccountStatus(userId, status);
+			return {
+				ok:
+					status === 'suspended'
+						? 'Account suspended. They lose access on their next request.'
+						: 'Account restored.'
+			};
+		} catch (err) {
+			if (err instanceof AppError) return fail(err.status, { error: err.message });
+			console.error(err);
+			return fail(500, { error: 'Could not update that account' });
 		}
 	}
 };

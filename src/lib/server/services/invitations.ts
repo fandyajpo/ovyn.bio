@@ -120,21 +120,29 @@ export async function cancelInvitation(actorId: string, invitationId: string): P
 }
 
 export async function rejectInvitation(inviteeId: string, invitationId: string): Promise<void> {
-	const [invitation] = await db
-		.select()
-		.from(guildInvitations)
-		.where(eq(guildInvitations.id, invitationId))
-		.limit(1);
-	if (!invitation || invitation.inviteeId !== inviteeId) {
-		throw new NotFoundError('Invitation not found');
-	}
-	if (invitation.status !== 'pending') {
-		throw new ValidationError(`Invitation is already ${invitation.status}`);
-	}
-	await db
-		.update(guildInvitations)
-		.set({ status: 'rejected' })
-		.where(eq(guildInvitations.id, invitationId));
+	await db.transaction(async (tx) => {
+		// Lazy-expire first, so an expired invitation is reported as expired
+		// instead of being marked rejected.
+		await expireStale(tx);
+
+		const [invitation] = await tx
+			.select()
+			.from(guildInvitations)
+			.where(eq(guildInvitations.id, invitationId))
+			.for('update')
+			.limit(1);
+		if (!invitation || invitation.inviteeId !== inviteeId) {
+			throw new NotFoundError('Invitation not found');
+		}
+		if (invitation.status !== 'pending') {
+			throw new ValidationError(`Invitation is already ${invitation.status}`);
+		}
+
+		await tx
+			.update(guildInvitations)
+			.set({ status: 'rejected' })
+			.where(and(eq(guildInvitations.id, invitationId), eq(guildInvitations.status, 'pending')));
+	});
 }
 
 /**
@@ -204,6 +212,10 @@ export async function acceptInvitation(
 }
 
 export async function listMyInvitations(userId: string): Promise<InvitationWithGuild[]> {
+	// Expire stale rows BEFORE fetching, so a page load never shows an
+	// already-expired invitation as pending.
+	await db.transaction(async (tx) => expireStale(tx));
+
 	const rows = await db
 		.select({
 			invitation: guildInvitations,
@@ -216,7 +228,6 @@ export async function listMyInvitations(userId: string): Promise<InvitationWithG
 		.where(and(eq(guildInvitations.inviteeId, userId), eq(guildInvitations.status, 'pending')))
 		.orderBy(desc(guildInvitations.createdAt));
 
-	await db.transaction(async (tx) => expireStale(tx));
 	return rows;
 }
 
@@ -247,10 +258,11 @@ export async function listUsernamesForInvite(guildId: string, query: string) {
 		.where(sql`(${profiles.slug} ILIKE ${`%${query}%`} OR ${profiles.displayName} ILIKE ${`%${query}%`})`)
 		.limit(10);
 
-	const members = await db
+	// Invitees already in any circle can never accept, so keep them out of
+	// the search instead of failing later at accept time.
+	const memberships = await db
 		.select({ userId: guildMembers.userId })
-		.from(guildMembers)
-		.where(eq(guildMembers.guildId, guildId));
-	const memberIds = new Set(members.map((m) => m.userId));
-	return rows.filter((r) => !memberIds.has(r.userId));
+		.from(guildMembers);
+	const takenIds = new Set(memberships.map((m) => m.userId));
+	return rows.filter((r) => !takenIds.has(r.userId));
 }

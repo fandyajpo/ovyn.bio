@@ -155,6 +155,13 @@
 				>
 					{mode === 'signin' ? 'New to ovyn? Create an account' : 'Already have an account? Sign in'}
 				</button>
+
+				{#if mode === 'signin'}
+					<a
+						href="/forgot-password"
+						class="text-xs text-neutral-400 underline-offset-4 hover:text-neutral-200 hover:underline"
+					>Forgot your password?</a>
+				{/if}
 			</form>
 		</Card>
 

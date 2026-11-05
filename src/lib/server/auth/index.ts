@@ -14,6 +14,7 @@ import {
 import { db } from '#lib/server/db';
 import * as schema from '#lib/server/db/schema';
 import { provisionUser } from '#lib/server/services/profiles';
+import { sendEmail } from '#lib/server/services/mail';
 import { isValidSlug } from '#lib/server/utils/slug';
 
 function createAuth() {
@@ -49,12 +50,42 @@ function createAuth() {
 		database: drizzleAdapter(db, { provider: 'pg', schema }),
 		// Credential sign-in: email or username plus password. Social providers
 		// are optional individually; at least one sign-in path always exists.
-		emailAndPassword: { enabled: true },
+		emailAndPassword: {
+			enabled: true,
+			// Password reset for credential accounts; the emailed link lands on
+			// /reset-password. Mail without Resend config degrades to a log entry.
+			sendResetPassword: async ({ user, url }) => {
+				await sendEmail({
+					to: user.email,
+					subject: 'Reset your ovyn password',
+					text: `Reset your password: ${url}\n\nIf you didn't request this, ignore this email.`,
+					html: `<p>Reset your ovyn password:</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, ignore this email.</p>`
+				}).catch((err) => console.error('Password reset email failed', err));
+			}
+		},
+		emailVerification: {
+			// Credential accounts verify their address (skipped silently for the
+			// Discord placeholder, see mail.ts). A verified email is what later
+			// allows a social provider to link to the account.
+			sendVerificationEmail: async ({ user, url }) => {
+				if (user.emailVerified) return;
+				await sendEmail({
+					to: user.email,
+					subject: 'Verify your ovyn email',
+					text: `Verify your email address: ${url}`,
+					html: `<p>Welcome to ovyn! Verify your email address:</p><p><a href="${url}">${url}</a></p>`
+				}).catch((err) => console.error('Verification email failed', err));
+			},
+			sendOnSignUp: true,
+			autoSignInAfterVerification: true
+		},
 		socialProviders,
-		// Discord accounts without email use a stable placeholder address.
-		mapProfileToUser: (profile: { id: string; email?: string | null }) => ({
+		// Discord accounts without email use a stable placeholder address. Google
+		// verifies its addresses at the provider, so those accounts can later
+		// link by email; the placeholder address can never be verified or linked.
+		mapProfileToUser: (profile: { id: string; email?: string | null; emailVerified?: boolean }) => ({
 			email: profile.email ?? `${profile.id}@oauth.ovyn.me`,
-			emailVerified: false
+			emailVerified: profile.emailVerified ?? Boolean(profile.email)
 		}),
 		user: {
 			additionalFields: {

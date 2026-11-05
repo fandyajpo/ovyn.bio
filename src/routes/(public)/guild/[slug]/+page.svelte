@@ -24,7 +24,7 @@
 			<div>
 				<h1 class="font-[family-name:var(--font-display)] text-3xl font-bold">{data.guild.name}</h1>
 				<p class="mt-1 font-mono text-xs text-neutral-500">
-					/{data.guild.slug} · {data.members.length} member{data.members.length === 1 ? '' : 's'} ·
+					/{data.guild.slug} · {data.memberCount} member{data.memberCount === 1 ? '' : 's'} ·
 					created {formatDate(data.guild.createdAt)}
 				</p>
 			</div>
@@ -57,6 +57,12 @@
 					</li>
 				{/each}
 			</ul>
+			{#if data.memberCount > data.members.length}
+				<p class="mt-3 text-xs text-neutral-500">
+					{data.memberCount - data.members.length}
+					member{data.memberCount - data.members.length === 1 ? '' : 's'} keep their profile private.
+				</p>
+			{/if}
 		</Card>
 	</article>
 {/if}

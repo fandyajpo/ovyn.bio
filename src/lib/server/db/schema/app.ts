@@ -37,7 +37,8 @@ export const orderStatusEnum = pgEnum('order_status', [
 	'paid',
 	'failed',
 	'expired',
-	'cancelled'
+	'cancelled',
+	'refunded'
 ]);
 export const paymentStatusEnum = pgEnum('payment_status', [
 	'pending',
@@ -95,6 +96,24 @@ export const profiles = pgTable(
 		updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 	},
 	(t) => [index('profiles_slug_idx').on(t.slug)]
+);
+
+/**
+ * Slugs a profile has used before. Old public URLs keep resolving through
+ * these rows, and a freed slug stays reserved while its row exists — except
+ * for the profile reclaiming it, which removes the row.
+ */
+export const profileSlugHistory = pgTable(
+	'profile_slug_history',
+	{
+		id: uuid('id').primaryKey().defaultRandom(),
+		profileId: uuid('profile_id')
+			.notNull()
+			.references(() => profiles.id, { onDelete: 'cascade' }),
+		slug: text('slug').notNull().unique(),
+		changedAt: timestamp('changed_at', { withTimezone: true }).notNull().defaultNow()
+	},
+	(t) => [index('profile_slug_history_profile_idx').on(t.profileId)]
 );
 
 /** Social and custom links displayed on a public profile. */

@@ -145,6 +145,33 @@ export async function listGuildMembers(guildId: string) {
 		.orderBy(asc(guildMembers.joinedAt));
 }
 
+/**
+ * The member directory shown on public circle pages: only members whose own
+ * profile is public, and without Discord usernames — that data belongs to the
+ * workspace, not to strangers.
+ */
+export async function listPublicGuildMembers(guildId: string) {
+	return db
+		.select({
+			slug: profiles.slug,
+			displayName: profiles.displayName,
+			role: guildMembers.role,
+			joinedAt: guildMembers.joinedAt
+		})
+		.from(guildMembers)
+		.innerJoin(profiles, eq(profiles.userId, guildMembers.userId))
+		.where(and(eq(guildMembers.guildId, guildId), eq(profiles.visibility, 'public')))
+		.orderBy(asc(guildMembers.joinedAt));
+}
+
+export async function countGuildMembers(guildId: string): Promise<number> {
+	const [row] = await db
+		.select({ total: count() })
+		.from(guildMembers)
+		.where(eq(guildMembers.guildId, guildId));
+	return Number(row?.total ?? 0);
+}
+
 export async function getMembership(userId: string) {
 	if (!userId) return null;
 	const [row] = await db
@@ -350,6 +377,11 @@ export async function disbandGuild(userId: string) {
 			throw new ForbiddenError('Only the owner can disband the circle');
 		}
 
+		// Lock the guild row so a concurrent join/accept waits here and then
+		// sees the disbanded status, instead of slipping a membership in
+		// behind the disband.
+		await tx.execute(sql`SELECT id FROM "guilds" WHERE id = ${guild.id} FOR UPDATE`);
+
 		// Soft delete keeps historical invitation/order data intact.
 		await tx
 			.update(guilds)
@@ -417,10 +449,11 @@ export async function searchGuildMemberCandidates(guildId: string, query: string
 		.where(sql`(${profiles.slug} ILIKE ${`%${query}%`} OR ${profiles.displayName} ILIKE ${`%${query}%`})`)
 		.limit(10);
 
-	const members = await db
+	// Candidates for remove/promote must not already sit in another circle:
+	// their membership row is the single-guild slot, so they are unreachable.
+	const memberships = await db
 		.select({ userId: guildMembers.userId })
-		.from(guildMembers)
-		.where(eq(guildMembers.guildId, guildId));
-	const memberIds = new Set(members.map((m) => m.userId));
-	return rows.filter((r) => !memberIds.has(r.userId));
+		.from(guildMembers);
+	const takenIds = new Set(memberships.map((m) => m.userId));
+	return rows.filter((r) => !takenIds.has(r.userId));
 }

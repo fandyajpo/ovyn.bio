@@ -11,6 +11,7 @@ export type AdminPlanRow = {
 	email: string | null;
 	slug: string | null;
 	displayName: string | null;
+	status: string;
 	overrideTier: PlanOverrideTier | null;
 	overrideNote: string | null;
 	overrideUpdatedAt: Date | null;
@@ -50,6 +51,7 @@ export async function listAdminPlanUsers(rawQuery: string, limit = 40): Promise<
 			email: user.email,
 			slug: profiles.slug,
 			displayName: profiles.displayName,
+			status: user.status,
 			overrideTier: planOverrides.tier,
 			overrideNote: planOverrides.note,
 			overrideUpdatedAt: planOverrides.updatedAt,

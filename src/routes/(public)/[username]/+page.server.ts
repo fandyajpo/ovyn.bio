@@ -1,6 +1,6 @@
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getProfileBySlug } from '#lib/server/services/profiles';
+import { getProfileBySlug, getSlugRedirect } from '#lib/server/services/profiles';
 import { listProfileLinks } from '#lib/server/services/profile-content';
 import { getMembership } from '#lib/server/services/guilds';
 import { getEquippedForProfile } from '#lib/server/services/cosmetics';
@@ -12,7 +12,12 @@ import { runInBackground } from '#lib/server/utils/background';
 export const load: PageServerLoad = async (event) => {
 	const { params, locals } = event;
 	const row = await getProfileBySlug(params.username);
-	if (!row) error(404, 'Profile not found');
+	if (!row) {
+		// Renamed profiles keep resolving: old slugs 301 to the current one.
+		const current = await getSlugRedirect(params.username);
+		if (current && current !== params.username) redirect(301, `/${current}`);
+		error(404, 'Profile not found');
+	}
 
 	const isOwner = locals.user?.id === row.profile.userId;
 	const safeProfile = {

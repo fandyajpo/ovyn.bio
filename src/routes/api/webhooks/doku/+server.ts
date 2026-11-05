@@ -1,5 +1,6 @@
 import type { RequestHandler } from './$types';
 import { verifyNotificationSignature } from '#lib/server/payments/doku/webhook';
+import { minifiedBodyHash } from '#lib/server/payments/doku/signature';
 import { processWebhookNotification } from '#lib/server/services/billing';
 import { AppError } from '#lib/server/utils/errors';
 
@@ -63,7 +64,11 @@ export const POST: RequestHandler = async ({ request, url }) => {
 
 	try {
 		const applied = await processWebhookNotification({
-			providerEventId: request.headers.get('X-EXTERNAL-ID') ?? `${orderId}:${status}`,
+			// Distinct notifications must never share an idempotency slot: when
+			// DOKU omits X-EXTERNAL-ID, the raw-body hash separates same-status
+			// events instead of collapsing them into `orderId:status`.
+			providerEventId:
+				request.headers.get('X-EXTERNAL-ID') ?? `${orderId}:${status}:${minifiedBodyHash(rawBody)}`,
 			orderId,
 			latestTransactionStatus: status,
 			providerTransactionId: body.originalReferenceNo ?? null,
