@@ -521,3 +521,19 @@ export const mediaCleanupQueue = pgTable('media_cleanup_queue', {
 	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
 });
+
+// ---------------------------------------------------------------------------
+// Runtime feature flags (admin "Manage auth")
+// ---------------------------------------------------------------------------
+
+/**
+ * Admin-toggled switches for sign-in methods, read on every auth attempt
+ * (with a short per-instance cache). Absent rows mean enabled, so a fresh
+ * database never locks anyone out and the gate can never fail closed.
+ */
+export const featureFlags = pgTable('feature_flags', {
+	key: text('key').primaryKey(),
+	enabled: boolean('enabled').notNull().default(true),
+	updatedBy: text('updated_by'),
+	updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow()
+});

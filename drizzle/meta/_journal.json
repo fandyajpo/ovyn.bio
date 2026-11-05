@@ -113,6 +113,13 @@
       "when": 1793690000000,
       "tag": "0015_slug_history_and_refunded_orders",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1793710000000,
+      "tag": "0016_add_feature_flags",
+      "breakpoints": true
     }
   ]
 }
