@@ -14,7 +14,7 @@ import {
 import { db } from '#lib/server/db';
 import * as schema from '#lib/server/db/schema';
 import { provisionUser } from '#lib/server/services/profiles';
-import { sendEmail } from '#lib/server/services/mail';
+import { passwordResetEmail, sendEmail } from '#lib/server/services/mail';
 import { isValidSlug } from '#lib/server/utils/slug';
 
 function createAuth() {
@@ -54,19 +54,17 @@ function createAuth() {
 			enabled: true,
 			// Password reset for credential accounts; the emailed link lands on
 			// /reset-password. Mail without Resend config degrades to a log entry.
+			resetPasswordTokenExpiresIn: 3600, // 1 hour, same as the email copy says
 			sendResetPassword: async ({ user, url }) => {
-				await sendEmail({
-					to: user.email,
-					subject: 'Reset your ovyn password',
-					text: `Reset your password: ${url}\n\nIf you didn't request this, ignore this email.`,
-					html: `<p>Reset your ovyn password:</p><p><a href="${url}">${url}</a></p><p>If you didn't request this, ignore this email.</p>`
-				}).catch((err) => console.error('Password reset email failed', err));
+				const template = passwordResetEmail({ name: user.name, url });
+				await sendEmail({ to: user.email, ...template }).catch((err) =>
+					console.error('Password reset email failed', err)
+				);
 			}
 		},
 		emailVerification: {
-			// Credential accounts verify their address (skipped silently for the
-			// Discord placeholder, see mail.ts). A verified email is what later
-			// allows a social provider to link to the account.
+			// Kept wired but not sent on sign-up for now - Resend is only used for
+			// password reset. Set sendOnSignUp: true once a sending domain is live.
 			sendVerificationEmail: async ({ user, url }) => {
 				if (user.emailVerified) return;
 				await sendEmail({
@@ -76,7 +74,7 @@ function createAuth() {
 					html: `<p>Welcome to ovyn! Verify your email address:</p><p><a href="${url}">${url}</a></p>`
 				}).catch((err) => console.error('Verification email failed', err));
 			},
-			sendOnSignUp: true,
+			sendOnSignUp: false,
 			autoSignInAfterVerification: true
 		},
 		socialProviders,
