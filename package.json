@@ -1,61 +1,62 @@
 {
-	"name": "ovyn-bio",
-	"version": "0.1.0",
-	"private": true,
-	"type": "module",
-	"imports": {
-		"#lib": "./src/lib/index.ts",
-		"#lib/*": "./src/lib/*"
-	},
-	"scripts": {
-		"dev": "vp dev",
-		"build": "vp build",
-		"preview": "vp preview",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && vp lint",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"lint": "vp lint",
-		"test": "vp test",
-		"db:generate": "drizzle-kit generate",
-		"db:migrate": "drizzle-kit migrate",
-		"db:backfill": "node scripts/backfill-better-auth.mjs",
-		"db:reset": "node scripts/reset-db.mjs",
-		"db:seed-shop": "node scripts/seed-shop.mjs",
-		"db:push": "drizzle-kit push",
-		"db:studio": "drizzle-kit studio"
-	},
-	"devDependencies": {
-		"@sveltejs/adapter-vercel": "^7.0.2",
-		"@sveltejs/kit": "3.1.1",
-		"@sveltejs/vite-plugin-svelte": "7.3.1",
-		"@tailwindcss/vite": "^4.3.3",
-		"@types/node": "^22.17.0",
-		"drizzle-kit": "^0.31.11",
-		"svelte": "5.57.3",
-		"svelte-check": "^4.7.7",
-		"tailwindcss": "^4.3.3",
-		"typescript": "~6.0.3",
-		"vite-plus": "1.4.0"
-	},
-	"dependencies": {
-		"@aws-sdk/client-s3": "^3.820.0",
-		"@aws-sdk/s3-request-presigner": "^3.820.0",
-		"@dnd-kit/svelte": "^0.5.3",
-		"@tanstack/svelte-query": "^6.3.9",
-		"@tanstack/svelte-table": "^9.3.1",
-		"@tiptap/core": "3.33.0",
-		"@tiptap/extension-link": "3.33.0",
-		"@tiptap/pm": "3.33.0",
-		"@tiptap/starter-kit": "3.33.0",
-		"better-auth": "^1.7.15",
-		"date-fns": "^4.4.0",
-		"drizzle-orm": "^0.45.4",
-		"es-toolkit": "^1.30.0",
-		"postgres": "^3.4.7",
-		"sveltekit-superforms": "^3.1.0",
-		"tiptap-markdown": "0.9.0",
-		"zod": "^4.6.7"
-	},
-	"engines": {
-		"node": ">=22.18"
-	}
+  "name": "ovyn-bio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#lib": "./src/lib/index.ts",
+    "#lib/*": "./src/lib/*"
+  },
+  "scripts": {
+    "dev": "vp dev",
+    "build": "vp build",
+    "preview": "vp preview",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json && vp lint",
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "lint": "vp lint",
+    "test": "vp test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:backfill": "node scripts/backfill-better-auth.mjs",
+    "db:reset": "node scripts/reset-db.mjs",
+    "db:seed-shop": "node scripts/seed-shop.mjs",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@sveltejs/adapter-vercel": "^7.0.2",
+    "@sveltejs/kit": "3.1.1",
+    "@sveltejs/vite-plugin-svelte": "7.3.1",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^22.17.0",
+    "drizzle-kit": "^0.31.11",
+    "svelte": "5.57.3",
+    "svelte-check": "^4.7.7",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.3",
+    "vite-plus": "1.4.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.820.0",
+    "@aws-sdk/s3-request-presigner": "^3.820.0",
+    "@dnd-kit/svelte": "^0.5.3",
+    "@tanstack/svelte-query": "^6.3.9",
+    "@tanstack/svelte-table": "^9.3.1",
+    "@tiptap/core": "3.33.0",
+    "@tiptap/extension-link": "3.33.0",
+    "@tiptap/pm": "3.33.0",
+    "@tiptap/starter-kit": "3.33.0",
+    "better-auth": "^1.7.15",
+    "date-fns": "^4.4.0",
+    "drizzle-orm": "^0.45.4",
+    "es-toolkit": "^1.30.0",
+    "postgres": "^3.4.7",
+    "sveltekit-superforms": "^3.1.0",
+    "tiptap-markdown": "0.9.0",
+    "zod": "^4.6.7"
+  },
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=22.18"
+  }
 }
