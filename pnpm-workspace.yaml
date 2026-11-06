@@ -15,11 +15,40 @@ minimumReleaseAgeExclude:
   - vite-plus@1.4.0
   - '@tanstack/query-core@5.105.3'
   - '@tanstack/svelte-query@6.3.9'
+  - '@tiptap/core@3.33.0'
+  - '@tiptap/extension-blockquote@3.33.0'
+  - '@tiptap/extension-bold@3.33.0'
+  - '@tiptap/extension-bullet-list@3.33.0'
+  - '@tiptap/extension-code-block@3.33.0'
+  - '@tiptap/extension-code@3.33.0'
+  - '@tiptap/extension-document@3.33.0'
+  - '@tiptap/extension-dropcursor@3.33.0'
+  - '@tiptap/extension-gapcursor@3.33.0'
+  - '@tiptap/extension-hard-break@3.33.0'
+  - '@tiptap/extension-heading@3.33.0'
+  - '@tiptap/extension-horizontal-rule@3.33.0'
+  - '@tiptap/extension-italic@3.33.0'
+  - '@tiptap/extension-link@3.33.0'
+  - '@tiptap/extension-list-item@3.33.0'
+  - '@tiptap/extension-list-keymap@3.33.0'
+  - '@tiptap/extension-list@3.33.0'
+  - '@tiptap/extension-ordered-list@3.33.0'
+  - '@tiptap/extension-paragraph@3.33.0'
+  - '@tiptap/extension-strike@3.33.0'
+  - '@tiptap/extension-text@3.33.0'
+  - '@tiptap/extension-underline@3.33.0'
+  - '@tiptap/extensions@3.33.0'
+  - '@tiptap/pm@3.33.0'
+  - '@tiptap/starter-kit@3.33.0'
 
 overrides:
   # SvelteKit and the Vite plugins import `vite`; point them at the Vite+ core.
   # Keep this version in step with the vite-plus version in package.json.
   vite@*: npm:@voidzero-dev/vite-plus-core@1.4.0
+  # Use patched glob only for Vercel's file tracing dependency.
+  '@vercel/nft@1.11.0>glob': 14.0.2
+patchedDependencies:
+  drizzle-kit@0.31.11: patches/drizzle-kit@0.31.11.patch
 permissions:
   '@tanstack/svelte-table':
     skills: false
